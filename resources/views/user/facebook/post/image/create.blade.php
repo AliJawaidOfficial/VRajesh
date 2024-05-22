@@ -42,8 +42,6 @@
     <section class="main-content-wrapper d-flex flex-column">
         <div class="main-inventory-heading d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center justify-content-center">
-                <span class="go-back-icon d-inline-block"><img src="{{ asset('assets/images/icons/arrow-back.png') }}"
-                        alt=""></span>
                 <span class="heading">Create Facebook Post</span>
             </div>
         </div>

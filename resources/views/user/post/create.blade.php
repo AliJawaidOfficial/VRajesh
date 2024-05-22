@@ -42,9 +42,6 @@
     <section class="main-content-wrapper d-flex flex-column">
         <div class="main-inventory-heading d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center justify-content-center">
-                <a href="{{ route('user.dashboard') }}" class="go-back-icon d-inline-block">
-                    <img src="{{ asset('assets/images/icons/arrow-back.png') }}" alt="">
-                </a>
                 <span class="heading">Create New Post</span>
             </div>
         </div>

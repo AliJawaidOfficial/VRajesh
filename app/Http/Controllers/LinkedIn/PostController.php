@@ -258,9 +258,6 @@ class PostController extends Controller
                                     'text' => $description,
                                 ],
                                 'media' => $asset_id,
-                                'title' => [
-                                    'text' => $title,
-                                ],
                             ],
                         ],
                     ],

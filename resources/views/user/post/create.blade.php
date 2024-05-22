@@ -68,19 +68,18 @@
                             <div class="col-md-12">
                                 <label>
                                     <span>Media</span>
-                                    <input type="file" name="file" accept="video/*, image/*" id="fileInput"
-                                        class="form-control" />
+                                    <input type="file" name="media" accept="video/*, image/*" class="form-control" />
                                 </label>
                             </div>
                             <div class="col-md-4">
                                 <label class="d-inline-flex align-items-center gap-1 justify-content-start w-auto">
-                                    <input type="checkbox" name="on_facebook" value="1" required />
+                                    <input type="checkbox" name="on_facebook" value="1" />
                                     <span class="m-0">Facebook</span>
                                 </label>
                             </div>
                             <div class="col-md-4">
                                 <label class="d-inline-flex align-items-center gap-1 justify-content-start w-auto">
-                                    <input type="checkbox" name="on_linkedin" value="1" required />
+                                    <input type="checkbox" name="on_linkedin" value="1" />
                                     <span class="m-0">LinkedIn</span>
                                 </label>
                             </div>

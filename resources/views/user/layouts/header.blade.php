@@ -10,7 +10,7 @@
         <div class="notifications-wrapper">
             <button class="alert-icon position-relative" type="button" id="notificationButton" data-bs-toggle="dropdown"
                 aria-expanded="false">
-                <img src="./assets/images/icons/Notification.png" alt="Notifications">
+                <img src={{ asset('assets/images/icons/Notification.png') }} style="filter: invert(100%)" alt="Notifications">
                 <span class="badge d-flex align-items-center justify-content-center">05</span>
                 <!-- Add the badge here -->
             </button>

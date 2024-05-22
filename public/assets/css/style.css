@@ -1,5 +1,6 @@
 :root {
-	--sidebar-width: 330px;
+	--sidebar-width: 250px;
+	--logo-height: 160px;
 }
 
 .pace {
@@ -61,7 +62,7 @@ body {
 	margin: 0;
 	overflow-x: hidden;
 	font-family: 'Poppins', sans-serif;
-	background-color: #F9F9F9;
+	background-color: #eef0f4;
 }
 
 
@@ -228,21 +229,18 @@ body {
 /* Sidebar styles */
 .sidebar {
 	width: var(--sidebar-width);
-	background-color: #FFFFFF;
+	background-color: #2b303c;
 	height: 100vh;
 	position: fixed;
 	top: 0%;
 	left: 0%;
 	z-index: 100;
 	overflow: hidden;
-	padding-left: 20px;
-	padding-right: 20px;
 }
 
 /* Logo styles */
 .logo {
-	height: 160px;
-	padding-top: 50px;
+	height: var(--logo-height);
 	color: #3C3C3C;
 	font-size: 26px;
 	font-weight: 700;
@@ -261,7 +259,7 @@ body {
 }
 
 .navigation nav.main-menu {
-	padding-right: 10px;
+	/* padding-right: 10px; */
 	/* Adjust padding as needed */
 }
 
@@ -271,28 +269,30 @@ body {
 }
 
 .navigation li {
-	border-radius: 12px !important;
+	/* border-radius: 12px !important; */
+	background-color:#2b303c ;
 }
 
 .navigation li a,
 .navigation li button {
-	padding: 16px 26px !important;
-	border-radius: 12px !important;
+	padding: 14px 15px !important;
+	/* border-radius: 12px !important; */
 	text-decoration: none;
 	display: flex !important;
 	align-items: flex-end;
+	background-color: transparent;
 }
 
 .navigation li img {
-	width: 24px;
-	height: 24px;
-	margin-right: 12px;
+	width: 20px;
+	height: 20px;
+	margin-right: 10px;
 }
 
 .navigation li a span,
 .navigation li button {
-	color: #8C8C8C;
-	font-size: 16px;
+	color: #fff;
+	font-size: 14px;
 	font-weight: 400;
 }
 
@@ -320,10 +320,14 @@ body {
 	/* Change background color as needed */
 }
 
+.accordion-header {
+	background-color: #2b303c !important;
+}
+
 .accordion-button::after {
-	width: 18px;
-	height: 18px;
-	background-size: 18px;
+    width: 14px;
+    height: 14px;
+    background-size: 14px;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%238C8C8C'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
 }
 
@@ -338,6 +342,7 @@ body {
 
 .accordion-button {
 	box-shadow: none !important;
+	background-color: transparent !important;
 }
 
 .accordion-body {
@@ -349,14 +354,11 @@ body {
 	width: calc(100% - var(--sidebar-width));
 	margin-left: var(--sidebar-width);
 	background-color: #F1F1F1;
-	padding: 20px;
 }
 
 .top-header {
-	border-radius: 15px;
-	background: #FFF;
-	padding: 25px 20px;
-	background-color: #FFFFFF;
+	padding: 15px 20px;
+	background-color: #2b303c;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -385,9 +387,13 @@ body {
 	cursor: pointer;
 }
 
-.notifications-wrapper,
-.check-list-wrapper {
+.notifications-wrapper{
 	cursor: pointer;
+}
+
+.notifications-wrapper img {
+	width: 30px;
+	height: 30px;
 }
 
 .notifications-wrapper button {
@@ -399,15 +405,16 @@ body {
 /* Badge styles */
 .alert-wrapper .badge {
 	background-color: #F00;
-	color: #fff;
-	border-radius: 50%;
-	width: 30px;
-	height: 30px;
-	position: absolute;
-	top: -14px;
-	right: -9px;
-	font-size: 14px;
-	font-weight: 700;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+	top: -9px;
+    right: -2px;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 500;
 }
 
 .location-dropdown-wrapper {
@@ -476,22 +483,22 @@ body {
 }
 
 .user-dropdown-wrapper .user-info .user-name {
-	color: #000;
-	font-size: 20px;
+	color: #fff;
+	font-size: 16px;
 	font-weight: 500;
 }
 
 .user-dropdown-wrapper .user-info .user-role {
 	color: #8C8C8C;
-	font-size: 16px;
+	font-size: 12px;
 	font-weight: 400;
 }
 
 .user-dropdown-wrapper .user-avatar {
-	width: 58px;
-	height: 58px;
+	width: 45px;
+    height: 45px;
 	border-radius: 50%;
-	margin-left: 10px;
+	margin-left: 6px;
 	border: none;
 	padding: 0%;
 }
@@ -526,7 +533,7 @@ body {
 
 .user-dropdown-wrapper .user-avatar .user-name-badge {
 	color: #FFF;
-	font-size: 22px;
+	font-size: 18px;
 	font-weight: 600;
 	width: 100%;
 	height: 100%;
@@ -813,10 +820,8 @@ body {
 
 /* Invertory Page */
 .main-content-wrapper {
-	margin-top: 40px;
-	padding: 25px 20px;
-	border-radius: 15px;
-	background: #FFF;
+	margin-top: 20px;
+	padding: 15px 20px;
 }
 
 .main-content-wrapper .invertory-main-table {

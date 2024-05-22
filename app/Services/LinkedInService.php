@@ -24,13 +24,16 @@ class LinkedInService
         $this->clientSecret = env('LINKEDIN_CLIENT_SECRET');
     }
 
+    /**
+     * Auth
+     */
     public function generateAuthUrl()
     {
         $param = [
             'response_type' => 'code',
             'client_id' => $this->clientId,
             'scope' => 'openid profile email w_member_social ',
-            'redirect_uri' => route('connect.linkedin.callback'),
+            'redirect_uri' => route('user.connect.linkedin.callback'),
             'state' => uniqid(),
         ];
         $url = 'https://www.linkedin.com/oauth/v2/authorization?' . http_build_query($param);
@@ -45,7 +48,7 @@ class LinkedInService
                 'grant_type' => 'authorization_code',
                 'client_id' => $this->clientId,
                 'client_secret' => $this->clientSecret,
-                'redirect_uri' => route('connect.linkedin.callback'),
+                'redirect_uri' => route('user.connect.linkedin.callback'),
                 'code' => $code,
             ];
 
@@ -69,6 +72,9 @@ class LinkedInService
         }
     }
 
+    /**
+     * User
+     */
     public function getProfile()
     {
         try {
@@ -89,7 +95,10 @@ class LinkedInService
         }
     }
 
-    public function textStore($request)
+    /**
+     * Post
+     */
+    public function postText($request)
     {
         try {
             $url = $this->baseUrl . 'ugcPosts';
@@ -134,7 +143,7 @@ class LinkedInService
         }
     }
 
-    // public function videoStore(Request $request)
+    // public function postVideo(Request $request)
     // {
     //     try {
     //         $validator = Validator::make(

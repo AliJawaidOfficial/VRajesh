@@ -41,7 +41,7 @@
                 <div class="col-md-12 py-2">
                     <div class="d-flex align-items-center justify-content-between">
                         <p class="m-0">Connect With LinkedIn</p>
-                        @if (Session::get('linkedin_user'))
+                        @if (Session::get('LINKEDIN_USER_TOKEN'))
                             <a href="{{ route('user.logout') }}" class="btn btn-danger">Disconnect</a>
                         @else
                             <a href="{{ route('user.connect.linkedin') }}" class="btn btn-dark">Connect</a>

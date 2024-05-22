@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Services\LinkedInService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -10,6 +11,13 @@ use Laravel\Socialite\Facades\Socialite;
 
 class ConnectController extends Controller
 {
+    protected $linkedinService;
+
+    public function __construct(private readonly LinkedInService $service)
+    {
+        $this->linkedinService = $service;
+    }
+
     public function index()
     {
         return view('user.connect.index');
@@ -36,14 +44,7 @@ class ConnectController extends Controller
 
     public function linkedin()
     {
-        $param = [
-            'response_type' => 'code',
-            'client_id' => env('LINKEDIN_CLIENT_ID'),
-            'scope' => 'openid profile email w_member_social ',
-            'redirect_uri' => env('LINKEDIN_CALLBACK_URL'),
-            'state' => uniqid(),
-        ];
-        $url = 'https://www.linkedin.com/oauth/v2/authorization?' . http_build_query($param);
+        $url = $this->linkedinService->generateAuthUrl();
         return redirect($url);
     }
 
@@ -52,41 +53,14 @@ class ConnectController extends Controller
         try {
             $code = $request->code;
 
-            $url = 'https://www.linkedin.com/oauth/v2/accessToken';
-            $params = [
-                'grant_type' => 'authorization_code',
-                'client_id' => env('LINKEDIN_CLIENT_ID'),
-                'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
-                'redirect_uri' => env('LINKEDIN_CALLBACK_URL'),
-                'code' => $code,
-            ];
+            $generateAccessToken = $this->linkedinService->generateAccessToken($code);
+            if ($generateAccessToken === false) throw new Exception('Failed to generate access token');
 
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            $response = curl_exec($ch);
-            if ($response === false) throw new Exception(curl_error($ch));
-            curl_close($ch);
-            $data = json_decode($response, true);
+            $getProfile = $this->linkedinService->getProfile();
+            if ($getProfile === false) throw new Exception('Failed to get profile');
 
-            Session::put('linkedin_access_token', $data['access_token']);
-
-            // User Info
-            $url = 'https://api.linkedin.com/v2/userinfo';
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $data['access_token'],
-            ]);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            $response = curl_exec($ch);
-            if ($response === false) throw new Exception(curl_error($ch));
-            curl_close($ch);
-            $data = json_decode($response, true);
-
-            Session::put('linkedin_user', $data);
+            Session::put('LINKEDIN_USER_TOKEN', $generateAccessToken);
+            Session::put('LINKEDIN_USER_URN', $getProfile['sub']);
 
             return redirect()->route('user.connect');
         } catch (Exception $e) {
@@ -97,7 +71,8 @@ class ConnectController extends Controller
         }
     }
 
-    public function logout() {
+    public function logout()
+    {
         Session::flush();
         return redirect()->route('user.connect');
     }

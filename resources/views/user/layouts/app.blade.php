@@ -54,7 +54,7 @@
 
             <main class="main-wrapper">
                 {{-- Header --}}
-                {{-- @include('user.layouts.header') --}}
+                @include('user.layouts.header')
                 {{-- .Header --}}
 
                 {{-- Content --}}
@@ -84,6 +84,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <!-- tagify -->
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+    <!-- tagify -->
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
     <script>
         @if (Session::has('success'))
             toastr['success']('{{ session('success')['text'] }}', 'Successfully');

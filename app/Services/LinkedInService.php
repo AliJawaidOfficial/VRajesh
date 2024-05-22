@@ -98,6 +98,7 @@ class LinkedInService
     /**
      * Post
      * Text
+     * Image
      * Video
      */
 
@@ -146,6 +147,163 @@ class LinkedInService
             return $e->getMessage();
         }
     }
+
+    /**
+     * Image
+     */
+    public function postImage($imagePath, $title)
+    {
+        try {
+            $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
+            $params = [
+                'registerUploadRequest' => [
+                    'owner' => "urn:li:person:" . Session::get('LINKEDIN_USER_URN'),
+                    'recipes' => ['urn:li:digitalmediaRecipe:feedshare-image'],
+                    'serviceRelationships' => [
+                        [
+                            'relationshipType' => 'OWNER',
+                            'identifier' => 'urn:li:userGeneratedContent'
+                        ]
+                    ],
+                    'supportedUploadMechanism' => ['SYNCHRONOUS_UPLOAD'],
+                ]
+            ];
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Content-Type: application/json',
+            ]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+            if ($response === false) throw new Exception(curl_error($ch));
+            curl_close($ch);
+
+            $data = json_decode($response, true);
+            $upload_url = $data['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
+            $asset_id = $data['value']['asset'];
+
+            return $this->postImage2($upload_url, $imagePath, $asset_id, $title);
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+    public function postImage2($upload_url, $imagePath, $asset_id, $title)
+    {
+        try {
+            $image = file_get_contents($imagePath);
+
+            $ch = curl_init($upload_url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $image);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Content-Type: application/octet-stream',
+            ]);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+            if ($response === false) throw new Exception(curl_error($ch));
+            curl_close($ch);
+
+            return $this->postImage3($asset_id, $title);
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function postImage3($asset_id, $title)
+    {
+        try {
+            $url = "https://api.linkedin.com/v2/assets/{$asset_id}/action=completeUpload";
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+            ]);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+            if ($response === false) throw new Exception(curl_error($ch));
+            curl_close($ch);
+
+            return $this->postImage4($asset_id, $title);
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+    public function postImage4($asset_id, $title)
+    {
+        try {
+            $url = 'https://api.linkedin.com/v2/ugcPosts';
+            $params = [
+                'author' => "urn:li:person:" . Session::get('LINKEDIN_USER_URN'),
+                'lifecycleState' => 'PUBLISHED',
+                'specificContent' => [
+                    'com.linkedin.ugc.ShareContent' => [
+                        'shareCommentary' => [
+                            'text' => $title,
+                        ],
+                        'shareMediaCategory' => 'IMAGE',
+                        'media' => [
+                            [
+                                'status' => 'READY',
+                                'media' => $asset_id,
+                                'title' => [
+                                    'text' => $title,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'visibility' => [
+                    'com.linkedin.ugc.MemberNetworkVisibility' => 'PUBLIC',
+                ],
+            ];
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Content-Type: application/json',
+            ]);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+            if ($response === false) throw new Exception(curl_error($ch));
+            curl_close($ch);
+
+            $data = json_decode($response, true);
+
+            if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
+
+            return ['status' => 200];
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+
 
     /**
      * Video

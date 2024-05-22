@@ -58,55 +58,48 @@
                     @csrf
                     @method('POST')
                     <div class="inventory-main-input-wrapper">
-                        <div class="row justify-content-between">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>
+                                    <span>Title</span>
+                                    <input type="text" name="title" required />
+                                </label>
+                            </div>
                             <div class="col-md-12">
                                 <label>
                                     <span>Media</span>
                                     <input type="file" name="file" accept="video/*, image/*" id="fileInput"
-                                        class="form-control" required />
+                                        class="form-control" />
                                 </label>
                             </div>
-                        </div>
-                        <div class="row justify-content-between">
-                            <div class="col-md-12">
-                                <label>
-                                    <span>Title</span>
-                                    <input type="text" name="title" id="title" required />
-                                </label>
-                            </div>
-                        </div>
-                        <div class="row">
                             <div class="col-md-4">
                                 <label class="d-inline-flex align-items-center gap-1 justify-content-start w-auto">
-                                    <input type="checkbox" name="title" id="title" required />
+                                    <input type="checkbox" name="on_facebook" value="1" required />
                                     <span class="m-0">Facebook</span>
                                 </label>
                             </div>
                             <div class="col-md-4">
                                 <label class="d-inline-flex align-items-center gap-1 justify-content-start w-auto">
-                                    <input type="checkbox" name="title" id="title" required />
+                                    <input type="checkbox" name="on_linkedin" value="1" required />
                                     <span class="m-0">LinkedIn</span>
                                 </label>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
+                            {{-- <div class="col-md-12">
                                 <label class="d-inline-flex align-items-center gap-1 justify-content-start w-100">
-                                    <input type="checkbox" name="post_now" value="1" required />
+                                    <input type="checkbox" name="post_now" value="1" />
                                     <span class="m-0 w-100">Post Now?</span>
                                 </label>
                             </div>
-                        </div>
-                        <div class="row justify-content-between">
                             <div class="col-md-12">
                                 <label>
                                     <span>Post On</span>
-                                    <input type="datetime-local" name="post_on" id="post_on" required value="{{ now() }}" />
+                                    <input type="datetime-local" name="post_on" id="post_on"
+                                        value="{{ now() }}" />
                                 </label>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
-                    
+
                     <div class="perform-action-btn d-flex align-items-center">
                         <div class="d-flex align-items-center justify-content-center">
                             <button type="reset" class="btn btn-light">Discard</button>
@@ -116,8 +109,8 @@
                 </form>
             </div>
             <div class="col-md-6">
-                <div class="card h-100 d-flex justify-content-center align-items-center bg-light">
-                    <h6>PREVIEW</h6>
+                <div class="card h-100 d-flex justify-content-center align-items-center bg-dark rounded-4">
+                    <h6 class="text-light my-4">PREVIEW</h6>
                 </div>
             </div>
         </div>

@@ -4,18 +4,24 @@
             'name' => 'Dashboard',
             'url' => route('user.dashboard'),
             'active_url' => 'user.dashboard',
-            'icon' => 'https://zetdigi.com/vrajesh/public/' . asset('assets/images/icons/arrow-right.png'),
+            'icon' => asset('assets/images/icons/arrow-right.png'),
         ],
         [
             'name' => 'Connect',
             'url' => route('user.connect'),
             'active_url' => 'user.connect',
-            'icon' => 'https://zetdigi.com/vrajesh/public/' . asset('assets/images/icons/arrow-right.png'),
+            'icon' => asset('assets/images/icons/arrow-right.png'),
+        ],
+        [
+            'name' => 'Post',
+            'url' => route('user.post.create'),
+            'active_url' => 'user.post.create',
+            'icon' => asset('assets/images/icons/arrow-right.png'),
         ],
         [
             'name' => 'Facebook Post',
             'active_url' => 'user.facebook.post.*',
-            'icon' => 'https://zetdigi.com/vrajesh/public/' . asset('assets/images/icons/arrow-right.png'),
+            'icon' => asset('assets/images/icons/arrow-right.png'),
             'submenu' => [
                 [
                     'name' => 'Text Post',
@@ -40,7 +46,7 @@
         [
             'name' => 'LinkedIn',
             'active_url' => 'user.linkedin.post.*',
-            'icon' => 'https://zetdigi.com/vrajesh/public/' . asset('assets/images/icons/arrow-right.png'),
+            'icon' => asset('assets/images/icons/arrow-right.png'),
             'submenu' => [
                 [
                     'name' => 'Text Post',
@@ -59,7 +65,11 @@
 @endphp
 
 <div class="sidebar">
-    <div class="logo d-flex align-items-center justify-content-between">Marketing Software <span class="cancel-icon"><img src="./assets/images/icons/cancel.png" alt=""></span></div>
+    <div class="logo d-flex align-items-center justify-content-between">Marketing Software
+    <span class="cancel-icon">
+        <img src="./assets/images/icons/cancel.png" alt="">
+    </span>
+</div>
     <div class="navigation">
         <nav class="main-menu">
             <ul class="accordion" id="accordionExample">
@@ -91,9 +101,9 @@
                                                             <li
                                                                 class="menu-item {{ Str::is($item['active_url'], Route::currentRouteName()) ? 'active' : '' }}">
                                                                 <a href="{{ $item['url'] }}">
-                                                                    <span class="menu-icon"><img
-                                                                            src="https://zetdigi.com/vrajesh/public/{{ asset('assets/images/icons/arrow-right.png') }}"
-                                                                            alt=""></span>
+                                                                    <span class="menu-icon">
+                                                                        <img src="{{ asset('assets/images/icons/arrow-right.png') }}" alt="">
+                                                                    </span>
                                                                     <span>{{ $item['name'] }}</span>
                                                                 </a>
                                                             </li>

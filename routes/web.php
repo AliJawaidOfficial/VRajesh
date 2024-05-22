@@ -6,6 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\User\ConnectController;
 use App\Http\Controllers\LinkedIn\PostController as LinkedInPostController;
 use App\Http\Controllers\Facebook\PostController as FacebookPostController;
+use App\Http\Controllers\User\PostController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -33,6 +35,12 @@ Route::name('user.')
         Route::get('/connect/linkedin/callback', [ConnectController::class, 'linkedinCallback'])->name('connect.linkedin.callback');
         Route::get('/logout', [ConnectController::class, 'logout'])->name('logout');
 
+
+        // Post
+        Route::get('/post', [PostController::class, 'create'])->name('post.create');
+        Route::post('/post', [PostController::class, 'store'])->name('post.store');
+
+
         Route::prefix('/facebook')
             ->name('facebook.')
             ->group(function () {
@@ -55,7 +63,6 @@ Route::name('user.')
                 Route::get('/post/video/create', [LinkedInPostController::class, 'videoCreate'])->name('post.video.create');
                 Route::post('/post/video/store', [LinkedInPostController::class, 'videoStore'])->name('post.video.store');
             });
-
     });
 
 

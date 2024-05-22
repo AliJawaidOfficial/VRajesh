@@ -6,15 +6,101 @@
 
 {{-- Styles --}}
 @section('styles')
+    <style>
+        .preview-container {
+            background-color: #1e1b1b;
+            border-left: 4px solid #0073e6;
+            padding: 16px;
+            border-radius: 4px;
+            height: 400px;
+            /* Fixed height for consistency */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .preview-container img,
+        .preview-container video {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 4px;
+            position: absolute;
+        }
+    </style>
 @endsection
 
 {{-- Vendor Scripts --}}
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+@endsection
+
+{{-- Content --}}
+@section('content')
+    <section class="main-content-wrapper d-flex flex-column">
+        <div class="h1 p-4 bg-white text-center">
+            <h1>Create Post</h1>
+        </div>
+
+        <div class="row align-items-stretch mt-3">
+            <div class="col-md-6">
+                <form id="postForm" class="p-4 bg-white rounded" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="inventory-main-input-wrapper">
+                        <div class="w-100 mb-4">
+                            <label class="d-block w-100">
+                                <span class="d-block w-100">Title</span>
+                                <input class="d-block w-100 form-control" type="text" name="title"
+                                    placeholder="Enter your title here" required />
+                            </label>
+                        </div>
+                        <div class="w-100 my-4">
+                            <label class="d-block w-100">
+                                <span class="d-block w-100">Media</span>
+                                <input class="d-block w-100 form-control" type="file" name="media"
+                                    accept="video/*, image/*" id="mediaInput" />
+                            </label>
+                        </div>
+                        <div class="w-100 my-4 d-flex align-items-center gap-3">
+                            <label class="d-inline-block">
+                                <input type="checkbox" name="on_facebook" value="1" class="form-check-input" />
+                                <span>Facebook</span>
+                            </label>
+
+                            <label class="d-inline-block">
+                                <input type="checkbox" name="on_linkedin" value="1" class="form-check-input" />
+                                <span>LinkedIn</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-center gap-4">
+                        <button type="reset" class="btn btn-secondary w-100">Discard</button>
+                        <button type="submit" class="btn btn-primary w-100">Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content d-flex align-items-center justify-content-center p-5">
+                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Preview Script --}}
     <script>
-        document.getElementById('fileInput').addEventListener('change', function(event) {
+        document.getElementById('mediaInput').addEventListener('change', function(event) {
             const file = event.target.files[0];
             const imagePreview = document.getElementById('imagePreview');
             const videoPreview = document.getElementById('videoPreview');
+            const previewText = document.getElementById('previewText');
 
             if (file) {
                 const fileType = file.type;
@@ -24,94 +110,30 @@
                     imagePreview.src = fileURL;
                     imagePreview.style.display = 'block';
                     videoPreview.style.display = 'none';
+                    previewText.style.display = 'none';
                 } else if (fileType.startsWith('video/')) {
                     videoPreview.src = fileURL;
                     videoPreview.style.display = 'block';
                     imagePreview.style.display = 'none';
+                    previewText.style.display = 'none';
                 } else {
                     imagePreview.style.display = 'none';
                     videoPreview.style.display = 'none';
+                    previewText.style.display = 'block';
                 }
+            } else {
+                imagePreview.style.display = 'none';
+                videoPreview.style.display = 'none';
+                previewText.style.display = 'block';
             }
         });
+
+        document.getElementById('postForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
+            modal.show(); // Show the modal
+            // After showing the modal, submit the form
+            this.submit();
+        });
     </script>
-@endsection
-
-{{-- Content --}}
-@section('content')
-    <section class="main-content-wrapper d-flex flex-column">
-        <div class="main-inventory-heading d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center justify-content-center">
-                <span class="heading">Create New Post</span>
-            </div>
-        </div>
-
-        <div class="preview-container mt-3" style="object-fit: contain;">
-            <img id="imagePreview" src="" alt=""
-                style="display:none; width: 100%; height: auto;border-radius: 12px">
-            <video id="videoPreview" controls style="display:none; max-width: 100%; height: auto;"></video>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <form action="{{ route('user.post.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('POST')
-                    <div class="inventory-main-input-wrapper">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <label>
-                                    <span>Title</span>
-                                    <input type="text" name="title" required />
-                                </label>
-                            </div>
-                            <div class="col-md-12">
-                                <label>
-                                    <span>Media</span>
-                                    <input type="file" name="media" accept="video/*, image/*" class="form-control" />
-                                </label>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="d-inline-flex align-items-center gap-1 justify-content-start w-auto">
-                                    <input type="checkbox" name="on_facebook" value="1" />
-                                    <span class="m-0">Facebook</span>
-                                </label>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="d-inline-flex align-items-center gap-1 justify-content-start w-auto">
-                                    <input type="checkbox" name="on_linkedin" value="1" />
-                                    <span class="m-0">LinkedIn</span>
-                                </label>
-                            </div>
-                            {{-- <div class="col-md-12">
-                                <label class="d-inline-flex align-items-center gap-1 justify-content-start w-100">
-                                    <input type="checkbox" name="post_now" value="1" />
-                                    <span class="m-0 w-100">Post Now?</span>
-                                </label>
-                            </div>
-                            <div class="col-md-12">
-                                <label>
-                                    <span>Post On</span>
-                                    <input type="datetime-local" name="post_on" id="post_on"
-                                        value="{{ now() }}" />
-                                </label>
-                            </div> --}}
-                        </div>
-                    </div>
-
-                    <div class="perform-action-btn d-flex align-items-center">
-                        <div class="d-flex align-items-center justify-content-center">
-                            <button type="reset" class="btn btn-light">Discard</button>
-                            <button type="submit" class="btn btn-primary btn-theme">Post</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="col-md-6">
-                <div class="card h-100 d-flex justify-content-center align-items-center bg-dark rounded-4">
-                    <h6 class="text-light my-4">PREVIEW</h6>
-                </div>
-            </div>
-        </div>
-    </section>
 @endsection

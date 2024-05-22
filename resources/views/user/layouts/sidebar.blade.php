@@ -4,13 +4,13 @@
             'name' => 'Dashboard',
             'url' => route('user.dashboard'),
             'active_url' => 'user.dashboard',
-            'icon' => asset('assets/images/icons/arrow-right.png'),
+            'icon' => asset('assets/images/icons/home.png'),
         ],
         [
             'name' => 'Connect',
             'url' => route('user.connect'),
             'active_url' => 'user.connect',
-            'icon' => asset('assets/images/icons/arrow-right.png'),
+            'icon' => asset('assets/images/icons/connect.png'),
         ],
         [
             'name' => 'Post',
@@ -18,56 +18,56 @@
             'active_url' => 'user.post.create',
             'icon' => asset('assets/images/icons/arrow-right.png'),
         ],
-        [
-            'name' => 'Facebook Post',
-            'active_url' => 'user.facebook.post.*',
-            'icon' => asset('assets/images/icons/arrow-right.png'),
-            'submenu' => [
-                [
-                    'name' => 'Text Post',
-                    'url' => route('user.facebook.post.text.create'),
-                    'active_url' => 'user.facebook.post.text.create',
-                    'permission' => 'product category read',
-                ],
-                [
-                    'name' => 'Image Post',
-                    'url' => route('user.facebook.post.image.create'),
-                    'active_url' => 'user.facebook.post.image.create',
-                    'permission' => 'product category read',
-                ],
-                [
-                    'name' => 'Video Post',
-                    'url' => route('user.facebook.post.video.create'),
-                    'active_url' => 'user.facebook.post.video.create',
-                    'permission' => 'product category read',
-                ],
-            ],
-        ],
-        [
-            'name' => 'LinkedIn',
-            'active_url' => 'user.linkedin.post.*',
-            'icon' => asset('assets/images/icons/arrow-right.png'),
-            'submenu' => [
-                [
-                    'name' => 'Text Post',
-                    'url' => route('user.linkedin.post.text.create'),
-                    'active_url' => 'user.linkedin.post.text.create',
-                ],
-                [
-                    'name' => 'Video Post',
-                    'url' => route('user.linkedin.post.video.create'),
-                    'active_url' => 'user.linkedin.post.video.create',
-                    'permission' => 'product category read',
-                ],
-            ],
-        ],
+        // [
+        //     'name' => 'Facebook Post',
+        //     'active_url' => 'user.facebook.post.*',
+        //     'icon' => asset('assets/images/icons/arrow-right.png'),
+        //     'submenu' => [
+        //         [
+        //             'name' => 'Text Post',
+        //             'url' => route('user.facebook.post.text.create'),
+        //             'active_url' => 'user.facebook.post.text.create',
+        //             'permission' => 'product category read',
+        //         ],
+        //         [
+        //             'name' => 'Image Post',
+        //             'url' => route('user.facebook.post.image.create'),
+        //             'active_url' => 'user.facebook.post.image.create',
+        //             'permission' => 'product category read',
+        //         ],
+        //         [
+        //             'name' => 'Video Post',
+        //             'url' => route('user.facebook.post.video.create'),
+        //             'active_url' => 'user.facebook.post.video.create',
+        //             'permission' => 'product category read',
+        //         ],
+        //     ],
+        // ],
+        // [
+        //     'name' => 'LinkedIn',
+        //     'active_url' => 'user.linkedin.post.*',
+        //     'icon' => asset('assets/images/icons/arrow-right.png'),
+        //     'submenu' => [
+        //         [
+        //             'name' => 'Text Post',
+        //             'url' => route('user.linkedin.post.text.create'),
+        //             'active_url' => 'user.linkedin.post.text.create',
+        //         ],
+        //         [
+        //             'name' => 'Video Post',
+        //             'url' => route('user.linkedin.post.video.create'),
+        //             'active_url' => 'user.linkedin.post.video.create',
+        //             'permission' => 'product category read',
+        //         ],
+        //     ],
+        // ],
     ];
 @endphp
 
 <div class="sidebar">
-    <div class="logo d-flex align-items-center justify-content-between">
+    <div class="logo d-flex align-items-center">
 
-        <img src="{{ asset('assets/images/logo.png') }}" alt="">
+        <img src="{{ asset('assets/images/logo.png') }}" class="main-logo" alt="">
         <span class="cancel-icon">
             <img src="{{ asset('assets/images/icons/cancel.png') }}" alt="">
         </span>

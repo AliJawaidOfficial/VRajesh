@@ -15,38 +15,46 @@
 {{-- Content --}}
 @section('content')
     <section class="main-content-wrapper d-flex flex-column">
-        <div class="main-inventory-heading d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center justify-content-center">
-                <span class="heading">Connect Accounts</span>
-            </div>
+
+        <div class="h1 p-4 bg-white text-center">
+            <h1>Connect Accounts</h1>
         </div>
-        <div class="inventory-main-input-wrapper mt-3">
-            <div class="row justify-content-between">
-                <div class="col-md-12 py-2">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <p class="m-0">Connect With Facebok</p>
+
+
+        <div class="row row-cols-1 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 rounded mt-3">
+            {{-- <div class="col">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-center">
+                        <img src="{{ asset('assets/images/icons/icons-facebook.png') }}" alt="">
+                    </div>
+
+                    <div class="card-body pt-0">
+                        <p class="mb-3 text-center">Connect With Facebok</p>
                         @if (Session::get('facebook_user'))
-                            <a href="{{ route('user.logout') }}" class="btn btn-danger">Disconnect</a>
+                            <a href="{{ route('user.logout') }}" class="btn btn-danger d-block">Disconnect</a>
                         @else
-                            <a href="{{ route('user.connect.linkedin') }}" class="btn btn-dark">Connect</a>
+                            <a href="{{ route('user.connect.linkedin') }}" class="btn btn-dark d-block">Connect</a>
+                        @endif
+                    </div>
+                </div>
+            </div> --}}
+            <div class="col">
+                <div class="card">
+                    <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-center">
+                        <img src="{{ asset('assets/images/icons/icons-linkedin.png') }}" alt="">
+                    </div>
+
+                    <div class="card-body pt-0">
+                        <p class="mb-3 text-center">Connect With LinkedIn</p>
+                        @if (Session::get('facebook_user'))
+                            <a href="{{ route('user.logout') }}" class="btn btn-danger d-block">Disconnect</a>
+                        @else
+                            <a href="{{ route('user.connect.linkedin') }}" class="btn btn-dark d-block">Connect</a>
                         @endif
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="inventory-main-input-wrapper mt-3">
-            <div class="row justify-content-between">
-                <div class="col-md-12 py-2">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <p class="m-0">Connect With LinkedIn</p>
-                        @if (Session::get('LINKEDIN_USER_TOKEN'))
-                            <a href="{{ route('user.logout') }}" class="btn btn-danger">Disconnect</a>
-                        @else
-                            <a href="{{ route('user.connect.linkedin') }}" class="btn btn-dark">Connect</a>
-                        @endif
-                    </div>
-                </div>
-            </div>
+
         </div>
     </section>
 @endsection

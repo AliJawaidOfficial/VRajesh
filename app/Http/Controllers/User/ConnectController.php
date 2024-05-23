@@ -28,14 +28,15 @@ class ConnectController extends Controller
     public function facebook()
     {
         return Socialite::driver('facebook')
-            // ->scopes(['email', 'public_profile'])
-            ->redirect();
+        ->redirect();
+        // ->scopes(['email', 'public_profile'])
     }
 
     public function facebookCallback()
     {
         try {
-            $user = Socialite::driver('facebook')->user();
+            $user = Socialite::driver('facebook')->stateless()->user();
+            return $user;
             Session::put('user', $user);
             return redirect('/');
         } catch (Exception $e) {

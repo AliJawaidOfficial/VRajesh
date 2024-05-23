@@ -15,11 +15,9 @@
 {{-- Content --}}
 @section('content')
     <section class="main-content-wrapper d-flex flex-column">
-
         <div class="h1 p-4 bg-white text-center">
             <h1>Connect Accounts</h1>
         </div>
-
 
         <div class="row row-cols-1 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 rounded mt-3">
             <div class="col">

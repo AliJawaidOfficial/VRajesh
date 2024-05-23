@@ -17,11 +17,16 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('meta_email')->nullable();
-            $table->string('linkedin_email')->nullable();
-            $table->string('linkedin_token')->nullable();
-            $table->string('meta_token')->nullable();
             $table->string('password');
+
+            $table->string('meta_email')->nullable();
+            $table->text('meta_access_token')->nullable();
+
+            $table->string('linkedin_email')->nullable();
+            $table->text('linkedin_access_token')->nullable();
+            $table->text('linkedin_urn')->nullable();
+
+
             $table->rememberToken();
             $table->timestamps();
         });

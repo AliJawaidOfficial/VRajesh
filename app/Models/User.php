@@ -21,11 +21,15 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'email',
-        'linkedin_email',
-        'meta_email',
-        'linkedin_token',
-        'meta_token',
         'password',
+
+        'meta_email',
+        'meta_access_token',
+        
+        'linkedin_email',
+        'linkedin_access_token',
+        'linkedin_urn',
+        
     ];
 
     /**

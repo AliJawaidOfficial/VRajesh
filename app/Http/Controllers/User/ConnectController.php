@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\LinkedInService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -59,15 +61,16 @@ class ConnectController extends Controller
             $getProfile = $this->linkedinService->getProfile();
             if ($getProfile === false) throw new Exception('Failed to get profile');
 
-            Session::put('LINKEDIN_USER_TOKEN', $generateAccessToken);
-            Session::put('LINKEDIN_USER_URN', $getProfile['sub']);
+            $user = User::where('id', Auth::guard('web')->user()->id)->first();
+            $user->linkedin_access_token = $generateAccessToken;
+            $user->linkedin_urn = $getProfile['sub'];
+            $user->save();
 
             return redirect()->route('user.connect');
         } catch (Exception $e) {
-            return [
-                'status' => 500,
-                'error' => $e->getMessage(),
-            ];
+            return $e->getMessage();
+            Session::flash('error', ['text' => 'Something went wrong. Please try again.']);
+            return redirect()->route('user.connect');
         }
     }
 

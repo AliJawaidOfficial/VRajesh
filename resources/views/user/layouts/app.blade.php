@@ -8,7 +8,12 @@
     <!-------------- Favion -------------->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png?v=0') }}" type="image/x-icon">
     <!---------------- SEO ---------------->
-    <title>@yield('title') {{ config('app.name') }}</title>
+    <title>
+        @yield('title') -
+        {{ Str::is('agency.*', Route::currentRouteName()) ? '- Agency -' : '' }}
+        {{ Str::is('admin.*', Route::currentRouteName()) ? '- Admin -' : '' }}
+        {{ config('app.name') }}
+    </title>
     <meta name="description" content="" />
     <!--------------- Fonts --------------->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -41,12 +46,10 @@
 <body>
 
     {{-- Content --}}
-    @if (
-            request()->is('login') ||
+    @if (request()->is('login') ||
             request()->is('register') ||
             request()->is('forget-password') ||
-            request()->is('reset-password/*')
-        )
+            request()->is('reset-password/*'))
         @yield('content')
     @else
         <div class="dashboard">

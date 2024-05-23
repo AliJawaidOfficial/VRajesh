@@ -3,18 +3,14 @@
 namespace App\Services;
 
 use Exception;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class LinkedInService
 {
     protected $baseUrl;
     protected $clientId;
     protected $clientSecret;
-    protected $aceessToken;
+    protected $accessToken;
     protected $personUrn;
 
     public function __construct()
@@ -62,7 +58,7 @@ class LinkedInService
             curl_close($ch);
             $data = json_decode($response, true);
 
-            $this->aceessToken = $data['access_token'];
+            Auth::guard('web')->user()->linkedin_access_token = $data['access_token'];
             return $data['access_token'];
         } catch (Exception $e) {
             return [
@@ -81,7 +77,7 @@ class LinkedInService
             $url = $this->baseUrl . 'userinfo';
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $this->aceessToken]);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
             if ($response === false) throw new Exception(curl_error($ch));
@@ -110,7 +106,7 @@ class LinkedInService
         try {
             $url = $this->baseUrl . 'ugcPosts';
             $params = [
-                'author' => "urn:li:person:" . Session::get('LINKEDIN_USER_URN'),
+                'author' => "urn:li:person:" . Auth::guard('web')->user()->linkedin_urn,
                 'lifecycleState' => 'PUBLISHED',
                 'specificContent' => [
                     'com.linkedin.ugc.ShareContent' => [
@@ -128,7 +124,7 @@ class LinkedInService
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token,
                 'Content-Type: application/json',
                 'x-li-format: json'
             ]);
@@ -157,7 +153,7 @@ class LinkedInService
             $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
             $params = [
                 'registerUploadRequest' => [
-                    'owner' => "urn:li:person:" . Session::get('LINKEDIN_USER_URN'),
+                    'owner' => "urn:li:person:" . Auth::guard('web')->user()->linkedin_urn,
                     'recipes' => ['urn:li:digitalmediaRecipe:feedshare-image'],
                     'serviceRelationships' => [
                         [
@@ -173,7 +169,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -205,7 +201,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $image);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token,
                 'Content-Type: application/octet-stream',
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -231,7 +227,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token,
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
@@ -252,7 +248,7 @@ class LinkedInService
         try {
             $url = 'https://api.linkedin.com/v2/ugcPosts';
             $params = [
-                'author' => "urn:li:person:" . Session::get('LINKEDIN_USER_URN'),
+                'author' => "urn:li:person:" . Auth::guard('web')->user()->linkedin_urn,
                 'lifecycleState' => 'PUBLISHED',
                 'specificContent' => [
                     'com.linkedin.ugc.ShareContent' => [
@@ -280,7 +276,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -314,7 +310,7 @@ class LinkedInService
             $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
             $params = [
                 'registerUploadRequest' => [
-                    'owner' => "urn:li:person:" . Session::get('LINKEDIN_USER_URN'),
+                    'owner' => "urn:li:person:" . Auth::guard('web')->user()->linkedin_urn,
                     'recipes' => ['urn:li:digitalmediaRecipe:feedshare-video'],
                     'serviceRelationships' => [
                         [
@@ -330,7 +326,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params)); // Encode params as JSON
@@ -365,7 +361,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $video);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token,
                 'Content-Type: application/octet-stream',
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -391,7 +387,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token,
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
@@ -418,7 +414,7 @@ class LinkedInService
         try {
             $url = 'https://api.linkedin.com/v2/ugcPosts';
             $params = [
-                'author' => "urn:li:person:" . Session::get('LINKEDIN_USER_URN'),
+                'author' => "urn:li:person:" . Auth::guard('web')->user()->linkedin_urn,
                 'lifecycleState' => 'PUBLISHED',
                 'specificContent' => [
                     'com.linkedin.ugc.ShareContent' => [
@@ -446,7 +442,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . Session::get('LINKEDIN_USER_TOKEN'),
+                'Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));

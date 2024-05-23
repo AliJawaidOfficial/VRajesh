@@ -46,7 +46,7 @@
 
                     <div class="card-body pt-0">
                         <p class="mb-3 text-center">Connect With LinkedIn</p>
-                        @if (Session::get('LINKEDIN_USER_TOKEN'))
+                        @if (Auth::guard('web')->user()->linkedin_access_token != null)
                             <a href="{{ route('user.logout') }}" class="btn btn-danger d-block">Disconnect</a>
                         @else
                             <a href="{{ route('user.connect.linkedin') }}" class="btn btn-dark d-block">Connect</a>

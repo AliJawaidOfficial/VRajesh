@@ -31,7 +31,7 @@
             </svg>
         </div>
 
-        <div class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column">
+        <div class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column rounded-8">
             <h3 class="text-center">Forget Password</h3>
             <form action={{ route('user.password.forget.email') }} method="POST" id="login" class="w-100">
                 @csrf
@@ -55,7 +55,7 @@
                     <input type="email" name="email" class="d-block w-100" placeholder="Enter Email"
                         value="{{ old('email', 'alijawaidofficial.pk@gmail.com') }}" required />
                 </div>
-                <button type="submit" class="btn d-block w-100" type="submit">Login</button>
+                <button type="submit" class="btn d-block w-100 mt-4" type="submit">Login</button>
             </form>
         </div>
     </div>

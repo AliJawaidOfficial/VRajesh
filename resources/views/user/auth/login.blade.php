@@ -54,7 +54,7 @@
             </svg>
         </div>
 
-        <div class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column">
+        <div class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column rounded-8">
             <h3 class="text-center">Log In</h3>
             <form action={{ route('user.login') }} method="POST" id="login" class="w-100">
                 @csrf
@@ -75,7 +75,7 @@
                             </defs>
                         </svg>
                     </span>
-                    <input type="email" name="email" class="d-block w-100" placeholder="Enter Email"
+                    <input type="email" name="email" class="d-block w-100 rounded" placeholder="Enter Email"
                         value="{{ old('email', 'alijawaidofficial.pk@gmail.com') }}" required />
                 </div>
                 <div class="input-icon-wrapper input-show-password position-relative">
@@ -87,7 +87,7 @@
                                 fill="#8C8C8C" />
                         </svg>
                     </span>
-                    <input type="password" name="password" id="password_input" class="d-block w-100" placeholder="Password"
+                    <input type="password" name="password" id="password_input" class="d-block w-100 rounded" placeholder="Password"
                         value="admin" required />
                     <button type="button" class="show-password-btn position-absolute">
                         <svg xmlns="http://www.w3.org/2000/svg" height="16" width="18" viewBox="0 0 576 512">
@@ -96,13 +96,13 @@
                         </svg>
                     </button>
                 </div>
-                <div class="extra-fields">
+                <div class="extra-fields d-flex justify-content-end">
                     <p class="mb-0">
                         <a href="{{ route('user.password.forget') }}">Forget Password?</a>
                     </p>
                 </div>
 
-                <button type="submit" class="btn d-block w-100" type="submit">Login</button>
+                <button type="submit" class="btn d-block w-100 rounded" type="submit">Login</button>
             </form>
 
             <div class="extra-fields">

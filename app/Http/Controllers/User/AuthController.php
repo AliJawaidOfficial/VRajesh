@@ -4,16 +4,19 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
-use App\Models\User;
-use Exception;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\User\RegisterMail;
+use Illuminate\Support\Str;
+use Exception;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+
 
 class AuthController extends Controller
 {
@@ -42,10 +45,12 @@ class AuthController extends Controller
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
+            if (User::where('email', $request->email)->first()->email_verified_at == null) throw new Exception('Please verify your email');
+
             if (!Auth::attempt($request->only('email', 'password'))) throw new Exception('Invalid email or password');
 
             Session::flash('success', ['text' => 'Login successfully']);
-            return redirect()->intended('dashboard');
+            return redirect()->route('user.dashboard');
         } catch (Exception $e) {
             Session::flash('error', ['text' => $e->getMessage()]);
             return redirect()->back()->withInput();
@@ -64,6 +69,8 @@ class AuthController extends Controller
     public function registerStore(Request $request)
     {
         try {
+            DB::beginTransaction();
+
             $validator = Validator::make(
                 $request->all(),
                 [
@@ -92,17 +99,53 @@ class AuthController extends Controller
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
-            $user = User::create([
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
+            $token = Str::random(60);
+            $data = new User;
+            $data->first_name = $request->first_name;
+            $data->last_name = $request->last_name;
+            $data->email = $request->email;
+            $data->password = Hash::make($request->password);
+            $data->remember_token = $token;
+            $data->save();
 
+            Mail::to($data->email)->send(new RegisterMail([
+                'name' => $data->first_name . ' ' . $data->last_name,
+                'url' => route('user.register.verify', [
+                    'token' => $token,
+                    'email' => $data->email
+                ]),
+            ]));
+
+            DB::commit();
 
             Session::flash('success', ['text' => 'Account registered successfully']);
             return redirect()->route('user.login');
         } catch (Exception $e) {
+            DB::rollBack();
+
+            Session::flash('error', ['text' => $e->getMessage()]);
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function registerVerify(String $token, String $email)
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = User::where('remember_token', $token)->where('email', $email)->first();
+            if (!$user) throw new Exception('Invalid Request');
+
+            $user->email_verified_at = now();
+            $user->save();
+
+            DB::commit();
+
+            Session::flash('success', ['text' => 'Your Account verified successfully']);
+            return redirect()->route('user.login');
+        } catch (Exception $e) {
+            DB::rollBack();
+
             Session::flash('error', ['text' => $e->getMessage()]);
             return redirect()->back()->withInput();
         }

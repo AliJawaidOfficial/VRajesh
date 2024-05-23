@@ -76,7 +76,7 @@
                             </defs>
                         </svg>
                     </span>
-                    <input type="text" name="first_name" class="d-block w-100" placeholder="First Name"
+                    <input type="text" name="first_name" value="{{ old('first_name') }}" class="d-block w-100" placeholder="First Name"
                         required />
                 </div>
 
@@ -96,7 +96,7 @@
                             </defs>
                         </svg>
                     </span>
-                    <input type="text" name="last_name" class="d-block w-100" placeholder="Last Name"
+                    <input type="text" name="last_name" value="{{ old('last_name') }}" class="d-block w-100" placeholder="Last Name"
                         required />
                 </div>
 
@@ -116,7 +116,7 @@
                             </defs>
                         </svg>
                     </span>
-                    <input type="email" name="email" class="d-block w-100" placeholder="Email"
+                    <input type="email" name="email" value="{{ old('email') }}" class="d-block w-100" placeholder="Email"
                         required />
                 </div>
                 <div class="input-icon-wrapper input-show-password position-relative">

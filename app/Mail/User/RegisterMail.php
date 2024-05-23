@@ -41,7 +41,7 @@ class RegisterMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'mails.user.auth.register',
+            view: 'mails.user.auth.register-mail',
         );
     }
 

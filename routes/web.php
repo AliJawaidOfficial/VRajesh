@@ -31,9 +31,10 @@ Route::name('user.')
         Route::middleware('guest')->group(function () {
             Route::get('login', [AuthController::class, 'login'])->name('login');
             Route::post('login', [AuthController::class, 'loginStore']);
-            
+
             Route::get('register', [AuthController::class, 'register'])->name('register');
-            Route::post('register', [AuthController::class, 'registerStore']);
+            Route::post('register', [AuthController::class, 'registerStore'])->name('register.store');
+            Route::get('register/{token}/{email}', [AuthController::class, 'registerVerify'])->name('register.verify');
 
             Route::get('forget-password', [AuthController::class, 'forgetPassword'])->name('password.forget');
             Route::post('forget-password', [AuthController::class, 'forgetPasswordStore'])->name('password.forget.email');

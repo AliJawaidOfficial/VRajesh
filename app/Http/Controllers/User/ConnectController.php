@@ -40,8 +40,16 @@ class ConnectController extends Controller
             return redirect('/');
         } catch (Exception $e) {
             Session::flash('error', ['text' => $e->getMessage()]);
-            return redirect()->route('dashboard');
+            return redirect()->route('user.connect');
         }
+    }
+
+    public function facebookDisconnect()
+    {
+        $user = User::where('id', Auth::guard('web')->user()->id)->first();
+        $user->facebook_access_token = null;
+        $user->save();
+        return redirect()->route('user.connect');
     }
 
     public function linkedin()
@@ -68,10 +76,18 @@ class ConnectController extends Controller
 
             return redirect()->route('user.connect');
         } catch (Exception $e) {
-            return $e->getMessage();
             Session::flash('error', ['text' => 'Something went wrong. Please try again.']);
             return redirect()->route('user.connect');
         }
+    }
+
+    public function linkedinDisconnect()
+    {
+        $user = User::where('id', Auth::guard('web')->user()->id)->first();
+        $user->linkedin_access_token = null;
+        $user->linkedin_urn = null;
+        $user->save();
+        return redirect()->route('user.connect');
     }
 
     public function logout()

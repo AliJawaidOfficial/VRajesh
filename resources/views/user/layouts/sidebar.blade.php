@@ -14,25 +14,13 @@
         ],
         [
             'name' => 'Post',
-            'url' => route('user.post.create'),
-            'active_url' => 'user.post.create',
-            'icon' => asset('assets/images/icons/arrow-right.png'),
-        ],
-        [
-            'name' => 'LinkedIn',
-            'active_url' => 'user.linkedin.post.*',
+            'active_url' => 'user.post.*',
             'icon' => asset('assets/images/icons/arrow-right.png'),
             'submenu' => [
                 [
-                    'name' => 'Text Post',
-                    'url' => route('user.linkedin.post.text.create'),
-                    'active_url' => 'user.linkedin.post.text.create',
-                ],
-                [
-                    'name' => 'Video Post',
-                    'url' => route('user.linkedin.post.video.create'),
-                    'active_url' => 'user.linkedin.post.video.create',
-                    'permission' => 'product category read',
+                    'name' => 'Create',
+                    'url' => route('user.post.create'),
+                    'active_url' => 'user.post.create',
                 ],
             ],
         ],

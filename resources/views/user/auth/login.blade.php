@@ -76,7 +76,7 @@
                         </svg>
                     </span>
                     <input type="email" name="email" class="d-block w-100 rounded" placeholder="Enter Email"
-                        value="{{ old('email', 'alijawaidofficial.pk@gmail.com') }}" required />
+                        value="{{ old('email') }}" required />
                 </div>
                 <div class="input-icon-wrapper input-show-password position-relative">
                     <span class="input-icons position-absolute">
@@ -87,8 +87,7 @@
                                 fill="#8C8C8C" />
                         </svg>
                     </span>
-                    <input type="password" name="password" id="password_input" class="d-block w-100 rounded" placeholder="Password"
-                        value="admin" required />
+                    <input type="password" name="password" id="password_input" class="d-block w-100 rounded" placeholder="Password" required />
                     <button type="button" class="show-password-btn position-absolute">
                         <svg xmlns="http://www.w3.org/2000/svg" height="16" width="18" viewBox="0 0 576 512">
                             <path fill="#8c8c8c"

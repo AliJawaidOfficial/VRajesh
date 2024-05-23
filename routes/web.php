@@ -55,10 +55,10 @@ Route::name('user.')
             Route::get('/connect', [ConnectController::class, 'index'])->name('connect');
             Route::get('/connect/facebook', [ConnectController::class, 'facebook'])->name('connect.facebook');
             Route::get('/connect/facebook/callback', [ConnectController::class, 'facebookCallback'])->name('connect.facebook.callback');
-            // Route::get('/connect/facebook/disconnect', [ConnectController::class, 'facebookDisconnect'])->name('connect.facebook.disconnect');
+            Route::get('/connect/facebook/disconnect', [ConnectController::class, 'facebookDisconnect'])->name('connect.facebook.disconnect');
             Route::get('/connect/linkedin', [ConnectController::class, 'linkedin'])->name('connect.linkedin');
             Route::get('/connect/linkedin/callback', [ConnectController::class, 'linkedinCallback'])->name('connect.linkedin.callback');
-            // Route::get('/connect/linkedin/disconnect', [ConnectController::class, 'linkedinDisconnect'])->name('connect.linkedin.disconnect');
+            Route::get('/connect/linkedin/disconnect', [ConnectController::class, 'linkedinDisconnect'])->name('connect.linkedin.disconnect');
 
 
             /**

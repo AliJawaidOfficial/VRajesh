@@ -53,7 +53,7 @@
                         </svg>
                     </span>
                     <input type="email" name="email" class="d-block w-100" placeholder="Enter Email"
-                        value="{{ old('email', 'alijawaidofficial.pk@gmail.com') }}" required />
+                        value="{{ old('email') }}" required />
                 </div>
                 <button type="submit" class="btn d-block w-100 mt-4" type="submit">Send Request</button>
             </form>

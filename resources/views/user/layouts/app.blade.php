@@ -41,10 +41,12 @@
 <body>
 
     {{-- Content --}}
-    @if (Request()->is('login') ||
-            Request()->is('reset-password') ||
-            Request()->is('new-password') ||
-            Request()->is('new-password/*'))
+    @if (
+            Request()->is('login') ||
+            Request()->is('register') ||
+            Request()->is('forget-password') ||
+            Request()->is('reset-password')
+        )
         @yield('content')
     @else
         <div class="dashboard">

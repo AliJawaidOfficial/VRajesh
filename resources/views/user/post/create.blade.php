@@ -2,7 +2,7 @@
 @extends('user.layouts.app')
 
 {{-- Title --}}
-@section('title', 'Add New Post - ')
+@section('title', 'Create New Post')
 
 {{-- Styles --}}
 @section('styles')
@@ -30,9 +30,8 @@
     </style>
 @endsection
 
-{{-- Vendor Scripts --}}
+{{-- Scripts --}}
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 @endsection
 
 {{-- Content --}}

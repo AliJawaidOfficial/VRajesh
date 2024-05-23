@@ -2,7 +2,7 @@
 @extends('user.layouts.app')
 
 {{-- Title --}}
-@section('title', 'Add New User - ')
+@section('title', 'Connect Your Accounts')
 
 {{-- Styles --}}
 @section('styles')
@@ -46,7 +46,7 @@
 
                     <div class="card-body pt-0">
                         <p class="mb-3 text-center">Connect With LinkedIn</p>
-                        @if (Session::get('facebook_user'))
+                        @if (Session::get('LINKEDIN_USER_TOKEN'))
                             <a href="{{ route('user.logout') }}" class="btn btn-danger d-block">Disconnect</a>
                         @else
                             <a href="{{ route('user.connect.linkedin') }}" class="btn btn-dark d-block">Connect</a>

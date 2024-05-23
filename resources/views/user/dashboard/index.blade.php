@@ -2,7 +2,7 @@
 @extends('user.layouts.app')
 
 {{-- Title --}}
-@section('title', 'Add New User - ')
+@section('title', 'Dashboard')
 
 {{-- Styles --}}
 @section('styles')

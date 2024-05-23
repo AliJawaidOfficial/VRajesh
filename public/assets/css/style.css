@@ -448,8 +448,8 @@ body {
 	padding: 3px;
 	border-radius: 50%;
 	position: absolute;
-	top: 0;
-	right: 3%;
+	bottom: 0px;
+	right: 0;
 }
 
 .user-dropdown-wrapper .user-avatar .online::after {
@@ -869,7 +869,7 @@ body {
 	}
 
 	.user-dropdown-wrapper .user-avatar .online {
-		top: -2px;
+		bottom: -2px;
 		right: -16%;
 	}
 

@@ -19,6 +19,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('meta_email')->nullable();
             $table->string('linkedin_email')->nullable();
+            $table->string('linkedin_token')->nullable();
+            $table->string('meta_token')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

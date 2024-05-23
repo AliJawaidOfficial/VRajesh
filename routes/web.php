@@ -38,8 +38,8 @@ Route::name('user.')
 
             Route::get('forget-password', [AuthController::class, 'forgetPassword'])->name('password.forget');
             Route::post('forget-password', [AuthController::class, 'forgetPasswordStore'])->name('password.forget.email');
-            Route::get('password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-            Route::post('password/reset', [AuthController::class, 'reset'])->name('password.update');
+            Route::get('reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
+            Route::post('reset-password', [AuthController::class, 'resetPasswordStore'])->name('password.update');
         });
 
         Route::middleware('auth')->group(function () {

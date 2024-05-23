@@ -10,8 +10,8 @@
 
 <body>
     <p>Hello {{ $name }}</p>
-    <p>Please click on the below button to verify your email</p>
-    <a href="{{ $url }}" target="_blank">Verify</a>
+    <p>Please click on the below button for reset your password</p>
+    <a href="{{ $url }}" target="_blank">Reset</a>
 </body>
 
 </html>

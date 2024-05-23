@@ -42,10 +42,10 @@
 
     {{-- Content --}}
     @if (
-            Request()->is('login') ||
-            Request()->is('register') ||
-            Request()->is('forget-password') ||
-            Request()->is('reset-password')
+            request()->is('login') ||
+            request()->is('register') ||
+            request()->is('forget-password') ||
+            request()->is('reset-password/*')
         )
         @yield('content')
     @else

@@ -9,7 +9,7 @@ class PasswordResetToken extends Model
 {
     use HasFactory;
 
-    // public $timestamps = true;
+    public $timestamps = false;
     protected $primaryKey = 'email';
     protected $keyType = 'string';
     public $incrementing = false;

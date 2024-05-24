@@ -64,7 +64,10 @@ Route::name('user.')
             /**
              * Post
              */
-            Route::get('/post', [PostController::class, 'create'])->name('post.create');
+            Route::get('/post', [PostController::class, 'index'])->name('post.index');
+            Route::get('/post/draft', [PostController::class, 'draft'])->name('post.draft');
+            Route::get('/post/scheduled', [PostController::class, 'scheduled'])->name('post.scheduled');
+            Route::get('/post/create', [PostController::class, 'create'])->name('post.create');
             Route::post('/post', [PostController::class, 'store'])->name('post.store');
 
 

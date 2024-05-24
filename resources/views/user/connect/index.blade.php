@@ -10,6 +10,42 @@
 
 {{-- Vendor Scripts --}}
 @section('scripts')
+    {{-- <script>
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {
+                return;
+            }
+            js = d.createElement(s);
+            js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: '{{ env('FACEBOOK_CLIENT_ID') }}',
+                xfbml: true,
+                version: '{{ env('FACEBOOK_GRAPH_VERSION') }}'
+            });
+        };
+
+        document.getElementById("loginBtn").addEventListener("click", function() {
+            FB.login(function(response) {
+                if (response.authResponse) {
+                    console.log('Welcome!  Fetching your information.... ');
+                    FB.api('/me', {
+                        fields: 'name, email'
+                    }, function(response) {
+                        document.getElementById("profile").innerHTML = "Good to see you, " +
+                            response
+                            .name + ". i see your email address is " + response.email
+                    });
+                } else {
+                    console.log('User cancelled login or did not fully authorize.');
+                }
+            });
+        })
+    </script> --}}
 @endsection
 
 {{-- Content --}}
@@ -18,6 +54,8 @@
         <div class="h1 p-4 bg-white text-center">
             <h1>Connect Accounts</h1>
         </div>
+
+        {{-- <p id="profile"></p> --}}
 
         <div class="row row-cols-1 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 rounded mt-3">
             <div class="col">
@@ -28,6 +66,7 @@
 
                     <div class="card-body pt-0">
                         <p class="mb-3 text-center">Connect With Facebok</p>
+                        {{-- <a href="javascript:void(0)" id="loginBtn" class="btn btn-dark d-block">Connect</a> --}}
                         @if (Auth::guard('web')->user()->facebook_access_token != null)
                             <a href="{{ route('user.connect.facebook.disconnect') }}"
                                 class="btn btn-danger d-block">Disconnect</a>

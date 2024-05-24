@@ -27,15 +27,13 @@ class ConnectController extends Controller
 
     public function facebook()
     {
-        return Socialite::driver('facebook')
-        ->redirect();
-        // ->scopes(['email', 'public_profile'])
+        return Socialite::driver('facebook')->redirect();
     }
 
     public function facebookCallback()
     {
         try {
-            $user = Socialite::driver('facebook')->stateless()->user();
+            $user = Socialite::driver('facebook')->user();
             return $user;
             Session::put('user', $user);
             return redirect('/');
@@ -55,13 +53,15 @@ class ConnectController extends Controller
 
     public function linkedin()
     {
-        $url = $this->linkedinService->generateAuthUrl();
-        return redirect($url);
+        // return Socialite::driver('linkedin-openid')->redirect();
+        return redirect($this->linkedinService->generateAuthUrl());
     }
 
     public function linkedinCallback(Request $request)
     {
         try {
+            // return Socialite::driver('linkedin-openid')->user();
+
             $code = $request->code;
 
             $generateAccessToken = $this->linkedinService->generateAccessToken($code);
@@ -77,6 +77,7 @@ class ConnectController extends Controller
 
             return redirect()->route('user.connect');
         } catch (Exception $e) {
+            return $e->getMessage();
             Session::flash('error', ['text' => 'Something went wrong. Please try again.']);
             return redirect()->route('user.connect');
         }

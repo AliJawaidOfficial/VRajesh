@@ -22,6 +22,21 @@ class PostController extends Controller
         $this->facebookService = $importFacebookService;
     }
 
+    public function index()
+    {
+        return view('user.post.index');
+    }
+
+    public function draft()
+    {
+        return view('user.post.draft');
+    }
+
+    public function scheduled()
+    {
+        return view('user.post.scheduled');
+    }
+
     public function create()
     {
         return view('user.post.create');

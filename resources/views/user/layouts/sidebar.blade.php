@@ -22,6 +22,21 @@
                     'url' => route('user.post.create'),
                     'active_url' => 'user.post.create',
                 ],
+                [
+                    'name' => 'All',
+                    'url' => route('user.post.index'),
+                    'active_url' => 'user.post.index',
+                ],
+                [
+                    'name' => 'Draft',
+                    'url' => route('user.post.draft'),
+                    'active_url' => 'user.post.draft',
+                ],
+                [
+                    'name' => 'Scheduled',
+                    'url' => route('user.post.scheduled'),
+                    'active_url' => 'user.post.scheduled',
+                ],
             ],
         ],
     ];

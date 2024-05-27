@@ -45,9 +45,9 @@
             'icon' => asset('assets/images/icons/arrow-right.png'),
             'submenu' => [
                 [
-                    'name' => 'Board',
-                    'url' => route('user.linkedin.board.index'),
-                    'active_url' => 'user.linkedin.board.index',
+                    'name' => 'Pipeline',
+                    'url' => route('user.linkedin.pipeline.index'),
+                    'active_url' => 'user.linkedin.pipeline.index',
                 ],
             ],
         ],

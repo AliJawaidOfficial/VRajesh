@@ -8,7 +8,7 @@ use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\ConnectController;
 use App\Http\Controllers\User\PostController;
 
-use App\Http\Controllers\User\LinkedIn\BoardController;
+use App\Http\Controllers\User\LinkedIn\PipelineController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -86,7 +86,7 @@ Route::name('user.')
                 ->name('facebook.')
                 ->group(function () {
 
-                    
+
                     // Route::get('/post/image/create', [FacebookPostController::class, 'imageCreate'])->name('post.image.create');
                     // Route::post('/post/image/store', [FacebookPostController::class, 'imageStore'])->name('post.image.store');
 
@@ -103,7 +103,7 @@ Route::name('user.')
             Route::prefix('/linkedin')
                 ->name('linkedin.')
                 ->group(function () {
-                    Route::get('/board', [BoardController::class, 'index'])->name('board.index');
+                    Route::get('/pipeline', [PipelineController::class, 'index'])->name('pipeline.index');
 
                     // Route::get('/post/text/create', [LinkedInPostController::class, 'textCreate'])->name('post.text.create');
                     // Route::post('/post/text/store', [LinkedInPostController::class, 'textStore'])->name('post.text.store');

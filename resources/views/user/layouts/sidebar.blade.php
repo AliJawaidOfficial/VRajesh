@@ -23,7 +23,7 @@
                     'active_url' => 'user.post.create',
                 ],
                 [
-                    'name' => 'All',
+                    'name' => 'Published',
                     'url' => route('user.post.index'),
                     'active_url' => 'user.post.index',
                 ],

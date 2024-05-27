@@ -70,10 +70,16 @@ body {
 }
 
 .btn {
-	padding: 12px 0px;
+	padding: 12px;
 	font-size: 14px;
 	font-weight: 500;
 	border: none;
+}
+
+.line-clap {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
 }
 
 
@@ -914,89 +920,6 @@ body {
 		margin-top: 20px;
 	}
 
-	.main-inventory-heading {
-		flex-direction: column;
-		gap: 10px;
-	}
-
-	.main-inventory-heading>* {
-		width: 100% !important;
-	}
-
-	.main-inventory-heading>.d-flex {
-		justify-content: flex-start !important;
-	}
-
-	.inventory-main-input-wrapper label {
-		margin-top: 15px;
-	}
-
-	.inventory-main-input-wrapper .inventory-input-tabs ul {
-		width: 100%;
-	}
-
-	.invertory-main-input-wrapper .inventory-row-inputs {
-		margin-top: 20px;
-		gap: 10px;
-		flex-direction: column;
-	}
-
-	.invertory-main-input-wrapper .invertory-main-input-header {
-		margin-top: 20px;
-		padding-left: 0px;
-		padding-right: 0px;
-	}
-
-	.perform-action-btn div {
-		width: 100%;
-	}
-
-	.perform-action-btn a {
-		width: 50%;
-	}
-
-	.main-inventory-button {
-		margin-top: 20px;
-		flex-wrap: wrap;
-		justify-content: center;
-	}
-
-	.invertory-main-subtotal-wrapper div>span {
-		font-size: 16px;
-	}
-
-	.email-modal-header .email-info-wrapper {
-		margin-bottom: 30px;
-	}
-
-	.email-modal-header .email-info-wrapper span {
-		font-size: 14px;
-	}
-
-	.email-modal-header .email-info-wrapper input,
-	.email-modal-header .email-info-wrapper select,
-	.email-modal-body .pdf-wrapper span:first-child,
-	.email-modal-body p {
-		font-size: 16px;
-	}
-
-	.email-modal-footer {
-		margin-top: 30px;
-	}
-
-	.user-modal-footer .btn-action,
-	.email-modal-footer .btn-action {
-		width: auto;
-		flex-grow: 1;
-	}
-
-	.product-lot-search-wrapper {
-		gap: 20px;
-	}
-
-	.user-modal-body p {
-		font-size: 16px;
-	}
 }
 
 
@@ -1013,101 +936,7 @@ body {
 		font-size: 14px;
 	}
 
-	/* Home Page Main Content Wrapper */
-	.main-wrapper .total-number-wrapper .total-number-counting>span:nth-child(1) {
-		font-size: 18px;
-	}
 
-	.dashboard-page-main-wrapper .total-number-wrapper .total-number-counting>span:nth-child(2) {
-		font-size: 12px;
-	}
-
-
-	.dashboard-page-main-wrapper .dashboard-notification-wrapper .dashboard-notification-header span:nth-child(1) img,
-	.dashboard-page-main-wrapper .dashboard-store-wrapper .dashboard-store-header span:nth-child(1) img {
-		width: 23px;
-		height: 23px;
-	}
-
-	.dashboard-page-main-wrapper .dashboard-notification-wrapper .dashboard-notification-header span:nth-child(2),
-	.dashboard-page-main-wrapper .dashboard-store-wrapper .dashboard-store-header span:nth-child(2) {
-		font-size: 18px;
-	}
-
-	.dashboard-page-main-wrapper .dashboard-notification-wrapper .dashboard-notification-header,
-	.dashboard-page-main-wrapper .dashboard-store-wrapper .dashboard-store-header {
-		padding-bottom: 10px;
-	}
-
-	.search-box input {
-		font-size: 13px;
-		padding: 10px 18px 10px 50px;
-		border: 1px solid #E8E8E8;
-	}
-
-	.main-action-btns .main-action-btn-left,
-	.main-action-btns .main-action-btn-right button {
-		font-size: 14px;
-	}
-
-	.invertory-main-table-wrapper table th,
-	.invertory-main-table-wrapper table td {
-		font-size: 13px;
-	}
-
-	.inventory-main-input-wrapper label span {
-		font-size: 14px;
-	}
-
-	.inventory-main-input-wrapper label input,
-	.inventory-main-input-wrapper label select,
-	.inventory-main-input-wrapper label textarea,
-	.invertory-main-input-wrapper .inventory-row-inputs input,
-	.invertory-main-input-wrapper .inventory-row-inputs select {
-		font-size: 13px;
-	}
-
-	.main-inventory-button {
-		gap: 10px;
-		margin-top: 10px;
-	}
-
-	.main-inventory-button button,
-	.main-inventory-button a {
-		padding: 10px;
-	}
-
-	.modal-content {
-		padding: 30px;
-	}
-
-	.email-modal-header .email-info-wrapper input,
-	.email-modal-header .email-info-wrapper select,
-	.email-modal-body .pdf-wrapper span:first-child,
-	.email-modal-body p {
-		font-size: 14px;
-	}
-
-	.invertory-main-table-wrapper,
-	.invertory-main-subtotal-wrapper {
-		margin-top: 10px;
-	}
-
-	.invertory-main-subtotal-wrapper {
-		padding: 10px 0px;
-	}
-
-	.email-modal-header .email-info-wrapper {
-		margin-bottom: 15px;
-	}
-
-	.email-modal-body .pdf-wrapper {
-		margin-top: 0px;
-	}
-
-	.user-modal-body p {
-		font-size: 14px;
-	}
 }
 
 

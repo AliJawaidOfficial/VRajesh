@@ -45,21 +45,22 @@
 @section('content')
     <div class="sign-up-page position-relative">
         <div class="sign-up-bg-shaps-1 position-absolute">
-            <svg xmlns="http://www.w3.org/2000/svg" width="649" height="563" viewBox="0 0 649 563" fill="none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="649" height="563" viewBox="0 0 649 563" fill="#d89e3f">
                 <path fill-rule="evenodd" clip-rule="evenodd"
                     d="M585.74 -116.863C640.979 -48.7975 623.136 48.5324 629.337 135.993C635.593 224.22 672.772 322.278 622.018 394.758C571.478 466.933 465.217 460.043 382.051 489.136C303.542 516.6 230.934 575.567 149.228 560.148C65.794 544.404 1.36918 477.704 -47.2508 408.125C-93.0136 342.635 -115.876 263.802 -113.674 183.913C-111.608 108.968 -74.924 42.6223 -35.4192 -21.1278C4.48218 -85.5179 46.805 -150.527 114.563 -184.4C186.052 -220.138 267.683 -223.525 346.771 -212.189C433.806 -199.714 530.352 -185.114 585.74 -116.863Z"
-                    fill="#978EF4" fill-opacity="0.06" />
+                    fill="#d89e3f" fill-opacity="0.1" />
             </svg>
         </div>
         <div class="sign-up-bg-shaps-2 position-absolute">
-            <svg xmlns="http://www.w3.org/2000/svg" width="683" height="478" viewBox="0 0 683 478" fill="none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="683" height="478" viewBox="0 0 683 478" fill="#d89e3f">
                 <path fill-rule="evenodd" clip-rule="evenodd"
                     d="M0.655098 414.343C3.70128 326.736 81.0781 265.057 133.841 195.03C187.066 124.388 223.429 26.0249 309.305 4.69912C394.818 -16.5365 470.425 58.4461 552.248 91.126C629.489 121.976 722.97 125.194 774.459 190.481C827.038 257.149 831.816 349.759 822.785 434.161C814.284 513.602 779.751 588.066 725.624 646.864C674.846 702.025 603.61 727.964 531.951 750.094C459.573 772.446 384.962 793.674 311.619 774.718C234.238 754.718 170.455 703.662 118.259 643.172C60.8176 576.604 -2.39936 502.188 0.655098 414.343Z"
-                    fill="#978EF4" fill-opacity="0.06" />
+                    fill="#d89e3f" fill-opacity="0.1" />
             </svg>
         </div>
 
-        <div class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column rounded-8">
+        <div
+            class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column rounded-8">
             <h3 class="text-center">Register</h3>
             <form action={{ route('user.register') }} method="POST" id="login" class="w-100">
                 @csrf
@@ -81,8 +82,8 @@
                             </defs>
                         </svg>
                     </span>
-                    <input type="text" name="first_name" value="{{ old('first_name') }}" class="d-block w-100 rounded" placeholder="First Name"
-                        required />
+                    <input type="text" name="first_name" value="{{ old('first_name') }}" class="d-block w-100 rounded"
+                        placeholder="First Name" required />
                 </div>
 
                 <div class="input-icon-wrapper position-relative">
@@ -101,8 +102,8 @@
                             </defs>
                         </svg>
                     </span>
-                    <input type="text" name="last_name" value="{{ old('last_name') }}" class="d-block w-100 rounded" placeholder="Last Name"
-                        required />
+                    <input type="text" name="last_name" value="{{ old('last_name') }}" class="d-block w-100 rounded"
+                        placeholder="Last Name" required />
                 </div>
 
                 <div class="input-icon-wrapper position-relative">
@@ -121,8 +122,8 @@
                             </defs>
                         </svg>
                     </span>
-                    <input type="email" name="email" value="{{ old('email') }}" class="d-block w-100 rounded" placeholder="Email"
-                        required />
+                    <input type="email" name="email" value="{{ old('email') }}" class="d-block w-100 rounded"
+                        placeholder="Email" required />
                 </div>
 
                 <div class="input-icon-wrapper input-show-password position-relative">
@@ -134,8 +135,8 @@
                                 fill="#8C8C8C" />
                         </svg>
                     </span>
-                    <input type="password" name="password" id="password_input" class="d-block w-100 rounded" placeholder="Password"
-                        required />
+                    <input type="password" name="password" id="password_input" class="d-block w-100 rounded"
+                        placeholder="Password" required />
                     <button type="button" class="show-password-btn position-absolute">
                         <svg xmlns="http://www.w3.org/2000/svg" height="16" width="18" viewBox="0 0 576 512">
                             <path fill="#8c8c8c"
@@ -143,7 +144,7 @@
                         </svg>
                     </button>
                 </div>
-                
+
                 <div class="input-icon-wrapper input-show-password position-relative">
                     <span class="input-icons position-absolute">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -153,8 +154,8 @@
                                 fill="#8C8C8C" />
                         </svg>
                     </span>
-                    <input type="password" name="password_confirmation" id="confirm_password_input" class="d-block w-100 rounded"
-                        placeholder="Confirm Password" required />
+                    <input type="password" name="password_confirmation" id="confirm_password_input"
+                        class="d-block w-100 rounded" placeholder="Confirm Password" required />
                     <button type="button" class="show-password-btn position-absolute">
                         <svg xmlns="http://www.w3.org/2000/svg" height="16" width="18" viewBox="0 0 576 512">
                             <path fill="#8c8c8c"

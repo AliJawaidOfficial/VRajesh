@@ -1,7 +1,7 @@
 @extends('user.layouts.app')
 
 {{-- Title --}}
-@section('title', 'Dashboard')
+@section('title', 'Scheduled Posts')
 
 {{-- Styles --}}
 @section('styles')
@@ -160,20 +160,19 @@
             calendar.render();
 
             function fetchEvents(start, end) {
-                const apiUrl = `https://jsonplaceholder.typicode.com/posts`;
+                const apiUrl =
+                    `{{ route('user.post.scheduled.response') }}?start=${start.toISOString()}&end=${end.toISOString()}`;
 
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(data => {
                         const events = data.map((post, index) => {
-                            const dateOffset = index * 2;
-                            const eventDate = new Date(start);
-                            eventDate.setDate(eventDate.getDate() + dateOffset);
+                            const eventDate = new Date(post.scheduled_at);
                             return {
                                 id: post.id,
                                 title: post.title,
                                 start: eventDate.toISOString().split('T')[0],
-                                description: post.body
+                                description: post.description
                             };
                         });
                         calendar.removeAllEvents();
@@ -185,15 +184,19 @@
             }
 
             function fetchEventDetails(eventId) {
-                const apiUrl = `https://jsonplaceholder.typicode.com/posts/${eventId}`;
+                const assetUrl = '{{ asset('') }}';
+                const apiUrl = `{{ route('user.post.scheduled.response') }}/${eventId}`;
 
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById('modalBody').innerHTML = `
+                        html = `
                         <p><strong>Title:</strong> ${data.title}</p>
-                        <p><strong>Description:</strong> ${data.body}</p>
+                        <p><strong>Description:</strong> ${data.description}</p>
+                        <p><strong>Media:</strong> <img src="${assetUrl}${data.media}" class="w-100" style="max-width: 200px;" /></p>
+                        <p><strong>Media Type:</strong> ${data.media_type}</p>
                     `;
+                        document.getElementById('modalBody').innerHTML = html;
                         var myModal = new bootstrap.Modal(document.getElementById('scheduleModal'));
                         myModal.show();
                     })

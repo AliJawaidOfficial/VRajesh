@@ -33,6 +33,39 @@ class PostController extends Controller
         return view('user.post.scheduled');
     }
 
+    public function scheduledData(Request $request)
+    {
+        try {
+            $user = Auth::guard('web')->user();
+            $data = Post::where('user_id', $user->id)->whereNotNull('scheduled_at')
+                ->where('scheduled_at', '>=', $request->start)
+                ->where('scheduled_at', '<=', $request->end)
+                ->get();
+
+            return $data;
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function scheduledDataShow(String $id)
+    {
+        try {
+            $user = Auth::guard('web')->user();
+            $data = Post::where('user_id', $user->id)->where('id', $id)->first();
+
+            return $data;
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
     public function create()
     {
         return view('user.post.create');

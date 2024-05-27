@@ -186,7 +186,7 @@
             $("#post_schedule_date").val($("#scheduleDate").val());
             $("#post_schedule_time").val($("#scheduleTime").val());
             $("#scheduleModal").modal("hide");
-            // $("#postForm").submit();
+            $("#postForm").submit();
         });
 
         // Post Form

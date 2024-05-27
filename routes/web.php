@@ -24,6 +24,9 @@ use App\Http\Controllers\User\LinkedIn\BoardController;
 //     return view('welcome');
 // });
 
+
+Route::get('/scheduled/post/job', [PostController::class, 'scheduledJob'])->name('scheduled.post.job');
+
 Route::name('user.')
     ->group(function () {
 

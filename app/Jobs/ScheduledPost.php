@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\Post;
 use App\Services\FacebookService;
 use App\Services\LinkedInService;
+use Exception;
 use Illuminate\Support\Facades\Log;
 
 class ScheduledPost implements ShouldQueue
@@ -33,14 +34,18 @@ class ScheduledPost implements ShouldQueue
      */
     public function handle(): void
     {
-        $posts = Post::where('scheduled_at', '<=', now())->where('posted', 0)->where('draft', 0)->get();
+        Log::error('Test log');
+        $posts = Post::
+            // where('scheduled_at', '<=', now())->
+            where('posted', 0)->where('draft', 0)->get();
+
 
         foreach ($posts as $post) {
             try {
                 if ($post->on_facebook == 1) $this->processFacebookPost($post);
                 if ($post->on_linkedin == 1) $this->processLinkedinPost($post);
                 if ($post->on_instagram == 1) $this->processInstagramPost($post);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Failed to process post ID ' . $post->id . ': ' . $e->getMessage());
             }
             Post::where('id', $post->id)->update(['posted' => 1]);

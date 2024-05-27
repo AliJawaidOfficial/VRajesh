@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
@@ -63,6 +64,43 @@ class PostController extends Controller
                 'status' => 500,
                 'error' => $e->getMessage()
             ]);
+        }
+    }
+
+    public function scheduledJob()
+    {
+        $posts = Post::
+            // where('scheduled_at', '<=', now())->
+            where('posted', 0)->where('draft', 0)->get();
+
+        foreach ($posts as $post) {
+
+            if ($post->on_facebook == 1) {
+                if ($post->media != null) {
+                    $media_path = public_path($post->media);
+                    $media_size = filesize($post->media);
+                    if ($post->media_type == 'image') $this->facebookService->postImage($media_path, $post->description);
+                    if ($post->media_type == 'video') $this->facebookService->postVideo($media_size, $media_path, $post->description);
+                } else {
+                    $this->facebookService->postText($post->description);
+                }
+            }
+
+            if ($post->on_linkedin == 1) {
+                if ($post->media != null) {
+                    $media_path = public_path($post->media);
+                    if ($post->media_type == 'image') $this->linkedinService->postImage($media_path, $post->description);
+                    if ($post->media_type == 'video') $this->linkedinService->postVideo($media_path, $post->description);
+                } else {
+                    $this->linkedinService->postText($post->description);
+                }
+            }
+
+            if ($post->on_instagram == 1) {
+            }
+            Post::where('id', $post->id)->update(['posted' => 1]);
+
+            return true;
         }
     }
 
@@ -161,6 +199,10 @@ class PostController extends Controller
                 $data->posted = 1;
             } else {
                 $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
+
+                if ($request->has('on_facebook')) $data->on_facebook = 1;
+                if ($request->has('on_instagram')) $data->on_instagram = 1;
+                if ($request->has('on_linkedin')) $data->on_linkedin = 1;
             }
 
             $data->save();

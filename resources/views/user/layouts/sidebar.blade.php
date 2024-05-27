@@ -40,14 +40,24 @@
             ],
         ],
         [
-            'name' => 'Linkedin',
-            'active_url' => 'user.linkedin.*',
+            'name' => 'Pipelines',
+            'active_url' => 'user.linkedin.pipeline.*',
             'icon' => asset('assets/images/icons/arrow-right.png'),
             'submenu' => [
                 [
-                    'name' => 'Pipeline',
+                    'name' => 'B1',
                     'url' => route('user.linkedin.pipeline.index'),
                     'active_url' => 'user.linkedin.pipeline.index',
+                ],
+                [
+                    'name' => 'B2',
+                    'url' => route('user.linkedin.pipeline.index'),
+                    'active_url' => '',
+                ],
+                [
+                    'name' => 'B3',
+                    'url' => route('user.linkedin.pipeline.index'),
+                    'active_url' => '',
                 ],
             ],
         ],

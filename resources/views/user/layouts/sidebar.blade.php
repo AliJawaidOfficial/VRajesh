@@ -39,6 +39,18 @@
                 ],
             ],
         ],
+        [
+            'name' => 'Linkedin',
+            'active_url' => 'user.linkedin.*',
+            'icon' => asset('assets/images/icons/arrow-right.png'),
+            'submenu' => [
+                [
+                    'name' => 'Board',
+                    'url' => route('user.linkedin.board.index'),
+                    'active_url' => 'user.linkedin.board.index',
+                ],
+            ],
+        ],
     ];
 @endphp
 

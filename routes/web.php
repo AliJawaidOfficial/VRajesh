@@ -2,13 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\User\ConnectController;
-use App\Http\Controllers\LinkedIn\PostController as LinkedInPostController;
-use App\Http\Controllers\Facebook\PostController as FacebookPostController;
+use App\Http\Controllers\User\DashboardController;
+
 use App\Http\Controllers\User\AuthController;
+use App\Http\Controllers\User\ConnectController;
 use App\Http\Controllers\User\PostController;
 
+use App\Http\Controllers\User\LinkedIn\BoardController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -65,11 +65,14 @@ Route::name('user.')
              * Post
              */
             Route::get('/post', [PostController::class, 'index'])->name('post.index');
-            Route::get('/post/draft', [PostController::class, 'draft'])->name('post.draft');
+
             Route::get('/post/scheduled', [PostController::class, 'scheduled'])->name('post.scheduled');
+
+            Route::get('/post/draft', [PostController::class, 'draft'])->name('post.draft');
+            Route::post('/post/draft', [PostController::class, 'draftStore'])->name('post.draft.store');
+
             Route::get('/post/create', [PostController::class, 'create'])->name('post.create');
             Route::post('/post', [PostController::class, 'store'])->name('post.store');
-
 
             /**
              * Facebook
@@ -77,24 +80,31 @@ Route::name('user.')
             Route::prefix('/facebook')
                 ->name('facebook.')
                 ->group(function () {
-                    Route::get('/post/image/create', [FacebookPostController::class, 'imageCreate'])->name('post.image.create');
-                    Route::post('/post/image/store', [FacebookPostController::class, 'imageStore'])->name('post.image.store');
 
-                    Route::get('/post/text/create', [FacebookPostController::class, 'textCreate'])->name('post.text.create');
-                    Route::post('/post/text/store', [FacebookPostController::class, 'textStore'])->name('post.text.store');
+                    
+                    // Route::get('/post/image/create', [FacebookPostController::class, 'imageCreate'])->name('post.image.create');
+                    // Route::post('/post/image/store', [FacebookPostController::class, 'imageStore'])->name('post.image.store');
 
-                    Route::get('/post/video/create', [FacebookPostController::class, 'videoCreate'])->name('post.video.create');
-                    Route::post('/post/video/store', [FacebookPostController::class, 'videoStore'])->name('post.video.store');
+                    // Route::get('/post/text/create', [FacebookPostController::class, 'textCreate'])->name('post.text.create');
+                    // Route::post('/post/text/store', [FacebookPostController::class, 'textStore'])->name('post.text.store');
+
+                    // Route::get('/post/video/create', [FacebookPostController::class, 'videoCreate'])->name('post.video.create');
+                    // Route::post('/post/video/store', [FacebookPostController::class, 'videoStore'])->name('post.video.store');
                 });
 
+            /**
+             * LinkedIn
+             */
             Route::prefix('/linkedin')
                 ->name('linkedin.')
                 ->group(function () {
-                    Route::get('/post/text/create', [LinkedInPostController::class, 'textCreate'])->name('post.text.create');
-                    Route::post('/post/text/store', [LinkedInPostController::class, 'textStore'])->name('post.text.store');
+                    Route::get('/board', [BoardController::class, 'index'])->name('board.index');
 
-                    Route::get('/post/video/create', [LinkedInPostController::class, 'videoCreate'])->name('post.video.create');
-                    Route::post('/post/video/store', [LinkedInPostController::class, 'videoStore'])->name('post.video.store');
+                    // Route::get('/post/text/create', [LinkedInPostController::class, 'textCreate'])->name('post.text.create');
+                    // Route::post('/post/text/store', [LinkedInPostController::class, 'textStore'])->name('post.text.store');
+
+                    // Route::get('/post/video/create', [LinkedInPostController::class, 'videoCreate'])->name('post.video.create');
+                    // Route::post('/post/video/store', [LinkedInPostController::class, 'videoStore'])->name('post.video.store');
                 });
         });
     });

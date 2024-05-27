@@ -109,23 +109,6 @@
 {{-- Scripts --}}
 @section('scripts')
     <script>
-        document.getElementById('postForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-            const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
-            modal.show(); // Show the modal
-            // After showing the modal, submit the form
-            this.submit();
-        });
-
-        document.getElementById('scheduleForm').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
-            modal.show();
-            // Perform schedule post logic here
-            // After scheduling, close the modal
-            modal.hide();
-        });
-
         document.querySelectorAll('.toggle-post').forEach((toggleBtn) => {
             toggleBtn.addEventListener('click', (e) => {
                 const target = document.getElementById(e.target.dataset.bsToggle);
@@ -152,7 +135,8 @@
                     const url = e.target.result;
                     const isImage = file.type.startsWith('image/');
                     document.querySelectorAll('.post-media img').forEach(img => img.classList.add('d-none'));
-                    document.querySelectorAll('.post-media video').forEach(video => video.classList.add('d-none'));
+                    document.querySelectorAll('.post-media video').forEach(video => video.classList.add(
+                        'd-none'));
 
                     if (isImage) {
                         document.querySelectorAll('.post-media img').forEach(img => {
@@ -195,6 +179,69 @@
                 }
             });
         });
+
+        // Schedule Form
+        $("#scheduleForm").submit(function(e) {
+            e.preventDefault();
+            $("#post_schedule_date").val($("#scheduleDate").val());
+            $("#post_schedule_time").val($("#scheduleTime").val());
+            $("#scheduleModal").modal("hide");
+            // $("#postForm").submit();
+        });
+
+        // Post Form
+        $("#postForm").submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{{ route('user.post.store') }}",
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    $("#exampleModal").modal("show");
+                },
+                success: function(response) {
+                    if (response.status == 200) {
+                        if ($("#post_schedule_date").val() != null) {
+                            window.location.href = "{{ route('user.post.scheduled') }}";
+                        } else {
+                            window.location.href = "{{ route('user.post.index') }}";
+                        }
+                    } else {
+                        toastr.error(response.error);
+                    }
+
+                    $("#exampleModal").modal("hide");
+                }
+            });
+        });
+
+        // Draft Form
+        $('#postForm button[name="draft"]').click(function(e) {
+            let form = $('#postForm')[0];
+            $.ajax({
+                type: "POST",
+                url: "{{ route('user.post.draft.store') }}",
+                data: new FormData(form),
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    $("#exampleModal").modal("show");
+                },
+                success: function(response) {
+
+                    if (response.status == 200) {
+                        window.location.href = "{{ route('user.post.draft') }}";
+                    } else {
+                        toastr.error(response.error);
+                    }
+
+                    $("#exampleModal").modal("hide");
+                }
+            });
+        });
+
     </script>
 @endsection
 
@@ -210,13 +257,16 @@
 
                 <form id="postForm" class="p-4 bg-white rounded-8" method="POST" enctype="multipart/form-data">
                     @csrf
+                    <input type="date" name="schedule_date" id="post_schedule_date" class="d-none" />
+                    <input type="time" name="schedule_time" id="post_schedule_time" class="d-none" />
+
                     <div class="d-flex flex-column flex-grow-1">
                         <div class="mb-4">
                             <input class="d-block h-100 w-100 form-control" name="title"
                                 placeholder="Enter your title here" required />
                         </div>
                         <div class="textarea-wrapper my-2">
-                            <textarea class="d-block h-100 w-100 form-control" id="postDescription" name="title"
+                            <textarea class="d-block h-100 w-100 form-control" id="postDescription" name="description"
                                 placeholder="Enter your post description" required></textarea>
                         </div>
 
@@ -235,8 +285,8 @@
                                 </label>
 
                                 <label class="d-inline-block">
-                                    <input type="checkbox" name="on_instagram" value="1" data-bs-toggle="instagram-post"
-                                        class="form-check-input toggle-post" />
+                                    <input type="checkbox" name="on_instagram" value="1"
+                                        data-bs-toggle="instagram-post" class="form-check-input toggle-post" />
                                     <span class="d-inline-block ms-1">Instagram</span>
                                 </label>
                             </div>
@@ -252,15 +302,15 @@
 
                     <div class="d-flex align-items-center justify-content-between mt-2 gap-4">
                         <div>
-                            <button type="button" class="btn btn-secondary btn-custom btn-custom-secondary">Save as
-                                Draft</button>
+                            <button type="button" name="draft"
+                                class="btn btn-secondary btn-custom btn-custom-secondary">Save as Draft</button>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             <button type="button" class="btn btn-primary btn-custom btn-custom-primary"
                                 data-bs-toggle="modal" data-bs-target="#scheduleModal">Schedule</button>
-                            <button type="submit" class="btn btn-primary btn-custom btn-custom-primary">Post</button>
-
+                            <button type="submit" name="post"
+                                class="btn btn-primary btn-custom btn-custom-primary">Post</button>
                         </div>
                     </div>
                 </form>
@@ -384,7 +434,9 @@
                                 <span>&#9993;</span>
                             </div>
                             <div class="likes">789,187 likes</div>
-                            <div class="caption post-description"><span class="username">karuneshtalwar</span> <p class="d-inline-block">This is a default post description</p></div>
+                            <div class="caption post-description"><span class="username">karuneshtalwar</span>
+                                <p class="d-inline-block">This is a default post description</p>
+                            </div>
                             <div class="comments text-muted">View all 6,273 comments</div>
                             <div class="add-comment">
                                 <input type="text" placeholder="Add a comment...">

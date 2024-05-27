@@ -134,33 +134,33 @@
                 reader.onload = function(e) {
                     const url = e.target.result;
                     const isImage = file.type.startsWith('image/');
-                    document.querySelectorAll('.post-media img').forEach(img => img.classList.add('d-none'));
-                    document.querySelectorAll('.post-media video').forEach(video => video.classList.add(
-                        'd-none'));
 
                     if (isImage) {
                         document.querySelectorAll('.post-media img').forEach(img => {
                             img.src = url;
-                            img.classList.remove('d-none');
                             img.classList.add('active');
+                            img.style.display = 'block';
                         });
                         document.querySelectorAll('.post-media video').forEach(video => {
                             video.classList.remove('active');
+                            video.style.display = 'none';
                         });
                     } else {
                         document.querySelectorAll('.post-media video').forEach(video => {
                             video.src = url;
-                            video.classList.remove('d-none');
                             video.classList.add('active');
+                            video.style.display = 'block';
                         });
                         document.querySelectorAll('.post-media img').forEach(img => {
                             img.classList.remove('active');
+                            img.style.display = 'none';
                         });
                     }
                 };
                 reader.readAsDataURL(file);
             }
         });
+
 
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'Enter') {
@@ -241,7 +241,6 @@
                 }
             });
         });
-
     </script>
 @endsection
 
@@ -345,9 +344,9 @@
                             </div>
 
                             <div class="post-media">
-                                <img src="https://via.placeholder.com/500" alt="Post Image" class="img-fluid"
+                                <img src="#" alt="Post Image" class="img-fluid" style="display: none"
                                     id="postImage">
-                                <video controls class="w-100 d-none" id="postVideo">
+                                <video controls class="w-100" style="display: none" id="postVideo">
                                     <source src="#" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
@@ -386,9 +385,9 @@
                                 <p class="mb-0"></p>
                             </div>
                             <div class="post-media">
-                                <img src="https://via.placeholder.com/500" alt="Post Image" class="img-fluid"
+                                <img src="#" alt="Post Image" style="display: none" class="img-fluid"
                                     id="postImage">
-                                <video controls class="w-100 d-none" id="postVideo">
+                                <video controls class="w-100" style="display: none" id="postVideo">
                                     <source src="video.mp4" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
@@ -420,8 +419,8 @@
                         </div>
                         <div class="card-body p-0">
                             <div class="post-media">
-                                <img src="https://via.placeholder.com/500" class="img-fluid active" id="postImage">
-                                <video controls class="w-100 d-none" id="postVideo">
+                                <img src="#" class="img-fluid" style="display: none" id="postImage">
+                                <video controls class="w-100" style="display: none" id="postVideo">
                                     <source src="#" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>

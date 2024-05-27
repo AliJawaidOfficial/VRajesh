@@ -271,11 +271,6 @@ body {
 	overflow-y: auto;
 }
 
-.navigation nav.main-menu {
-	/* padding-right: 10px; */
-	/* Adjust padding as needed */
-}
-
 .navigation ul {
 	list-style: none;
 	padding: 0;
@@ -697,13 +692,13 @@ body {
 
 .dashboard-page-main-wrapper .dashboard-store-table-wrapper::-webkit-scrollbar-thumb {
 	border-radius: 10px;
-	background-image: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important !important;
+	background-image: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important;
 }
 
 .dashboard-page-main-wrapper .dashboard-store-table-wrapper::-webkit-scrollbar-thumb:horizontal {
 	min-width: 5px;
 	/* Adjust the min-width to control the width of the horizontal scrollbar */
-	background-image: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important !important;
+	background-image: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important;
 }
 
 .dashboard-page-main-wrapper .dashboard-store-table-wrapper table {
@@ -735,7 +730,7 @@ body {
 
 /* Invertory Page */
 .main-content-wrapper {
-	padding: 15px 20px;
+	padding: 15px;
 }
 
 /* Store Page */

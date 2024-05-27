@@ -110,8 +110,8 @@
 {{-- Content --}}
 @section('content')
     <section class="main-content-wrapper d-flex flex-column">
-        <div class="h1 p-4 bg-white text-center">
-            <h1>Connect Accounts</h1>
+        <div class="h3 p-3 bg-white text-center rounded-8">
+            <h3>Create Post</h3>
         </div>
 
         {{-- <div class="fb-like" data-share="true" data-width="450" data-show-faces="true"></div> --}}
@@ -154,9 +154,9 @@
             };
         </script> --}}
 
-        <div class="row row-cols-1 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 rounded mt-3">
+        <div class="row row-cols-1 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 rounded mt-1">
             <div class="col">
-                <div class="card shadow-sm">
+                <div class="card rounded-8">
                     <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-center">
                         <img src="{{ asset('assets/images/icons/icons-facebook.png') }}" alt="">
                     </div>
@@ -173,7 +173,7 @@
                 </div>
             </div>
             <div class="col">
-                <div class="card">
+                <div class="card rounded-8">
                     <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-center">
                         <img src="{{ asset('assets/images/icons/icons-linkedin.png') }}" alt="">
                     </div>

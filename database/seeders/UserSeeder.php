@@ -17,10 +17,10 @@ class UserSeeder extends Seeder
         User::create([
             'first_name' => 'Test',
             'last_name' => 'User',
-            'email' => 'alijawaidofficial.pk@gmail.com',
+            'email' => 'admin@gmail.com',
             'email_verified_at' => now(),
-            'meta_email' => 'alijawaidofficial.pk@gmail.com',
-            'linkedin_email' => 'alijawaidofficial.pk@gmail.com',
+            'meta_email' => 'admin@gmail.com',
+            'linkedin_email' => 'admin@gmail.com',
             'password' => Hash::make('admin'),
         ]);
     }

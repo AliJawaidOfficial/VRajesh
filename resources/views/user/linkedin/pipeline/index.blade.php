@@ -6,6 +6,8 @@
 
 {{-- Styles --}}
 @section('styles')
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jkanban@1.3.1/dist/jkanban.min.css">
     <style>
         .board-list-wrapper li a {
             color: black;
@@ -20,113 +22,167 @@
             color: #fff;
         }
 
+        /* jkanban */
+        #boardForm {
+            margin: 20px 0;
+        }
+
+        #myKanban {
+            max-height: 600px; /* Adjust as needed */
+            overflow-y: auto;
+            overflow-x: auto; /* Horizontal scrolling */
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: red blue; /* Firefox */
+        }
+
+        /* Scrollbar styling for WebKit browsers (Chrome, Safari) */
+        #myKanban::-webkit-scrollbar {
+            height: 12px; /* Horizontal scrollbar height */
+        }
+
+        #myKanban::-webkit-scrollbar-thumb {
+            background: red; /* Scrollbar thumb color */
+            border-radius: 10px; /* Scrollbar thumb rounded corners */
+        }
+
+        #myKanban::-webkit-scrollbar-track {
+            background: blue; /* Scrollbar track color */
+        }
+
         .kanban-board {
-            display: flex;
-            gap: 15px;
-            padding: 20px;
-        }
-
-        .kanban-column {
-            background-color: #f4f4f4;
-            border-radius: 8px;
-            padding: 15px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .kanban-column h4 {
-            margin-bottom: 15px;
-        }
-
-        .kanban-task {
             background-color: #fff;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 10px;
-            cursor: move;
+            max-height: 500px; /* Adjust as needed */
+            overflow-y: auto;
         }
 
-        .create-task {
-            margin-top: auto;
+        .kanban-board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-board-btn,
+        .add-item-btn,
+        .delete-item-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .add-item-input {
+            width: 60%;
+            margin-right: 10px;
+        }
+
+        .kanban-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 @endsection
 
-{{-- Scripts --}}
+{{-- Vendor Scripts --}}
 @section('scripts')
+
+    <script src="https://cdn.jsdelivr.net/npm/jkanban@1.3.1/dist/jkanban.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const createBoardButton = document.querySelector('.create-board-wrapper button');
-            const boardListWrapper = document.querySelector('.board-list-wrapper');
-            const kanbanBoard = document.querySelector('.kanban-board');
-
-            createBoardButton.addEventListener('click', function() {
-                const input = document.querySelector('.create-board-wrapper input');
-                const boardName = input.value.trim();
-                if (boardName) {
-                    const newBoard = document.createElement('li');
-                    newBoard.classList.add('py-2', 'px-3');
-                    newBoard.innerHTML = `<a href="#" class="text-decoration-none">${boardName}</a>`;
-                    boardListWrapper.appendChild(newBoard);
-                    input.value = '';
-                }
-            });
-
-            boardListWrapper.addEventListener('click', function(event) {
-                if (event.target.tagName === 'A') {
-                    const boards = boardListWrapper.querySelectorAll('li');
-                    boards.forEach(board => board.classList.remove('active'));
-                    event.target.parentElement.classList.add('active');
-                    // Load the corresponding Kanban board here
-                }
-            });
-
-            function createKanbanColumn(title) {
-                const column = document.createElement('div');
-                column.classList.add('kanban-column');
-                column.innerHTML = `<h4>${title}</h4><div class="kanban-tasks"></div><button class="btn btn-light create-task">+ Add Task</button>`;
-                kanbanBoard.appendChild(column);
-
-                const addTaskButton = column.querySelector('.create-task');
-                addTaskButton.addEventListener('click', function() {
-                    const taskText = prompt('Enter task description:');
-                    if (taskText) {
-                        const task = document.createElement('div');
-                        task.classList.add('kanban-task');
-                        task.textContent = taskText;
-                        column.querySelector('.kanban-tasks').appendChild(task);
-                        // Make the task draggable
-                        makeTaskDraggable(task);
-                    }
-                });
+        var kanban = new jKanban({
+            element: '#myKanban',
+            gutter: '15px',
+            widthBoard: '250px',
+            responsivePercentage: false,
+            dragItems: true,
+            boards: [],
+            dragEl: function(el, source) {
+                console.log('START DRAG: ' + el.dataset.eid);
+            },
+            dragendEl: function(el) {
+                console.log('END DRAG: ' + el.dataset.eid);
+                updateAllBoardCounts();
+            },
+            dropEl: function(el, target, source, sibling) {
+                console.log('DROPPED: ' + el.dataset.eid);
+                updateAllBoardCounts();
             }
-
-            function makeTaskDraggable(task) {
-                task.draggable = true;
-                task.addEventListener('dragstart', function() {
-                    task.classList.add('dragging');
-                });
-                task.addEventListener('dragend', function() {
-                    task.classList.remove('dragging');
-                });
-            }
-
-            function makeColumnDroppable(column) {
-                column.addEventListener('dragover', function(event) {
-                    event.preventDefault();
-                    const draggingTask = document.querySelector('.dragging');
-                    const tasksContainer = column.querySelector('.kanban-tasks');
-                    tasksContainer.appendChild(draggingTask);
-                });
-            }
-
-            // Example usage
-            ['To Do', 'In Progress', 'Done'].forEach(columnTitle => {
-                const column = createKanbanColumn(columnTitle);
-                makeColumnDroppable(column);
-            });
         });
+
+        // Function to update the item count on a board
+        function updateBoardCount(boardId) {
+            var boardElement = document.querySelector(`[data-id="${boardId}"]`);
+            if (boardElement) {
+                var itemCount = boardElement.querySelectorAll('.kanban-item').length;
+                var countElement = document.getElementById('count-' + boardId);
+                if (countElement) {
+                    countElement.innerText = '(' + itemCount + ')';
+                }
+            }
+        }
+
+        function updateAllBoardCounts() {
+            kanban.options.boards.forEach(function(board) {
+                updateBoardCount(board.id);
+            });
+        }
+
+        // Function to add a new board
+        function addNewBoard() {
+            var newBoardTitle = document.getElementById('newBoardTitle').value;
+            if (newBoardTitle) {
+                var newBoardId = 'board' + (kanban.options.boards.length + 1);
+                kanban.addBoards([{
+                    id: newBoardId,
+                    title: newBoardTitle + ' <span id="count-' + newBoardId +
+                        '">(0)</span> <button class="delete-board-btn" onclick="deleteBoard(\'' + newBoardId +
+                        '\')">Delete</button><input type="text" class="add-item-input" id="input-' +
+                        newBoardId +
+                        '" placeholder="New Item Title"><button class="add-item-btn" onclick="addNewItem(\'' +
+                        newBoardId + '\')">Add Item</button>',
+                    item: []
+                }]);
+                document.getElementById('newBoardTitle').value = ''; // Clear the input field
+                updateBoardCount(newBoardId); // Initialize the item count
+            } else {
+                alert('Please enter a board title');
+            }
+        }
+
+        // Function to delete a board
+        function deleteBoard(boardId) {
+            kanban.removeBoard(boardId);
+        }
+
+        // Function to add a new item
+        function addNewItem(boardId) {
+            var inputId = 'input-' + boardId;
+            var newItemTitle = document.getElementById(inputId).value;
+            if (newItemTitle) {
+                kanban.addElement(boardId, {
+                    title: newItemTitle + ' <button class="delete-item-btn" onclick="deleteItem(this, \'' +
+                        boardId + '\')">Delete</button>'
+                });
+                document.getElementById(inputId).value = ''; // Clear the input field
+                updateBoardCount(boardId); // Update the item count
+            } else {
+                alert('Please enter an item title');
+            }
+        }
+
+        // Function to delete an item
+        function deleteItem(button, boardId) {
+            var itemElement = button.parentElement;
+            var boardElement = document.querySelector(`[data-id="${boardId}"] .kanban-drag`);
+            boardElement.removeChild(itemElement);
+            updateBoardCount(boardId); // Update the item count
+        }
+
+        // Add event listeners to the button
+        document.getElementById('addBoardBtn').addEventListener('click', addNewBoard);
+
+        // Initialize board counts
+        updateAllBoardCounts();
     </script>
 @endsection
 
@@ -137,22 +193,12 @@
             <h3 class="mb-0">Published Posts</h3>
         </div>
 
-        <div class="row gap-3" style="padding: 0px 13px">
-            <div class="col-md-3 bg-white rounded-8 p-3">
-                <div class="create-board-wrapper d-flex align-items-stretch justify-content-between gap-2">
-                    <input type="text" class="flex-grow-1 form-control" placeholder="Create Board">
-                    <button class="btn btn-primary">+</button>
-                </div>
-
-                <ul class="list-unstyled mt-3 board-list-wrapper">
-                    <li class="py-2 px-3 active"><a href="#" class="text-decoration-none">Board 1</a></li>
-                    <li class="py-2 px-3"><a href="#" class="text-decoration-none">Board 2</a></li>
-                    <li class="py-2 px-3"><a href="#" class="text-decoration-none">Board 3</a></li>
-                </ul>
+        <div>
+            <div id="boardForm">
+                <input type="text" id="newBoardTitle" placeholder="New Board Title">
+                <button id="addBoardBtn">Add Board</button>
             </div>
-            <div class="col-md-9 bg-white rounded-8">
-                <div class="kanban-board"></div>
-            </div>
+            <div id="myKanban"></div>
         </div>
     </section>
 @endsection

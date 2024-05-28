@@ -31,7 +31,7 @@
             </svg>
         </div>
 
-        <div class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column rounded-8">
+        <div class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column rounded-6">
             <h3 class="text-center">Forget Password</h3>
             <form action={{ route('user.password.forget.email') }} method="POST" id="login" class="w-100">
                 @csrf

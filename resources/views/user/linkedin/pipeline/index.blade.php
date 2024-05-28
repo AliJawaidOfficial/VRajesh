@@ -189,7 +189,7 @@
 {{-- Content --}}
 @section('content')
     <section class="main-content-wrapper d-flex flex-column">
-        <div class="h3 p-3 mb-4 bg-white text-center rounded-8">
+        <div class="h3 p-3 mb-4 bg-white text-center rounded-6">
             <h3 class="mb-0">Published Posts</h3>
         </div>
 

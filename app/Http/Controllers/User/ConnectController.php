@@ -3,21 +3,27 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Services\LinkedInService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
+use App\Services\FacebookService;
+use App\Services\LinkedInService;
 
 class ConnectController extends Controller
 {
     protected $linkedinService;
+    protected $facebookService;
 
-    public function __construct(private readonly LinkedInService $service)
+    public function __construct(
+        private readonly LinkedInService $importLinkedin,
+        private readonly FacebookService $importService
+    )
     {
-        $this->linkedinService = $service;
+        $this->linkedinService = $importLinkedin;
+        $this->facebookService = $importService;
     }
 
     public function index()
@@ -30,13 +36,27 @@ class ConnectController extends Controller
         return Socialite::driver('facebook')->redirect();
     }
 
-    public function facebookCallback()
+    public function facebookCallback(Request $request)
     {
         try {
             $user = Socialite::driver('facebook')->user();
-            return $user;
-            Session::put('user', $user);
-            return redirect('/');
+
+            $userData = [
+                'id' => $user->getId(),
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+                'avatar' => $user->getAvatar(),
+                'token' => $this->facebookService->tokenTime($user->token),
+            ];
+
+            return response()->json($userData);
+
+            $user = User::where('id', Auth::guard('web')->user()->id)->first();
+            $user->meta_email = $userData['email'];
+            $user->meta_access_token = $userData['token'];
+            $user->save();
+
+            return redirect()->route('user.connect');
         } catch (Exception $e) {
             Session::flash('error', ['text' => $e->getMessage()]);
             return redirect()->route('user.connect');
@@ -60,8 +80,6 @@ class ConnectController extends Controller
     public function linkedinCallback(Request $request)
     {
         try {
-            // return Socialite::driver('linkedin-openid')->user();
-
             $code = $request->code;
 
             $generateAccessToken = $this->linkedinService->generateAccessToken($code);
@@ -73,11 +91,13 @@ class ConnectController extends Controller
             $user = User::where('id', Auth::guard('web')->user()->id)->first();
             $user->linkedin_access_token = $generateAccessToken;
             $user->linkedin_urn = $getProfile['sub'];
+            $user->linkedin_name = $getProfile['name'];
+            $user->linkedin_avatar = $getProfile['picture'];
+            $user->linkedin_email = $getProfile['email'];
             $user->save();
 
             return redirect()->route('user.connect');
         } catch (Exception $e) {
-            return $e->getMessage();
             Session::flash('error', ['text' => 'Something went wrong. Please try again.']);
             return redirect()->route('user.connect');
         }

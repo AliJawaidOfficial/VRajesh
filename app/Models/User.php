@@ -23,13 +23,16 @@ class User extends Authenticatable
         'email',
         'password',
 
-        'meta_email',
         'meta_access_token',
+        'meta_avatar',
+        'meta_name',
+        'meta_email',
         
-        'linkedin_email',
         'linkedin_access_token',
         'linkedin_urn',
-        
+        'linkedin_avatar',
+        'linkedin_name',
+        'linkedin_email',
     ];
 
     /**

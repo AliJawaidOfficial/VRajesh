@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
-use CURLFile;
-use Exception;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Exception;
+use CURLFile;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 
 class FacebookService
 {
@@ -17,6 +16,7 @@ class FacebookService
     protected $appId;
     protected $appSecret;
     protected $pageId;
+    protected $metaAccessToken;
     protected $pageAccessToken;
 
     public function __construct()
@@ -27,7 +27,43 @@ class FacebookService
         $this->appSecret = env('FACEBOOK_CLIENT_SECRET');
         $this->pageId = env('FACEBOOK_PAGE_ID');
         $this->pageAccessToken = env('FACEBOOK_PAGE_ACCESS_TOKEN');
+        if (Auth::guard('web')->check()) $this->metaAccessToken = Auth::guard('web')->user()->meta_access_token;
     }
+
+    /**
+     * Token Time
+     */
+    public function tokenTime($token, $user_id = null)
+    {
+        try {
+            $param = [
+                "grant_type" => "fb_exchange_token",
+                "client_id" => $this->appId,
+                "client_secret" => $this->appSecret,
+                "fb_exchange_token" => $token
+            ];
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "$this->baseUrl/oauth/access_token?" . http_build_query($param));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $token
+            ]);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $response = curl_exec($ch);
+            curl_close($ch);
+
+            $data = json_decode($response, true);
+            return $data->access_token;
+
+            if (isset($response['error'])) throw new Exception($response['error']['message']);
+
+            return;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
 
     /**
      * Post

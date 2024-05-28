@@ -152,7 +152,7 @@
             cursor: pointer;
 
         }
-        
+
         .btn-custom {
             width: 140px;
             font-weight: bold;
@@ -160,6 +160,7 @@
             background-image: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important;
             transition: all 0.3s ease;
         }
+
         .btn-custom:hover {
             background-image: linear-gradient(90deg, #d67f45 0%, #d89e33 100%) !important;
             color: #fff;
@@ -384,21 +385,24 @@
                                     <input type="checkbox" name="on_facebook" value="1" data-bs-toggle="facebook-post"
                                         class="form-check-input toggle-post"
                                         @if (Auth::guard()->user()->meta_access_token == null) disabled @endif />
-                                    <span class="d-inline-block ms-1"><i class="fab fa-facebook-f" style="font-size: 17px"></i></span>
+                                    <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"
+                                            style="font-size: 17px"></i></span>
                                 </label>
 
                                 <label class="d-inline-block">
                                     <input type="checkbox" name="on_linkedin" value="1" data-bs-toggle="linkedin-post"
                                         class="form-check-input toggle-post"
                                         @if (Auth::guard()->user()->linkedin_access_token == null) disabled @endif />
-                                    <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in" style="font-size: 17px"></i></span>
+                                    <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
+                                            style="font-size: 17px"></i></span>
                                 </label>
 
                                 <label class="d-inline-block">
                                     <input type="checkbox" name="on_instagram" value="1"
-                                        data-bs-toggle="instagram-post" class="form-check-input toggle-post" 
+                                        data-bs-toggle="instagram-post" class="form-check-input toggle-post"
                                         @if (Auth::guard()->user()->meta_access_token == null) disabled @endif />
-                                    <span class="d-inline-block ms-1"><i class="fab fa-instagram" style="font-size: 17px"></i></span>
+                                    <span class="d-inline-block ms-1"><i class="fab fa-instagram"
+                                            style="font-size: 17px"></i></span>
                                 </label>
                             </div>
 
@@ -414,15 +418,13 @@
 
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">
                         <div>
-                            <button type="button" name="draft"
-                                class="btn btn-custom">Save as Draft</button>
+                            <button type="button" name="draft" class="btn btn-custom">Save as Draft</button>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
-                            <button type="button" class="btn btn-custom"
-                                data-bs-toggle="modal" data-bs-target="#scheduleModal">Schedule</button>
-                            <button type="submit" name="post"
-                                class="btn btn-custom">Post</button>
+                            <button type="button" class="btn btn-custom" data-bs-toggle="modal"
+                                data-bs-target="#scheduleModal">Schedule</button>
+                            <button type="submit" name="post" class="btn btn-custom">Post</button>
                         </div>
                     </div>
                 </form>
@@ -435,9 +437,11 @@
                         <div
                             class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
                             <div class="d-flex align-items-center">
-                                <img src="https://via.placeholder.com/50" alt="Profile Picture" class="rounded-circle">
+                                <img src="{{ Auth::guard()->user()->meta_avatar }}" alt="Profile Picture"
+                                    class="rounded-circle">
                                 <div class="ms-2">
-                                    <h6 class="mb-0 line-clap" style="-webkit-line-clamp: 1;">DUET Media - DM</h6>
+                                    <h6 class="mb-0 line-clap" style="-webkit-line-clamp: 1;">
+                                        {{ Auth::guard()->user()->meta_name }}</h6>
                                     <small class="text-muted">1h · <img src="{{ asset('assets/images/icons/globe.png') }}"
                                             width="16" alt=""></small>
                                 </div>
@@ -475,11 +479,11 @@
                         <div
                             class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
                             <div class="d-flex align-items-center">
-                                <img src="https://via.placeholder.com/50" alt="Profile Picture" class="rounded-circle">
+                                <img src="{{ Auth::guard()->user()->linkedin_avatar }}" alt="Profile Picture"
+                                    class="rounded-circle" style="max-width: 50px">
                                 <div class="ms-2">
-                                    <h6 class="mb-0">Hania Mehdi</h6>
-                                    <small class="text-muted line-clap" style="-webkit-line-clamp: 1;">HR Professional |
-                                        Head Hunter | Technical & Non Technical Recruiter | International...</small>
+                                    <h6 class="mb-0">{{ Auth::guard()->user()->linkedin_name }}</h6>
+                                    {{-- <small class="text-muted line-clap" style="-webkit-line-clamp: 1;">HR Professional | Head Hunter | Technical & Non Technical Recruiter | International...</small> --}}
                                     <div><small class="text-muted">25m · Edited</small></div>
                                 </div>
                             </div>

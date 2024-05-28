@@ -2,8 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Post;
+use App\Services\FacebookService;
+use App\Services\LinkedInService;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class PostScheduled extends Command
@@ -23,29 +27,63 @@ class PostScheduled extends Command
     protected $description = 'Command description';
 
     /**
+     * 
+     * @var App\Services\LinkedInService
+     */
+    protected $linkedinService;
+
+    /**
+     * 
+     * @var App\Services\FacebookService
+     */
+    protected $facebookService;
+
+
+    /**
      * Execute the console command.
      */
+
+    public function __construct(private readonly LinkedInService $importLinkedinService, private readonly FacebookService $importFacebookService)
+    {
+        parent::__construct();
+        $this->linkedinService = $importLinkedinService;
+        $this->facebookService = $importFacebookService;
+    }
+
     public function handle()
     {
-        $url = route('post.scheduled.post');
+        $this->info(now());
+        $posts = Post::where('scheduled_at', '<=', now())
+            ->where('posted', 0)
+            ->where('draft', 0)
+            ->get();
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        foreach ($posts as $post) {
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        if (curl_errno($ch)) {
-            $this->error('Request to ' . $url . ' failed. Error: ' . curl_error($ch));
-        } else {
-            if ($httpCode == 200) {
-                $this->info('Request to ' . $url . ' was successful.');
-            } else {
-                $this->error('Request to ' . $url . ' failed. Status: ' . $httpCode);
+            if ($post->on_facebook == 1) {
+                if ($post->media != null) {
+                    $media_path = public_path($post->media);
+                    $media_size = filesize($post->media);
+                    if ($post->media_type == 'image') $this->facebookService->postImage($media_path, $post->description, $post->user_id);
+                    if ($post->media_type == 'video') $this->facebookService->postVideo($media_size, $media_path, $post->description, $post->user_id);
+                } else {
+                    $this->facebookService->postText($post->description, $post->user_id);
+                }
             }
+
+            if ($post->on_linkedin == 1) {
+                if ($post->media != null) {
+                    $media_path = public_path($post->media);
+                    if ($post->media_type == 'image') $this->linkedinService->postImage($media_path, $post->description, $post->user_id);
+                    if ($post->media_type == 'video') $this->linkedinService->postVideo($media_path, $post->description, $post->user_id);
+                } else {
+                    $this->linkedinService->postText($post->description, $post->user_id);
+                }
+            }
+
+            Post::where('id', $post->id)->update(['posted' => 1]);
         }
 
-        curl_close($ch);
+        $this->info('Posts have been posted successfully');
     }
 }

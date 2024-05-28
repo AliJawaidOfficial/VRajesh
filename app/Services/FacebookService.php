@@ -38,7 +38,7 @@ class FacebookService
     /**
      * Text
      */
-    public function postText($text)
+    public function postText($text, $user_id = null)
     {
         try {
             $ch = curl_init();
@@ -70,7 +70,7 @@ class FacebookService
     /**
      * Image
      */
-    public function postImage($imagePath, $title)
+    public function postImage($imagePath, $title, $user_id = null)
     {
         try {
             $ch = curl_init();
@@ -101,7 +101,7 @@ class FacebookService
     /**
      * Video
      */
-    public function postVideo($videoSize, $videoPath, $title)
+    public function postVideo($videoSize, $videoPath, $title, $user_id = null)
     {
         try {
             // Step 1

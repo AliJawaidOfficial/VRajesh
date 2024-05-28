@@ -24,9 +24,6 @@ use App\Http\Controllers\User\LinkedIn\PipelineController;
 //     return view('welcome');
 // });
 
-
-Route::get('/scheduled/post/job', [PostController::class, 'scheduledJob'])->name('scheduled.post.job');
-
 Route::name('user.')
     ->group(function () {
 
@@ -68,6 +65,7 @@ Route::name('user.')
              * Post
              */
             Route::get('/post', [PostController::class, 'index'])->name('post.index');
+            Route::get('/post/details/{id}', [PostController::class, 'show'])->name('post.show');
 
             Route::get('/post/scheduled', [PostController::class, 'scheduled'])->name('post.scheduled');
             Route::get('/post/scheduled/response', [PostController::class, 'scheduledData'])->name('post.scheduled.response');

@@ -123,18 +123,18 @@
             <h3 class="mb-0">Published Posts</h3>
         </div>
 
-        <div class="filter-section d-flex align-items-center justify-content-end bg-white rounded-8">
+        <form id="filterForm" class="filter-section d-flex align-items-center justify-content-end bg-white rounded-8">
             <div class="p-3">
                 <label for="filterMonth">Filter by Month: </label>
-                <select id="filterMonth">
-                    <option value="">Select Month</option>
-                    <option value="2022-05">May 2022</option>
-                    <option value="2022-06">June 2022</option>
-                    <option value="2022-07">July 2022</option>
-                    <!-- Add more months as needed -->
+                <select id="filterMonth" name="month" onchange="this.form.submit()">
+                    <option value="">All</option>
+                    @foreach ($postMonths as $month)
+                        <option value="{{ $month }}" {{ request()->get('month') == $month ? 'selected' : '' }}>
+                            {{ \Carbon\Carbon::parse($month)->format('F Y') }}</option>
+                    @endforeach
                 </select>
             </div>
-        </div>
+        </form>
 
         <div class="table-wrapper bg-white rounded-8">
             <table>
@@ -142,51 +142,42 @@
                     <tr>
                         <th class="text-center">S.No</th>
                         <th class="text-left">Title</th>
-                        <th class="text-center text-nowrap">Published Date</th>
+                        <th class="text-nowrap">Platforms</th>
+                        <th class="text-nowrap">Saved On</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="text-center" data-bs-toggle="modal" data-bs-target="#postDetail">1</td>
-                        <td data-bs-toggle="modal" data-bs-target="#postDetail">
-                            <p class="post-title mb-0">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Delectus
-                                ullam provident maiores
-                                deleniti ratione explicabo, debitis accusantium, ab omnis itaque tempora! Hic dicta
-                                veritatis consectetur fuga sit, eaque officia minus.
-                            </p>
-                        </td>
-                        <td data-bs-toggle="modal" data-bs-target="#postDetail">
-                            <p class="post-date mb-0">May 23, 2022 18:20</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-center" data-bs-toggle="modal" data-bs-target="#postDetail">2</td>
-                        <td data-bs-toggle="modal" data-bs-target="#postDetail">
-                            <p class="post-title mb-0">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Delectus
-                                ullam provident maiores
-                                deleniti ratione explicabo, debitis accusantium, ab omnis itaque tempora! Hic dicta
-                                veritatis consectetur fuga sit, eaque officia minus.
-                            </p>
-                        </td>
-                        <td data-bs-toggle="modal" data-bs-target="#postDetail">
-                            <p class="post-date mb-0">May 23, 2022 18:20</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-center" data-bs-toggle="modal" data-bs-target="#postDetail">3</td>
-                        <td data-bs-toggle="modal" data-bs-target="#postDetail">
-                            <p class="post-title mb-0">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Delectus
-                                ullam provident maiores
-                                deleniti ratione explicabo, debitis accusantium, ab omnis itaque tempora! Hic dicta
-                                veritatis consectetur fuga sit, eaque officia minus.
-                            </p>
-                        </td>
-                        <td data-bs-toggle="modal" data-bs-target="#postDetail">
-                            <p class="post-date mb-0">May 23, 2022 18:20</p>
-                        </td>
-                    </tr>
-
-                    <!-- Add more rows as needed -->
+                    @if (count($dataSet) == 0)
+                        <tr>
+                            <td colspan="3" class="text-center">Nothing to show you</td>
+                        </tr>
+                    @endif
+                    @foreach ($dataSet as $post)
+                        <tr onclick="showPostDetail({{ $post->id }})">
+                            <td class="text-center">
+                                {{ $loop->iteration != 10 ? $dataSet->currentPage() - 1 . $loop->iteration : $dataSet->currentPage() * $loop->iteration }}
+                            </td>
+                            <td>
+                                <p class="post-title mb-0">{{ $post->title }}</p>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    @if ($post->on_facebook)
+                                        <i class="fab fa-facebook"></i>
+                                    @endif
+                                    @if ($post->on_instagram)
+                                        <i class="fab fa-instagram"></i>
+                                    @endif
+                                    @if ($post->on_linkedin)
+                                        <i class="fab fa-linkedin-in"></i>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
+                                <p class="post-date mb-0">{{ standardDateTimeFormat($post->created_at) }}</p>
+                            </td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -236,8 +227,7 @@
 
                                             <label class="d-inline-block">
                                                 <input type="checkbox" name="on_instagram" value="1"
-                                                    data-bs-toggle="instagram-post"
-                                                    class="form-check-input toggle-post" />
+                                                    data-bs-toggle="instagram-post" class="form-check-input toggle-post" />
                                                 <span class="d-inline-block ms-1">Instagram</span>
                                             </label>
                                         </div>
@@ -245,8 +235,8 @@
                                         <div>
                                             <label for="mediaInput" class="btn btn-transparent text-primary"><i
                                                     class="fas fa-paperclip" style="font-size: 20px"></i></label>
-                                            <input class="d-block w-100 form-control d-none" type="file"
-                                                name="media" accept="video/*, image/*" id="mediaInput" />
+                                            <input class="d-block w-100 form-control d-none" type="file" name="media"
+                                                accept="video/*, image/*" id="mediaInput" />
                                         </div>
                                     </div>
                                 </div>
@@ -411,23 +401,6 @@
         </div>
 
 
-        <div class="pagination bg-white rounded-8">
-            <ul class="pagination">
-                <li class="disabled"><a href="#">&laquo;</a></li>
-                <li><a href="#" class="active">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">4</a></li>
-                <li><a href="#">5</a></li>
-                <li><a href="#">6</a></li>
-                <li><a href="#">7</a></li>
-                <li><a href="#">8</a></li>
-                <li><a href="#">9</a></li>
-                <li><a href="#">10</a></li>
-                <li><a href="#">...</a></li>
-                <li><a href="#">20</a></li>
-                <li><a href="#">&raquo;</a></li>
-            </ul>
-        </div>
+        {{ $dataSet->links('user.layouts.pagination') }}
     </section>
 @endsection

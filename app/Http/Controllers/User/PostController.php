@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Services\FacebookService;
 use App\Services\LinkedInService;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,15 +19,57 @@ class PostController extends Controller
     protected $linkedinService;
     protected $facebookService;
 
-    public function __construct(private readonly LinkedInService $importLinkedinService, private readonly FacebookService $importFacebookService)
-    {
+    public function __construct(
+        private readonly LinkedInService $importLinkedinService,
+        private readonly FacebookService $importFacebookService
+    ) {
         $this->linkedinService = $importLinkedinService;
         $this->facebookService = $importFacebookService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return view('user.post.index');
+        $user = Auth::guard('web')->user();
+
+        $postMonths = Post::where('user_id', $user->id)
+            ->where('posted', 1)
+            ->where('draft', 0)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->groupBy(function ($date) {
+                return Carbon::parse($date->created_at)->format('Y-m');
+            })
+            ->keys();
+
+        $dataSet = Post::where('user_id', $user->id)
+            ->where('posted', 1)
+            ->where('draft', 0)
+            ->orderBy('created_at', 'DESC');
+
+        if ($request->has('month') && $request->month != '') $dataSet = $dataSet->whereYear('created_at', '=', Carbon::parse($request->month)->year)
+            ->whereMonth('created_at', '=', Carbon::parse($request->month)->month);
+
+        $dataSet = $dataSet->paginate(10);
+
+        return view('user.post.index', compact('dataSet', 'postMonths'));
+    }
+
+    public function show(String $id)
+    {
+        try {
+            $user = Auth::guard('web')->user();
+            $data = Post::where('user_id', $user->id)->where('id', $id)->first();
+
+            return response()->json([
+                'status' => 200,
+                'data' => $data
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function scheduled()
@@ -64,43 +107,6 @@ class PostController extends Controller
                 'status' => 500,
                 'error' => $e->getMessage()
             ]);
-        }
-    }
-
-    public function scheduledJob()
-    {
-        $posts = Post::
-            // where('scheduled_at', '<=', now())->
-            where('posted', 0)->where('draft', 0)->get();
-
-        foreach ($posts as $post) {
-
-            if ($post->on_facebook == 1) {
-                if ($post->media != null) {
-                    $media_path = public_path($post->media);
-                    $media_size = filesize($post->media);
-                    if ($post->media_type == 'image') $this->facebookService->postImage($media_path, $post->description);
-                    if ($post->media_type == 'video') $this->facebookService->postVideo($media_size, $media_path, $post->description);
-                } else {
-                    $this->facebookService->postText($post->description);
-                }
-            }
-
-            if ($post->on_linkedin == 1) {
-                if ($post->media != null) {
-                    $media_path = public_path($post->media);
-                    if ($post->media_type == 'image') $this->linkedinService->postImage($media_path, $post->description);
-                    if ($post->media_type == 'video') $this->linkedinService->postVideo($media_path, $post->description);
-                } else {
-                    $this->linkedinService->postText($post->description);
-                }
-            }
-
-            if ($post->on_instagram == 1) {
-            }
-            Post::where('id', $post->id)->update(['posted' => 1]);
-
-            return true;
         }
     }
 
@@ -165,35 +171,40 @@ class PostController extends Controller
                 $data->media_type = $media_type;
             }
 
+            // Posting disabled for now
             if ($request->schedule_date == null && $request->schedule_time == null) {
                 if ($request->has('on_facebook')) {
                     $data->on_facebook = 1;
-                    if ($request->hasFile('media')) {
-                        if (str_starts_with($mediaType, 'image/')) {
-                            $post = $this->facebookService->postImage($mediaPath, $request->title);
-                        } elseif (str_starts_with($mediaType, 'video/')) {
-                            $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
-                        } else {
-                            throw new Exception('Invalid file type.');
-                        }
-                    } else {
-                        $post = $this->facebookService->postText($request->title);
-                    }
+                    // if ($request->hasFile('media')) {
+                    //     if (str_starts_with($mediaType, 'image/')) {
+                    //         $post = $this->facebookService->postImage($mediaPath, $request->title);
+                    //     } elseif (str_starts_with($mediaType, 'video/')) {
+                    //         $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
+                    //     } else {
+                    //         throw new Exception('Invalid file type.');
+                    //     }
+                    // } else {
+                    //     $post = $this->facebookService->postText($request->title);
+                    // }
+                }
+
+                if ($request->has('on_instagram')) {
+                    $data->on_instagram = 1;
                 }
 
                 if ($request->has('on_linkedin')) {
                     $data->on_linkedin = 1;
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') {
-                            $post = $this->linkedinService->postImage($mediaPath, $request->title);
-                        } elseif ($media_type == 'video') {
-                            $post = $this->linkedinService->postVideo($mediaPath, $request->title);
-                        } else {
-                            throw new Exception('Invalid file type.');
-                        }
-                    } else {
-                        $post = $this->linkedinService->postText($request->title);
-                    }
+                    // if ($request->hasFile('media')) {
+                    //     if ($media_type == 'image') {
+                    //         $post = $this->linkedinService->postImage($mediaPath, $request->title);
+                    //     } elseif ($media_type == 'video') {
+                    //         $post = $this->linkedinService->postVideo($mediaPath, $request->title);
+                    //     } else {
+                    //         throw new Exception('Invalid file type.');
+                    //     }
+                    // } else {
+                    //     $post = $this->linkedinService->postText($request->title);
+                    // }
                 }
 
                 $data->posted = 1;
@@ -221,9 +232,31 @@ class PostController extends Controller
         }
     }
 
-    public function draft()
+    public function draft(Request $request)
     {
-        return view('user.post.draft');
+        $user = Auth::guard('web')->user();
+
+        $postMonths = Post::where('user_id', $user->id)
+            ->where('posted', 0)
+            ->where('draft', 1)
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->groupBy(function ($date) {
+                return Carbon::parse($date->created_at)->format('Y-m');
+            })
+            ->keys();
+
+        $dataSet = Post::where('user_id', $user->id)
+            ->where('posted', 0)
+            ->where('draft', 1)
+            ->orderBy('created_at', 'DESC');
+
+        if ($request->has('month') && $request->month != '') $dataSet = $dataSet->whereYear('created_at', '=', Carbon::parse($request->month)->year)
+            ->whereMonth('created_at', '=', Carbon::parse($request->month)->month);
+
+        $dataSet = $dataSet->paginate(10);
+
+        return view('user.post.draft', compact('dataSet', 'postMonths'));
     }
 
     public function draftStore(Request $request)

@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('media')->nullable();
             $table->string('media_type')->nullable();
             $table->boolean('on_facebook')->default(0);
-            $table->boolean('on_instagram')->default(0);
             $table->boolean('on_linkedin')->default(0);
+            $table->boolean('on_instagram')->default(0);
             $table->dateTime('scheduled_at')->nullable();
             $table->boolean('draft')->default(0);
             $table->boolean('posted')->default(0);

@@ -131,6 +131,39 @@
             font-weight: bold;
             margin-right: 5px;
         }
+
+        .remove-media-btn {
+            background: rgba(0, 0, 0);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .form-check-input {
+            width: 17px;
+            height: 17px;
+            margin-right: 5px;
+            cursor: pointer;
+
+        }
+        
+        .btn-custom {
+            width: 140px;
+            font-weight: bold;
+            color: #fff;
+            background-image: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            background-image: linear-gradient(90deg, #d67f45 0%, #d89e33 100%) !important;
+            color: #fff;
+        }
     </style>
 @endsection
 
@@ -196,9 +229,28 @@
                             img.style.display = 'none';
                         });
                     }
+
+                    // Show remove button
+                    document.querySelectorAll('.remove-media-btn').forEach(btn => {
+                        btn.style.display = 'flex';
+                    });
                 };
                 reader.readAsDataURL(file);
             }
+        });
+
+        document.querySelectorAll('.remove-media-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.post-media img, .post-media video').forEach(media => {
+                    media.src = '';
+                    media.classList.remove('active');
+                    media.style.display = 'none';
+                });
+                document.querySelectorAll('.remove-media-btn').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                document.getElementById('mediaInput').value = '';
+            });
         });
 
         document.addEventListener('keydown', function(e) {
@@ -326,32 +378,36 @@
 
                         <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
                             <div class="d-flex align-items-center gap-3">
+                                <p class="mb-0">Check to share on:</p>
+
                                 <label class="d-inline-block">
                                     <input type="checkbox" name="on_facebook" value="1" data-bs-toggle="facebook-post"
                                         class="form-check-input toggle-post"
                                         @if (Auth::guard()->user()->meta_access_token == null) disabled @endif />
-                                    <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"></i></span>
+                                    <span class="d-inline-block ms-1"><i class="fab fa-facebook-f" style="font-size: 17px"></i></span>
                                 </label>
 
                                 <label class="d-inline-block">
                                     <input type="checkbox" name="on_linkedin" value="1" data-bs-toggle="linkedin-post"
                                         class="form-check-input toggle-post"
                                         @if (Auth::guard()->user()->linkedin_access_token == null) disabled @endif />
-                                    <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"></i></span>
+                                    <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in" style="font-size: 17px"></i></span>
                                 </label>
 
                                 <label class="d-inline-block">
                                     <input type="checkbox" name="on_instagram" value="1"
-                                        data-bs-toggle="instagram-post" class="form-check-input toggle-post" />
-                                    <span class="d-inline-block ms-1"><i class="fab fa-instagram"></i></span>
+                                        data-bs-toggle="instagram-post" class="form-check-input toggle-post" 
+                                        @if (Auth::guard()->user()->meta_access_token == null) disabled @endif />
+                                    <span class="d-inline-block ms-1"><i class="fab fa-instagram" style="font-size: 17px"></i></span>
                                 </label>
                             </div>
 
-                            <div>
+                            <div class="d-flex align-items-center">
                                 <label for="mediaInput" class="btn btn-transparent text-primary"><i class="fas fa-paperclip"
                                         style="font-size: 20px"></i></label>
                                 <input class="d-block w-100 form-control d-none" type="file" name="media"
                                     accept="video/*, image/*" id="mediaInput" />
+                                <button type="button" class="remove-media-btn" style="display: none;">&times;</button>
                             </div>
                         </div>
                     </div>
@@ -359,23 +415,23 @@
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">
                         <div>
                             <button type="button" name="draft"
-                                class="btn btn-secondary btn-custom btn-custom-secondary">Save as Draft</button>
+                                class="btn btn-custom">Save as Draft</button>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
-                            <button type="button" class="btn btn-primary btn-custom btn-custom-primary"
+                            <button type="button" class="btn btn-custom"
                                 data-bs-toggle="modal" data-bs-target="#scheduleModal">Schedule</button>
                             <button type="submit" name="post"
-                                class="btn btn-primary btn-custom btn-custom-primary">Post</button>
+                                class="btn btn-custom">Post</button>
                         </div>
                     </div>
                 </form>
             </div>
 
             <div class="col-md-4">
-                <div class="w-100 bg-white p-4 rounded-6 overflow-scroll d-flex flex-column gap-3" id="postPreview">
+                <div class="w-100 bg-white p-4 rounded-6 overflow-scroll d-flex flex-column gap-1" id="postPreview">
                     {{-- Facebook Post Preview --}}
-                    <div class="card rounded" id="facebook-post">
+                    <div class="card rounded" style="display: none" id="facebook-post">
                         <div
                             class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
                             <div class="d-flex align-items-center">
@@ -415,7 +471,7 @@
                     </div>
 
                     {{-- LinkedIn Post Preview --}}
-                    <div class="card rounded mt-4" id="linkedin-post">
+                    <div class="card rounded" style="display: none" id="linkedin-post">
                         <div
                             class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
                             <div class="d-flex align-items-center">
@@ -453,7 +509,7 @@
                     </div>
 
                     {{-- Instagram Post Preview --}}
-                    <div class="card rounded mt-4" id="instagram-post">
+                    <div class="card rounded" style="display: none" id="instagram-post">
                         <div
                             class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
                             <div class="d-flex align-items-center">
@@ -468,7 +524,7 @@
                                     width="20px" alt="">
                             </div>
                         </div>
-                        <div class="card-body p-0">
+                        <div class="card-body p-0 position-relative">
                             <div class="post-media">
                                 <img src="#" class="img-fluid" style="display: none" id="postImage">
                                 <video controls class="w-100" style="display: none" id="postVideo">

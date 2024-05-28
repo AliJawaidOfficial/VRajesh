@@ -21,13 +21,13 @@ return new class extends Migration
 
             $table->text('meta_access_token')->nullable();
             $table->text('meta_avatar')->nullable();
-            $table->text('meta_name')->nullable();
+            $table->string('meta_name')->nullable();
             $table->string('meta_email')->nullable();
 
             $table->text('linkedin_access_token')->nullable();
             $table->text('linkedin_urn')->nullable();
             $table->text('linkedin_avatar')->nullable();
-            $table->text('linkedin_name')->nullable();
+            $table->string('linkedin_name')->nullable();
             $table->string('linkedin_email')->nullable();
 
 

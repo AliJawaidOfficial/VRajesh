@@ -384,7 +384,7 @@
                                 <label class="d-inline-block">
                                     <input type="checkbox" name="on_facebook" value="1" data-bs-toggle="facebook-post"
                                         class="form-check-input toggle-post"
-                                        @if (Auth::guard()->user()->meta_access_token == null) disabled @endif />
+                                        @if (Auth::guard('user')->user()->meta_access_token == null) disabled @endif />
                                     <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"
                                             style="font-size: 17px"></i></span>
                                 </label>
@@ -392,7 +392,7 @@
                                 <label class="d-inline-block">
                                     <input type="checkbox" name="on_linkedin" value="1" data-bs-toggle="linkedin-post"
                                         class="form-check-input toggle-post"
-                                        @if (Auth::guard()->user()->linkedin_access_token == null) disabled @endif />
+                                        @if (Auth::guard('user')->user()->linkedin_access_token == null) disabled @endif />
                                     <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
                                             style="font-size: 17px"></i></span>
                                 </label>
@@ -400,7 +400,7 @@
                                 <label class="d-inline-block">
                                     <input type="checkbox" name="on_instagram" value="1"
                                         data-bs-toggle="instagram-post" class="form-check-input toggle-post"
-                                        @if (Auth::guard()->user()->meta_access_token == null) disabled @endif />
+                                        @if (Auth::guard('user')->user()->meta_access_token == null) disabled @endif />
                                     <span class="d-inline-block ms-1"><i class="fab fa-instagram"
                                             style="font-size: 17px"></i></span>
                                 </label>
@@ -437,11 +437,11 @@
                         <div
                             class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
                             <div class="d-flex align-items-center">
-                                <img src="{{ Auth::guard()->user()->meta_avatar }}" alt="Profile Picture"
+                                <img src="{{ Auth::guard('user')->user()->meta_avatar }}" alt="Profile Picture"
                                     class="rounded-circle">
                                 <div class="ms-2">
                                     <h6 class="mb-0 line-clap" style="-webkit-line-clamp: 1;">
-                                        {{ Auth::guard()->user()->meta_name }}</h6>
+                                        {{ Auth::guard('user')->user()->meta_name }}</h6>
                                     <small class="text-muted">1h · <img src="{{ asset('assets/images/icons/globe.png') }}"
                                             width="16" alt=""></small>
                                 </div>
@@ -479,10 +479,10 @@
                         <div
                             class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
                             <div class="d-flex align-items-center">
-                                <img src="{{ Auth::guard()->user()->linkedin_avatar }}" alt="Profile Picture"
+                                <img src="{{ Auth::guard('user')->user()->linkedin_avatar }}" alt="Profile Picture"
                                     class="rounded-circle" style="max-width: 50px">
                                 <div class="ms-2">
-                                    <h6 class="mb-0">{{ Auth::guard()->user()->linkedin_name }}</h6>
+                                    <h6 class="mb-0">{{ Auth::guard('user')->user()->linkedin_name }}</h6>
                                     {{-- <small class="text-muted line-clap" style="-webkit-line-clamp: 1;">HR Professional | Head Hunter | Technical & Non Technical Recruiter | International...</small> --}}
                                     <div><small class="text-muted">25m · Edited</small></div>
                                 </div>

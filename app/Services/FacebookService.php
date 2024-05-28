@@ -54,7 +54,7 @@ class FacebookService
             curl_close($ch);
 
             $data = json_decode($response, true);
-            return $data->access_token;
+            return $data['access_token'];
 
             if (isset($response['error'])) throw new Exception($response['error']['message']);
 

@@ -317,9 +317,9 @@
                 success: function(response) {
                     if (response.status == 200) {
                         if ($("#post_schedule_date").val() != null) {
-                            window.location.href = "{{ route('user.post.scheduled') }}";
+                            toastr.success("Post scheduled successfully");
                         } else {
-                            window.location.href = "{{ route('user.post.index') }}";
+                            toastr.success("Post created successfully");
                         }
                     } else {
                         toastr.error(response.error);
@@ -344,7 +344,7 @@
                 },
                 success: function(response) {
                     if (response.status == 200) {
-                        window.location.href = "{{ route('user.post.draft') }}";
+                        toastr.success("Post saved as draft");
                     } else {
                         toastr.error(response.error);
                     }
@@ -374,7 +374,7 @@
                         </div>
                         <div class="textarea-wrapper my-1">
                             <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
-                                placeholder="Enter your post description" required></textarea>
+                                placeholder="Enter your post description"></textarea>
                         </div>
 
                         <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">

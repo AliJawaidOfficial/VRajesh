@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
 
-        $schedule->command('app:post-scheduled')->everyMinute();
+        $schedule->command('app:post-scheduled')->cron('* * * * *');
     }
 
     /**

@@ -20,8 +20,7 @@ class ConnectController extends Controller
     public function __construct(
         private readonly LinkedInService $importLinkedin,
         private readonly FacebookService $importService
-    )
-    {
+    ) {
         $this->linkedinService = $importLinkedin;
         $this->facebookService = $importService;
     }
@@ -41,7 +40,7 @@ class ConnectController extends Controller
         try {
             $user = Socialite::driver('facebook')->user();
 
-            $userData = [
+            $response = [
                 'id' => $user->getId(),
                 'name' => $user->getName(),
                 'email' => $user->getEmail(),
@@ -49,11 +48,11 @@ class ConnectController extends Controller
                 'token' => $this->facebookService->tokenTime($user->token),
             ];
 
-            return response()->json($userData);
-
             $user = User::where('id', Auth::guard('web')->user()->id)->first();
-            $user->meta_email = $userData['email'];
-            $user->meta_access_token = $userData['token'];
+            $user->meta_access_token = $response['token'];
+            $user->meta_name = $response['name'];
+            $user->meta_email = $response['email'];
+            $user->meta_avatar = $response['avatar'];
             $user->save();
 
             return redirect()->route('user.connect');
@@ -66,7 +65,10 @@ class ConnectController extends Controller
     public function facebookDisconnect()
     {
         $user = User::where('id', Auth::guard('web')->user()->id)->first();
-        $user->facebook_access_token = null;
+        $user->meta_access_token = null;
+        $user->meta_name = null;
+        $user->meta_email = null;
+        $user->meta_avatar = null;
         $user->save();
         return redirect()->route('user.connect');
     }

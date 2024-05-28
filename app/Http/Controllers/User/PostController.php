@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Rules\AtLeastOnePlatform;
 use App\Services\FacebookService;
 use App\Services\LinkedInService;
 use Carbon\Carbon;
@@ -120,11 +121,14 @@ class PostController extends Controller
         try {
             DB::beginTransaction();
 
+            // Atleast one platform required
+            if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
+
             $validator = Validator::make(
                 $request->all(),
                 [
                     'title' => 'required',
-                    'description' => 'required',
+                    'description' => 'nullable|required_without:media',
                     'media' => 'nullable',
                     'on_facebook' => 'nullable|boolean',
                     'on_instagram' => 'nullable|boolean',
@@ -136,7 +140,9 @@ class PostController extends Controller
                     'title.required' => 'Title is required',
 
                     'description.required' => 'Description is required',
+                    'description.required_without' => 'Description is required',
 
+                    'media.required' => 'Media is required',
                     'media.required_if' => 'Media is required',
                 ]
             );
@@ -175,17 +181,17 @@ class PostController extends Controller
             if ($request->schedule_date == null && $request->schedule_time == null) {
                 if ($request->has('on_facebook')) {
                     $data->on_facebook = 1;
-                    // if ($request->hasFile('media')) {
-                    //     if (str_starts_with($mediaType, 'image/')) {
-                    //         $post = $this->facebookService->postImage($mediaPath, $request->title);
-                    //     } elseif (str_starts_with($mediaType, 'video/')) {
-                    //         $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
-                    //     } else {
-                    //         throw new Exception('Invalid file type.');
-                    //     }
-                    // } else {
-                    //     $post = $this->facebookService->postText($request->title);
-                    // }
+                    if ($request->hasFile('media')) {
+                        if (str_starts_with($mediaType, 'image/')) {
+                            $post = $this->facebookService->postImage($mediaPath, $request->title);
+                        } elseif (str_starts_with($mediaType, 'video/')) {
+                            $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
+                        } else {
+                            throw new Exception('Invalid file type.');
+                        }
+                    } else {
+                        $post = $this->facebookService->postText($request->title);
+                    }
                 }
 
                 if ($request->has('on_instagram')) {
@@ -194,17 +200,17 @@ class PostController extends Controller
 
                 if ($request->has('on_linkedin')) {
                     $data->on_linkedin = 1;
-                    // if ($request->hasFile('media')) {
-                    //     if ($media_type == 'image') {
-                    //         $post = $this->linkedinService->postImage($mediaPath, $request->title);
-                    //     } elseif ($media_type == 'video') {
-                    //         $post = $this->linkedinService->postVideo($mediaPath, $request->title);
-                    //     } else {
-                    //         throw new Exception('Invalid file type.');
-                    //     }
-                    // } else {
-                    //     $post = $this->linkedinService->postText($request->title);
-                    // }
+                    if ($request->hasFile('media')) {
+                        if ($media_type == 'image') {
+                            $post = $this->linkedinService->postImage($mediaPath, $request->title);
+                        } elseif ($media_type == 'video') {
+                            $post = $this->linkedinService->postVideo($mediaPath, $request->title);
+                        } else {
+                            throw new Exception('Invalid file type.');
+                        }
+                    } else {
+                        $post = $this->linkedinService->postText($request->title);
+                    }
                 }
 
                 $data->posted = 1;

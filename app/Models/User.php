@@ -33,6 +33,8 @@ class User extends Authenticatable
         'linkedin_avatar',
         'linkedin_name',
         'linkedin_email',
+
+        'email_verified_at'
     ];
 
     /**

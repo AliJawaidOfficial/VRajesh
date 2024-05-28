@@ -34,11 +34,7 @@ class ScheduledPost implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::error('Test log');
-        $posts = Post::
-            // where('scheduled_at', '<=', now())->
-            where('posted', 0)->where('draft', 0)->get();
-
+        $posts = Post::where('scheduled_at', '<=', now())->where('posted', 0)->where('draft', 0)->get();
 
         foreach ($posts as $post) {
             try {

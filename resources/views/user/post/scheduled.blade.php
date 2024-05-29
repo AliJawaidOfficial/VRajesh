@@ -137,6 +137,156 @@
             margin-right: 2px;
         }
     </style>
+    <style>
+        /* Table Styles */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #303030;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: 0px solid #ddd;
+        }
+
+        tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        /* Post Styles */
+        .post-title {
+            font-size: 14px;
+            -webkit-line-clamp: 1;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-date {
+            text-wrap: nowrap;
+            font-size: 14px;
+        }
+
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+
+        .pagination li {
+            margin: 0 5px;
+        }
+
+        .pagination li a {
+            display: block;
+            padding: 4px 12px;
+            color: #303030;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .pagination li a.active,
+        .pagination li a:hover {
+            background-color: #303030;
+            color: white;
+        }
+
+        .pagination li.disabled a {
+            color: #999;
+            pointer-events: none;
+            border-color: #ddd;
+        }
+
+        /* Filter Section Styles */
+        .filter-section {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .filter-section select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Media Preview Styles */
+        .media-preview {
+            width: 40%;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #ddd;
+        }
+
+        .post-details {
+            flex-grow: 1;
+            padding-left: 20px;
+        }
+
+        .platform-icons i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        /* Button Styles */
+        .btn-custom {
+            width: 140px;
+            font-weight: bold;
+            color: #fff;
+            background-image: linear-gradient(90deg, #ff6600 0%, #d89e33 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background-image: linear-gradient(90deg, #d67f45 0%, #d89e33 100%);
+            color: #fff;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 8px;
+            border: none;
+        }
+
+        .modal-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+    </style>
 @endsection
 
 {{-- Vendor Scripts --}}
@@ -212,15 +362,36 @@
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(response => {
-                        html = `
-                        <p><strong>Title:</strong> ${response.data.title}</p>
-                        <p><strong>Description:</strong> ${response.data.description}</p>
-                        <p><strong>Media:</strong> <img src="${assetUrl}${response.data.media}" class="w-100" style="max-width: 200px;" /></p>
-                        <p><strong>Media Type:</strong> ${response.data.media_type}</p>
-                    `;
-                        document.getElementById('modalBody').innerHTML = html;
-                        var myModal = new bootstrap.Modal(document.getElementById('scheduleModal'));
-                        myModal.show();
+                        let mediaHtml = '';
+                        let asset = `{{ asset('') }}`;
+                        let mediaType = response.data.media_type;
+                        let mediaContent = response.data.media;
+
+                        if (mediaType == 'image') {
+                            mediaHtml +=
+                                `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
+                        } else if (mediaType == 'video') {
+                            mediaHtml += `<video controls class="w-100 rounded mb-1">
+                                <source src="${asset}${mediaContent}" type="video/mp4">
+                                Your browser does not support the video tag.
+                              </video>`;
+                        } else {
+                            mediaHtml +=
+                                `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                        }
+
+                        $("#postDetailId").val(response.data.id);
+
+
+                        $("#facebook-post-detail").attr("checked", response.data.on_facebook ? true : false);
+                        $("#instagram-post-detail").attr("checked", response.data.on_instagram ? true : false);
+                        $("#linkedin-post-detail").attr("checked", response.data.on_linkedin ? true : false);
+
+                        $('#postDetail .media-preview').html(mediaHtml);
+                        $('#modalPostTitle').text(response.data.title);
+                        $('#modalPostDate').text(response.data.created_at);
+                        $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
+                        $('#postDetail').modal('show');
                     })
                     .catch(error => console.error('Error fetching event details:', error));
             }
@@ -356,6 +527,49 @@
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- Modal for Post Details --}}
+        <div class="modal fade" id="postDetail" tabindex="-1" aria-labelledby="postDetailLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content rounded-6">
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title" id="postDetailLabel">Post Details</h5>
+                        <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body d-flex">
+                        <div class="media-preview w-50 p-3">
+                            <p class="text-center text-muted my-auto">No image/video published</p>
+                            {{-- Placeholder for media preview --}}
+                        </div>
+                        <div class="post-details ms-3 w-50">
+                            <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle"></span></h4>
+                            <p class="modal-post-date mb-1"><strong>Published on:</strong> <span
+                                    id="modalPostDate"></span>
+                            </p>
+                            <div class="modal-post-description" style="max-height: 200px; overflow-y: auto;">
+                                <strong>Description:</strong> <span id="modalPostDescription"></span>
+                            </div>
+                            <input type="hidden" id="postDetailId">
+                            <div class="d-flex gap-3">
+                                <div class="d-flex gap-2">
+                                    <input type="checkbox" style="pointer-events: none" id="facebook-post-detail">
+                                    <i class="fab fa-facebook"></i>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <input type="checkbox" style="pointer-events: none" id="instagram-post-detail">
+                                    <i class="fab fa-instagram"></i>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <input type="checkbox" style="pointer-events: none" id="linkedin-post-detail">
+                                    <i class="fab fa-linkedin"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

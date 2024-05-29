@@ -516,7 +516,7 @@ class PostController extends Controller
                 $mediaName = time() . '.' . $media->getClientOriginalExtension();
                 $mediaType = $media->getMimeType();
                 $media->move(public_path('posts'), $mediaName);
-                $mediaPath = public_path('posts') . '/' . $mediaName;
+                $mediaPath = 'posts/' . $mediaName;
 
                 if (str_starts_with($mediaType, 'image/')) {
                     $media_type = 'image';
@@ -613,8 +613,6 @@ class PostController extends Controller
                     $onlyMediaPath = 'posts/' . $mediaName;
                     copy(public_path($oldPost->media), public_path('posts') . '/' . $mediaName);
 
-                    $mediaSize = filesize(public_path($onlyMediaPath));
-                    $mediaPath = public_path('posts') . '/' . $mediaName;
                     $data->media = $onlyMediaPath;
                     $data->media_type = $oldPost->media_type;
                 }

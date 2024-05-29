@@ -187,6 +187,9 @@
                                 `<p class="text-center text-muted my-auto">No image/video published</p>`;
                         }
 
+                        $("#postDetailId").val(response.data.id);
+
+
                         $("#facebook-post-detail").attr("checked", response.data.on_facebook ? true : false);
                         $("#instagram-post-detail").attr("checked", response.data.on_instagram ? true : false);
                         $("#linkedin-post-detail").attr("checked", response.data.on_linkedin ? true : false);
@@ -217,7 +220,7 @@
             $('#' + modalId + ' #PlatformInstagram').attr("checked", $("#instagram-post-detail").is(":checked"));
             $('#' + modalId + ' #PlatformLinkedIn').attr("checked", $("#linkedin-post-detail").is(":checked"));
 
-
+            $('#' + modalId + ' #postID').val($("#postDetailId").val());
 
 
             $('#postDetail').modal('hide');
@@ -359,6 +362,8 @@
                             <div class="modal-post-description" style="max-height: 200px; overflow-y: auto;">
                                 <strong>Description:</strong> <span id="modalPostDescription"></span>
                             </div>
+                            <input type="hidden" id="postDetailId">
+
 
                             <div class="d-flex gap-3">
                                 <div class="d-flex gap-2">
@@ -468,6 +473,7 @@
                             aria-label="Close"></button>
                     </div>
                     <form id="schedulePostForm">
+                        <input type="hidden" name="post_id" id="postID">
                         <div class="modal-body">
                             <div class="mb-3">
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
@@ -537,6 +543,7 @@
                             aria-label="Close"></button>
                     </div>
                     <form id="repostForm">
+                        <input type="hidden" name="post_id" id="postID">
                         <div class="modal-body">
                             <div class="mb-3">
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"

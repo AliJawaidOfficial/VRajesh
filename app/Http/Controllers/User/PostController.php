@@ -73,7 +73,7 @@ class PostController extends Controller
         }
     }
 
-    public function update(String $id, Request $request)
+    public function update(Request $request)
     {
         try {
             DB::beginTransaction();
@@ -81,6 +81,7 @@ class PostController extends Controller
             $validator = Validator::make(
                 $request->all(),
                 [
+                    'post_id' => 'required|exists:posts,id',
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
                     'media' => 'nullable',
@@ -91,6 +92,9 @@ class PostController extends Controller
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
                 [
+                    'post_id.required' => 'Post is required',
+                    'post_id.exists' => 'Invalid Post',
+
                     'title.required' => 'Title is required',
 
                     'description.required' => 'Description is required',
@@ -105,7 +109,7 @@ class PostController extends Controller
 
             if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
 
-            $data = Post::find($id);
+            $data = Post::find($request->post_id);
             if (!$data) throw new Exception('Post not found.');
 
             $data->user_id = Auth::guard('web')->user()->id;
@@ -137,7 +141,6 @@ class PostController extends Controller
             if ($request->has('on_facebook')) $data->on_facebook = 1;
             if ($request->has('on_instagram')) $data->on_instagram = 1;
             if ($request->has('on_linkedin')) $data->on_linkedin = 1;
-            if ($request->schedule_date != null && $request->schedule_time != null) $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
 
             $data->save();
 
@@ -306,9 +309,9 @@ class PostController extends Controller
             );
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
-            
+
             if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
-            
+
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
             $data->title = $request->title;

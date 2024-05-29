@@ -396,19 +396,17 @@
                                 <strong>Description:</strong> <span id="modalPostDescription"></span>
                             </div>
                             <input type="hidden" id="postDetailId">
-
-
                             <div class="d-flex gap-3">
                                 <div class="d-flex gap-2">
-                                    <input type="checkbox" name="platforms" id="facebook-post-detail">
+                                    <input type="checkbox" style="pointer-events: none" id="facebook-post-detail">
                                     <i class="fab fa-facebook"></i>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <input type="checkbox" name="platforms" id="instagram-post-detail">
+                                    <input type="checkbox" style="pointer-events: none" id="instagram-post-detail">
                                     <i class="fab fa-instagram"></i>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <input type="checkbox" name="platforms" id="linkedin-post-detail">
+                                    <input type="checkbox" style="pointer-events: none" id="linkedin-post-detail">
                                     <i class="fab fa-linkedin"></i>
                                 </div>
                             </div>

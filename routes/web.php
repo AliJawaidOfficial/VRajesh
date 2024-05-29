@@ -70,7 +70,7 @@ Route::name('user.')
                 ->group(function () {
                     Route::get('/', 'index')->name('index');
                     Route::get('/details/{id}', 'show')->name('show');
-                    Route::put('/update/{id}', 'update')->name('update');
+                    Route::post('/update', 'update')->name('update');
 
                     Route::get('/create', 'create')->name('create');
                     Route::post('/', 'store')->name('store');

@@ -177,7 +177,7 @@
 
             function fetchEvents(start, end) {
                 const apiUrl =
-                    `{{ route('user.post.scheduled.response') }}?start=${start.toISOString()}&end=${end.toISOString()}`;
+                    `{{ route('user.post.scheduled.all') }}?start=${start.toISOString()}&end=${end.toISOString()}`;
 
                 fetch(apiUrl)
                     .then(response => response.json())
@@ -192,7 +192,7 @@
 
                             return {
                                 id: post.id,
-                                title: `${icons} ${post.title}`,
+                                title: `${post.title}`,
                                 start: eventDate.toISOString().split('T')[0],
                                 description: post.description
                             };
@@ -207,7 +207,7 @@
 
             function fetchEventDetails(eventId) {
                 const assetUrl = '{{ asset('') }}';
-                const apiUrl = `{{ route('user.post.scheduled.response') }}/${eventId}`;
+                const apiUrl = `{{ route('user.post.index') }}/details/${eventId}`;
 
                 fetch(apiUrl)
                     .then(response => response.json())

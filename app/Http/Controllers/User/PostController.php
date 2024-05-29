@@ -190,7 +190,7 @@ class PostController extends Controller
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
             $data->title = $request->title;
-            $data->description = nl2br($request->description);
+            $data->description = str_replace('\n', "\n", $request->description);
 
             $mediaPath = null;
             $mediaType = null;

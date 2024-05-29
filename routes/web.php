@@ -64,18 +64,23 @@ Route::name('user.')
             /**
              * Post
              */
-            Route::get('/post', [PostController::class, 'index'])->name('post.index');
-            Route::get('/post/details/{id}', [PostController::class, 'show'])->name('post.show');
-            Route::put('/post/details/{id}', [PostController::class, 'update'])->name('post.update');
+            Route::prefix('/post')
+                ->controller(PostController::class)
+                ->name('post.')
+                ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/details/{id}', 'show')->name('show');
+                    Route::put('/update/{id}', 'update')->name('update');
 
-            Route::get('/post/scheduled', [PostController::class, 'scheduled'])->name('post.scheduled');
-            Route::get('/post/scheduled/response', [PostController::class, 'scheduledPosts'])->name('post.scheduled.all');
+                    Route::get('/scheduled', 'scheduled')->name('scheduled');
+                    Route::get('/scheduled/response', 'scheduledPosts')->name('scheduled.all');
 
-            Route::get('/post/draft', [PostController::class, 'draft'])->name('post.draft');
-            Route::post('/post/draft', [PostController::class, 'draftStore'])->name('post.draft.store');
+                    Route::get('/draft', 'draft')->name('draft');
+                    Route::post('/draft', 'draftStore')->name('draft.store');
 
-            Route::get('/post/create', [PostController::class, 'create'])->name('post.create');
-            Route::post('/post', [PostController::class, 'store'])->name('post.store');
+                    Route::get('/create', 'create')->name('create');
+                    Route::post('/', 'store')->name('store');
+                });
 
             /**
              * Facebook

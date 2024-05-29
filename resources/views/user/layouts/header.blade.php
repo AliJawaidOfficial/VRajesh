@@ -4,7 +4,7 @@
     <div class="d-flex align-items-center alert-wrapper">
         <div class="toggle-button">
             <button class="hamburger" id="toggleSidebar">
-                <img src="./assets/images/icons/hamberger.png" style="filter: invert(100%)" alt=""></button>
+                <img src="{{ asset('assets/images/icons/hamberger.png') }}" style="filter: invert(100%)" alt=""></button>
         </div>
 
         <div class="notifications-wrapper">

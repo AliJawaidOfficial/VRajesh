@@ -155,197 +155,93 @@
             border-top: 1px solid #dee2e6;
             background-color: #f8f9fa;
         }
-
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-
-        .btn-secondary:hover {
-            background-color: #545b62;
-            border-color: #4e555b;
-        }
-
-        .form-check-input {
-            width: 1.25em;
-            height: 1.25em;
-        }
-
-        .form-check-label {
-            margin-left: 0.5rem;
-        }
-
-        .date-time-inputs {
-            display: none;
-            /* Initially hidden */
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        .input-tag-title {
-            padding: 10px 0px;
-            border: none;
-            border-bottom: 1px solid #ddd;
-            border-radius: 0px;
-            font-size: 35px;
-            width: 100%;
-        }
-
-        .input-tag-description {
-            padding: 10px 0px;
-            border: none;
-            border-bottom: 1px solid #ddd;
-            border-radius: 0px;
-            font-size: 20px;
-            width: 100%;
-        }
-
-        .toggle-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
     </style>
 @endsection
 
 {{-- Vendor Scripts --}}
-@section('scripts')
-    <script>
-        function showPostDetail(id) {
-            $.ajax({
-                type: "GET",
-                url: `{{ route('user.post.index') }}/details/${id}`,
-                dataType: "json",
-                success: function(response) {
-                    if (response.status == 200) {
-                        let mediaHtml = '';
-                        let asset = `{{ asset('') }}`;
-                        let mediaType = response.data.media_type;
-                        let mediaContent = response.data.media;
+<script>
+    // Function to show the post detail in a modal
+    function showPostDetail(id) {
+        $.ajax({
+            type: "GET",
+            url: `{{ route('user.post.index') }}/details/${id}`,
+            dataType: "json",
+            success: function(response) {
+                if (response.status == 200) {
+                    let mediaHtml = '';
+                    let asset = `{{ asset('') }}`;
+                    let mediaType = response.data.media_type;
+                    let mediaContent = response.data.media;
 
-                        if (mediaType == 'image') {
-                            mediaHtml += `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
-                        } else if (mediaType == 'video') {
-                            mediaHtml += `<video controls class="w-100 rounded mb-1">
-                                            <source src="${asset}${mediaContent}" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                          </video>`;
-                        } else {
-                            mediaHtml += `<p class="text-center text-muted my-auto">No image/video published</p>`;
-                        }
-
-                        $('#postDetail .media-preview').html(mediaHtml);
-                        $('#modalPostTitle').text(response.data.title);
-                        $('#modalPostDate').text(response.data.created_at);
-                        $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
-                        $('#postDetail').modal('show');
+                    if (mediaType == 'image') {
+                        mediaHtml +=
+                            `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
+                    } else if (mediaType == 'video') {
+                        mediaHtml += `<video controls class="w-100 rounded mb-1">
+                                <source src="${asset}${mediaContent}" type="video/mp4">
+                                Your browser does not support the video tag.
+                              </video>`;
                     } else {
-                        toast.error(response.data.message);
+                        mediaHtml +=
+                            `<p class="text-center text-muted my-auto">No image/video published</p>`;
                     }
-                }
-            });
-        }
 
-        function toggleScheduleInputs(modalId) {
-            const toggle = document.getElementById(modalId + 'Toggle').checked;
-            const scheduleDate = document.getElementById(modalId + 'Date');
-            const scheduleTime = document.getElementById(modalId + 'Time');
-            const draftButton = document.getElementById(modalId + 'DraftButton');
-            const postButton = document.getElementById(modalId + 'PostButton');
-            const scheduleButton = document.getElementById(modalId + 'ScheduleButton');
-
-            scheduleDate.disabled = !toggle;
-            scheduleTime.disabled = !toggle;
-
-            if (toggle) {
-                draftButton.disabled = true;
-                postButton.disabled = true;
-                scheduleButton.disabled = false;
-                $('#' + modalId + ' .date-time-inputs').fadeIn(300); // Fade in transition for date and time inputs
-            } else {
-                draftButton.disabled = false;
-                postButton.disabled = false;
-                scheduleButton.disabled = true;
-                scheduleDate.value = '';
-                scheduleTime.value = '';
-                $('#' + modalId + ' .date-time-inputs').fadeOut(300); // Fade out transition for date and time inputs
-            }
-        }
-
-        function transferPostData(modalId) {
-            const title = $('#modalPostTitle').text();
-            const description = $('#modalPostDescription').text();
-
-            $('#' + modalId + ' #postTitle').val(title);
-            $('#' + modalId + ' #postDescription').val(description);
-
-            $('#postDetail').modal('hide');
-            setTimeout(function() {
-                $('#' + modalId).modal('show');
-            }, 500);
-        }
-
-        $('#createPostForm').on('submit', function(e) {
-            e.preventDefault();
-            var formValid = true;
-
-            $('#createPostModal input[required], #createPostModal textarea[required]').each(function() {
-                if (!$(this).val()) {
-                    $(this).addClass('is-invalid');
-                    formValid = false;
+                    $('#postDetail .media-preview').html(mediaHtml);
+                    $('#modalPostTitle').text(response.data.title);
+                    $('#modalPostDate').text(response.data.created_at);
+                    $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
+                    $('#postDetail').modal('show');
                 } else {
-                    $(this).removeClass('is-invalid');
+                    toast.error(response.data.message);
                 }
-            });
-
-            if (formValid) {
-                console.log('Form is valid, proceed with AJAX or form submission');
-            } else {
-                console.log('Validation failed, form not submitted');
             }
         });
+    }
 
-        function enableButtons(modalId) {
-            const postButton = document.getElementById(modalId + 'PostButton');
-            const draftButton = document.getElementById(modalId + 'DraftButton');
-            postButton.disabled = false;
-            draftButton.disabled = false;
+    // Function to transfer post data to the modal for editing, scheduling or reposting
+    // Function to transfer post data to the modal for editing, scheduling, or reposting
+    function transferPostData(modalId) {
+        const title = $('#modalPostTitle').text();
+        const description = $('#modalPostDescription').html().replace(/<br>/g, '\n');
+
+        
+        console.log($('#postDetail .platform-icons .fa-instagram'));
+
+        // Extract platform information from the post detail modal
+        const platforms = [];
+        if ($('#postDetail .platform-icons .fa-facebook').length) {
+            platforms.push('facebook');
+        }
+        if ($('#postDetail .platform-icons .fa-instagram').length) {
+            platforms.push('instagram');
+        }
+        if ($('#postDetail .platform-icons .fa-linkedin-in').length) {
+            platforms.push('linkedin');
         }
 
-        ['postTitle', 'postDescription', 'scheduleToggle'].forEach(id => {
-            document.getElementById(id).addEventListener('input', enableButtons.bind(null, 'createPostModal'));
-        });
+        // Set the platform checkboxes in the target modal
+        $('#' + modalId + ' #draftPlatformFacebook').prop('checked', platforms.includes('facebook'));
+        $('#' + modalId + ' #draftPlatformInstagram').prop('checked', platforms.includes('instagram'));
+        $('#' + modalId + ' #draftPlatformLinkedIn').prop('checked', platforms.includes('linkedin'));
 
-        $('#createPostForm').on('submit', function(e) {
-            e.preventDefault();
-            var formValid = true;
+        $('#' + modalId + ' #schedulePlatformFacebook').prop('checked', platforms.includes('facebook'));
+        $('#' + modalId + ' #schedulePlatformInstagram').prop('checked', platforms.includes('instagram'));
+        $('#' + modalId + ' #schedulePlatformLinkedIn').prop('checked', platforms.includes('linkedin'));
 
-            $('#createPostModal input[required], #createPostModal textarea[required]').each(function() {
-                if (!$(this).val()) {
-                    $(this).addClass('is-invalid');
-                    formValid = false;
-                } else {
-                    $(this).removeClass('is-invalid');
-                }
-            });
+        $('#' + modalId + ' #repostPlatformFacebook').prop('checked', platforms.includes('facebook'));
+        $('#' + modalId + ' #repostPlatformInstagram').prop('checked', platforms.includes('instagram'));
+        $('#' + modalId + ' #repostPlatformLinkedIn').prop('checked', platforms.includes('linkedin'));
 
-            if (formValid) {
-                console.log('Form is valid, proceed with AJAX or form submission');
-            } else {
-                console.log('Validation failed, form not submitted');
-            }
-        });
-    </script>
-@endsection
+        $('#' + modalId + ' #postTitle').val(title);
+        $('#' + modalId + ' #postDescription').val(description);
+
+        $('#postDetail').modal('hide');
+        setTimeout(function() {
+            $('#' + modalId).modal('show');
+        }, 500);
+    }
+</script>
+
 
 {{-- Content --}}
 @section('content')
@@ -435,15 +331,21 @@
                             <div class="modal-post-description" style="max-height: 200px; overflow-y: auto;">
                                 <strong>Description:</strong> <span id="modalPostDescription"></span>
                             </div>
+
+
+                            
                         </div>
                     </div>
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
-                            <button type="button" class="btn btn-custom" onclick="transferPostData('editPostModal')">Draft</button>
+                            <button type="button" class="btn btn-custom"
+                                onclick="transferPostData('draftPostModal')">Draft</button>
                         </div>
                         <div>
-                            <button type="button" class="btn btn-custom" onclick="transferPostData('schedulePostModal')">Schedule</button>
-                            <button type="button" class="btn btn-custom" onclick="transferPostData('repostModal')">Repost</button>
+                            <button type="button" class="btn btn-custom"
+                                onclick="transferPostData('schedulePostModal')">Schedule</button>
+                            <button type="button" class="btn btn-custom"
+                                onclick="transferPostData('repostModal')">Repost</button>
                         </div>
                     </div>
                 </div>
@@ -451,7 +353,7 @@
         </div>
 
         {{-- Draft Post Modal --}}
-        <div class="modal fade" id="editPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
+        <div class="modal fade" id="draftPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header bg-dark text-white">
@@ -462,67 +364,8 @@
                     <form id="editPostForm">
                         <div class="modal-body">
                             <div class="mb-3">
-                                <input class="input-tag-title d-block h-100 w-100 form-control" id="editPostTitle" name="title"
-                                    placeholder="Enter your title here" required />
-                            </div>
-                            <div class="textarea-wrapper my-1">
-                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="editPostDescription" name="description"
-                                    placeholder="Enter your post description"></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label>Platforms</label>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="editPlatformFacebook">
-                                    <label class="form-check-label" for="editPlatformFacebook">
-                                        <i class="fab fa-facebook-f"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="editPlatformInstagram">
-                                    <label class="form-check-label" for="editPlatformInstagram">
-                                        <i class="fab fa-instagram"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="editPlatformLinkedIn">
-                                    <label class="form-check-label" for="editPlatformLinkedIn">
-                                        <i class="fab fa-linkedin-in"></i>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="editPostImage" class="form-label">Upload Image</label>
-                                <input type="file" class="form-control" id="editPostImage" name="image" accept="image/*">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <div>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            </div>
-                            <div>
-                                <button type="button" class="btn btn-custom" id="editSaveButton">Draft Post</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        {{-- Create Post Modal --}}
-        <div class="modal fade" id="createPostModal" tabindex="-1" aria-labelledby="createPostModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title" id="createPostModalLabel">Create New Post</h5>
-                        <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <form id="createPostForm">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle" name="title"
-                                placeholder="Enter your title here" required />
+                                <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
+                                    name="title" placeholder="Enter your title here" required />
                             </div>
                             <div class="textarea-wrapper my-1">
                                 <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
@@ -531,34 +374,31 @@
                             <div class="mb-3">
                                 <label>Platforms</label>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="platformFacebook">
-                                    <label class="form-check-label" for="platformFacebook">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="draftPlatformFacebook">
+                                    <label class="form-check-label" for="draftPlatformFacebook">
                                         <i class="fab fa-facebook-f"></i>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="platformInstagram">
-                                    <label class="form-check-label" for="platformInstagram">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="draftPlatformInstagram">
+                                    <label class="form-check-label" for="draftPlatformInstagram">
                                         <i class="fab fa-instagram"></i>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="platformLinkedIn">
-                                    <label class="form-check-label" for="platformLinkedIn">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="draftPlatformLinkedIn">
+                                    <label class="form-check-label" for="draftPlatformLinkedIn">
                                         <i class="fab fa-linkedin-in"></i>
                                     </label>
                                 </div>
                             </div>
-                            <div class="mb-3 date-time-inputs">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="scheduleToggle"
-                                        onchange="toggleScheduleInputs('createPostModal')">
-                                    <label class="form-check-label" for="scheduleToggle">Schedule Post</label>
-                                </div>
-                                <input type="date" class="form-control mb-2" id="scheduleDate" name="schedule_date"
-                                    disabled required>
-                                <input type="time" class="form-control" id="scheduleTime" name="schedule_time"
-                                    disabled required>
+                            <div class="mb-3">
+                                <label for="editPostImage" class="form-label">Upload Image</label>
+                                <input type="file" class="form-control" id="editPostImage" name="image"
+                                    accept="image/*">
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -566,9 +406,7 @@
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-custom" id="draftButton" disabled>Save as Draft</button>
-                                <button type="button" class="btn btn-custom" id="scheduleButton" disabled>Schedule</button>
-                                <button type="button" class="btn btn-custom" id="postButton" disabled>Post</button>
+                                <button type="button" class="btn btn-custom" id="editSaveButton">Draft Post</button>
                             </div>
                         </div>
                     </form>
@@ -589,29 +427,32 @@
                     <form id="schedulePostForm">
                         <div class="modal-body">
                             <div class="mb-3">
-                                <input class="input-tag-title d-block h-100 w-100 form-control" id="schedulePostTitle" name="title"
-                                    placeholder="Enter your title here" required />
+                                <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
+                                    name="title" placeholder="Enter your title here" required />
                             </div>
                             <div class="textarea-wrapper my-1">
-                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="schedulePostDescription" name="description"
+                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
                                     placeholder="Enter your post description"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label>Platforms</label>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="schedulePlatformFacebook">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="schedulePlatformFacebook">
                                     <label class="form-check-label" for="schedulePlatformFacebook">
                                         <i class="fab fa-facebook-f"></i>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="schedulePlatformInstagram">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="schedulePlatformInstagram">
                                     <label class="form-check-label" for="schedulePlatformInstagram">
                                         <i class="fab fa-instagram"></i>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="schedulePlatformLinkedIn">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="schedulePlatformLinkedIn">
                                     <label class="form-check-label" for="schedulePlatformLinkedIn">
                                         <i class="fab fa-linkedin-in"></i>
                                     </label>
@@ -623,8 +464,8 @@
                                         onchange="toggleScheduleInputs('schedulePostModal')">
                                     <label class="form-check-label" for="schedulePostToggle">Schedule Post</label>
                                 </div>
-                                <input type="date" class="form-control mb-2" id="schedulePostDate" name="schedule_date"
-                                    disabled required>
+                                <input type="date" class="form-control mb-2" id="schedulePostDate"
+                                    name="schedule_date" disabled required>
                                 <input type="time" class="form-control" id="schedulePostTime" name="schedule_time"
                                     disabled required>
                             </div>
@@ -634,7 +475,8 @@
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-custom" id="schedulePostSaveButton" disabled>Save</button>
+                                <button type="button" class="btn btn-custom" id="schedulePostSaveButton"
+                                    disabled>Save</button>
                             </div>
                         </div>
                     </form>
@@ -654,29 +496,32 @@
                     <form id="repostForm">
                         <div class="modal-body">
                             <div class="mb-3">
-                                <input class="input-tag-title d-block h-100 w-100 form-control" id="repostTitle" name="title"
-                                    placeholder="Enter your title here" required />
+                                <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
+                                    name="title" placeholder="Enter your title here" required />
                             </div>
                             <div class="textarea-wrapper my-1">
-                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="repostDescription" name="description"
+                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
                                     placeholder="Enter your post description"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label>Platforms</label>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="repostPlatformFacebook">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="repostPlatformFacebook">
                                     <label class="form-check-label" for="repostPlatformFacebook">
                                         <i class="fab fa-facebook-f"></i>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="repostPlatformInstagram">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="repostPlatformInstagram">
                                     <label class="form-check-label" for="repostPlatformInstagram">
                                         <i class="fab fa-instagram"></i>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1" id="repostPlatformLinkedIn">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="repostPlatformLinkedIn">
                                     <label class="form-check-label" for="repostPlatformLinkedIn">
                                         <i class="fab fa-linkedin-in"></i>
                                     </label>
@@ -690,8 +535,8 @@
                                 </div>
                                 <input type="date" class="form-control mb-2" id="repostDate" name="schedule_date"
                                     disabled required>
-                                <input type="time" class="form-control" id="repostTime" name="schedule_time"
-                                    disabled required>
+                                <input type="time" class="form-control" id="repostTime" name="schedule_time" disabled
+                                    required>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -699,7 +544,8 @@
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-custom" id="repostSaveButton" disabled>Repost</button>
+                                <button type="button" class="btn btn-custom" id="repostSaveButton"
+                                    disabled>Repost</button>
                             </div>
                         </div>
                     </form>

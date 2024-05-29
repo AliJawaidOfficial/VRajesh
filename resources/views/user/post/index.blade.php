@@ -200,7 +200,7 @@
                         $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
                         $('#postDetail').modal('show');
                     } else {
-                        toast.error(response.data.message);
+                        toastr.error(response.message);
                     }
                 }
             });
@@ -229,7 +229,7 @@
             }, 500);
         }
 
-
+        // Draft Form
         $("#draftPostForm").submit(function(e) {
             e.preventDefault();
             $.ajax({
@@ -238,35 +238,68 @@
                 data: new FormData(this),
                 processData: false,
                 contentType: false,
+                beforeSend: function() {
+                    $("#draftSaveBtn").attr('disabled', 'true');
+                },
                 success: function(response) {
                     if (response.status == 200) {
-                        let mediaHtml = '';
-                        let asset = `{{ asset('') }}`;
-                        let mediaType = response.data.media_type;
-                        let mediaContent = response.data.media;
-
-                        if (mediaType == 'image') {
-                            mediaHtml +=
-                                `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
-                        } else if (mediaType == 'video') {
-                            mediaHtml += `<video controls class="w-100 rounded mb-1">
-                                    <source src="${asset}${mediaContent}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                  </video>`;
-                        } else {
-                            mediaHtml +=
-                                `<p class="text-center text-muted my-auto">No image/video published</p>`;
-                        }
-
-                        $('#postDetail .media-preview').html(mediaHtml);
-                        $('#modalPostTitle').text(response.data.title);
-                        $('#modalPostDate').text(response.data.created_at);
-                        $('#modalPostDescription').html(response.data.description.replace(/\n/g,
-                            '<br>'));
-                        $('#postDetail').modal('show');
+                        $("#draftPostModal").modal('hide');
+                        toastr.success(response.message);
                     } else {
-                        toast.error(response.data.message);
+                        toastr.error(response.message);
                     }
+
+                    $("#draftSaveBtn").removeAttr('disabled');
+                }
+            });
+        });
+
+        // Schedule Form
+        $("#schedulePostForm").submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: `{{ route('user.post.new.store') }}`,
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    $("#scheduleSaveBtn").attr('disabled', 'true');
+                },
+                success: function(response) {
+                    if (response.status == 200) {
+                        $("#schedulePostModal").modal('hide');
+                        toastr.success(response.message);
+                    } else {
+                        toastr.error(response.message);
+                    }
+
+                    $("#scheduleSaveBtn").removeAttr('disabled');
+                }
+            });
+        });
+
+        // Repost Form
+        $("#repostPostForm").submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: `{{ route('user.post.new.store') }}`,
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    $("#repostSaveBtn").attr('disabled', 'true');
+                },
+                success: function(response) {
+                    if (response.status == 200) {
+                        $("#repostModal").modal('hide');
+                        toastr.success(response.message);
+                    } else {
+                        toastr.error(response.message);
+                    }
+
+                    $("#repostSaveBtn").removeAttr('disabled');
                 }
             });
         });
@@ -420,33 +453,33 @@
                                     placeholder="Enter your post description"></textarea>
                             </div>
                             <div class="mb-3">
+                                <label for="media" class="form-label">Media</label>
+                                <input type="file" class="form-control" id="media" name="media"
+                                    accept="image/*">
+                            </div>
+                            <div class="mb-3">
                                 <label>Platforms</label>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1"
-                                        id="PlatformFacebook">
+                                    <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
+                                        id="PlatformFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformFacebook">
                                         <i class="fab fa-facebook-f"></i>
                                     </label>
                                 </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1"
-                                        id="PlatformInstagram">
+                                <div class="form-check form-check-inline mb-3">
+                                    <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
+                                        id="PlatformInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformInstagram">
                                         <i class="fab fa-instagram"></i>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1"
-                                        id="PlatformLinkedIn">
+                                    <input class="form-check-input" type="checkbox" name="on_linkedin" value="1"
+                                        id="PlatformLinkedIn" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformLinkedIn">
                                         <i class="fab fa-linkedin-in"></i>
                                     </label>
                                 </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="editPostImage" class="form-label">Upload Image</label>
-                                <input type="file" class="form-control" id="editPostImage" name="image"
-                                    accept="image/*">
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -454,7 +487,7 @@
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-custom" id="editSaveButton">Draft Post</button>
+                                <button type="submit" class="btn btn-custom" id="draftSaveBtn">Draft Post</button>
                             </div>
                         </div>
                     </form>
@@ -472,51 +505,53 @@
                         <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-                    <form id="schedulePostForm">
+                    <form id="schedulePostForm" enctype="multipart/form-data" method="POST">
+                        @method('POST')
+                        @csrf
                         <input type="hidden" name="post_id" id="postID">
                         <div class="modal-body">
                             <div class="mb-3">
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
                                     name="title" placeholder="Enter your title here" required />
                             </div>
-                            <div class="textarea-wrapper my-1">
+                            <div class="textarea-wrapper mb-3">
                                 <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
                                     placeholder="Enter your post description"></textarea>
+                            </div>
+                            <div class="mb-3 date-time-inputs">
+                                <input type="date" class="form-control mb-3" id="schedulePostDate"
+                                    name="schedule_date" required>
+                                <input type="time" class="form-control" id="schedulePostTime" name="schedule_time"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="media" class="form-label">Media</label>
+                                <input type="file" class="form-control" id="media" name="media"
+                                    accept="image/*">
                             </div>
                             <div class="mb-3">
                                 <label>Platforms</label>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1"
-                                        id="PlatformFacebook">
+                                    <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
+                                        id="PlatformFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformFacebook">
                                         <i class="fab fa-facebook-f"></i>
                                     </label>
                                 </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1"
-                                        id="PlatformInstagram">
+                                <div class="form-check form-check-inline mb-3">
+                                    <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
+                                        id="PlatformInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformInstagram">
                                         <i class="fab fa-instagram"></i>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1"
-                                        id="PlatformLinkedIn">
+                                    <input class="form-check-input" type="checkbox" name="on_linkedin" value="1"
+                                        id="PlatformLinkedIn" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformLinkedIn">
                                         <i class="fab fa-linkedin-in"></i>
                                     </label>
                                 </div>
-                            </div>
-                            <div class="mb-3 date-time-inputs">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="schedulePostToggle"
-                                        onchange="toggleScheduleInputs('schedulePostModal')">
-                                    <label class="form-check-label" for="schedulePostToggle">Schedule Post</label>
-                                </div>
-                                <input type="date" class="form-control mb-2" id="schedulePostDate"
-                                    name="schedule_date" disabled required>
-                                <input type="time" class="form-control" id="schedulePostTime" name="schedule_time"
-                                    disabled required>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -524,8 +559,7 @@
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-custom" id="schedulePostSaveButton"
-                                    disabled>Save</button>
+                                <button type="submit" class="btn btn-custom" id="scheduleSaveBtn">Schedule</button>
                             </div>
                         </div>
                     </form>
@@ -542,60 +576,55 @@
                         <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-                    <form id="repostForm">
+                    <form id="repostPostForm" enctype="multipart/form-data" method="POST">
+                        @method('POST')
+                        @csrf
                         <input type="hidden" name="post_id" id="postID">
                         <div class="modal-body">
                             <div class="mb-3">
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
                                     name="title" placeholder="Enter your title here" required />
                             </div>
-                            <div class="textarea-wrapper my-1">
+                            <div class="textarea-wrapper mb-3">
                                 <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
                                     placeholder="Enter your post description"></textarea>
                             </div>
                             <div class="mb-3">
+                                <label for="media" class="form-label">Media</label>
+                                <input type="file" class="form-control" id="media" name="media"
+                                    accept="image/*">
+                            </div>
+                            <div class="mb-3">
                                 <label>Platforms</label>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1"
-                                        id="PlatformFacebook">
+                                    <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
+                                        id="PlatformFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformFacebook">
                                         <i class="fab fa-facebook-f"></i>
                                     </label>
                                 </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1"
-                                        id="PlatformInstagram">
+                                <div class="form-check form-check-inline mb-3">
+                                    <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
+                                        id="PlatformInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformInstagram">
                                         <i class="fab fa-instagram"></i>
                                     </label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" value="1"
-                                        id="PlatformLinkedIn">
+                                    <input class="form-check-input" type="checkbox" name="on_linkedin" value="1"
+                                        id="PlatformLinkedIn" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformLinkedIn">
                                         <i class="fab fa-linkedin-in"></i>
                                     </label>
                                 </div>
                             </div>
-                            <div class="mb-3 date-time-inputs">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="repostToggle"
-                                        onchange="toggleScheduleInputs('repostModal')">
-                                    <label class="form-check-label" for="repostToggle">Schedule Post</label>
-                                </div>
-                                <input type="date" class="form-control mb-2" id="repostDate" name="schedule_date"
-                                    disabled required>
-                                <input type="time" class="form-control" id="repostTime" name="schedule_time" disabled
-                                    required>
-                            </div>
                         </div>
                         <div class="modal-footer">
                             <div>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                             <div>
-                                <button type="button" class="btn btn-custom" id="repostSaveButton"
-                                    disabled>Repost</button>
+                                <button type="submit" class="btn btn-custom" id="repostSaveBtn">Repost</button>
                             </div>
                         </div>
                     </form>

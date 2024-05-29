@@ -72,15 +72,16 @@ Route::name('user.')
                     Route::get('/details/{id}', 'show')->name('show');
                     Route::put('/update/{id}', 'update')->name('update');
 
-                    Route::get('/scheduled', 'scheduled')->name('scheduled');
-                    Route::get('/scheduled/response', 'scheduledPosts')->name('scheduled.all');
+                    Route::get('/create', 'create')->name('create');
+                    Route::post('/', 'store')->name('store');
+                    Route::post('/new', 'newStore')->name('new.store');
 
                     Route::get('/draft', 'draft')->name('draft');
                     Route::post('/draft', 'draftStore')->name('draft.store');
                     Route::post('/draft/new', 'draftNewStore')->name('draft.new.store');
 
-                    Route::get('/create', 'create')->name('create');
-                    Route::post('/', 'store')->name('store');
+                    Route::get('/scheduled', 'scheduled')->name('scheduled');
+                    Route::get('/scheduled/response', 'scheduledPosts')->name('scheduled.all');
                 });
 
             /**

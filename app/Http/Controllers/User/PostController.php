@@ -219,41 +219,41 @@ class PostController extends Controller
             if ($request->has('on_instagram')) $data->on_instagram = 1;
             if ($request->has('on_linkedin')) $data->on_linkedin = 1;
 
-            if ($request->schedule_date == null && $request->schedule_time == null) {
-                // if ($request->has('on_facebook')) {
-                //     if ($request->hasFile('media')) {
-                //         if (str_starts_with($mediaType, 'image/')) {
-                //             $post = $this->facebookService->postImage($mediaPath, $request->title);
-                //         } elseif (str_starts_with($mediaType, 'video/')) {
-                //             $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
-                //         } else {
-                //             throw new Exception('Invalid file type.');
-                //         }
-                //     } else {
-                //         $post = $this->facebookService->postText($request->title);
-                //     }
-                // }
+            if ($request->schedule_date != null && $request->schedule_time != null) {
+                $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
+            } else {
+                if ($request->has('on_facebook')) {
+                    if ($request->hasFile('media')) {
+                        if ($media_type == 'image') {
+                            $post = $this->facebookService->postImage($mediaPath, $request->title);
+                        } elseif ($media_type == 'video') {
+                            $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
+                        } else {
+                            throw new Exception('Invalid file type.');
+                        }
+                    } else {
+                        $post = $this->facebookService->postText($request->title);
+                    }
+                }
 
-                // if ($request->has('on_instagram')) {
-                // }
+                if ($request->has('on_instagram')) {
+                }
 
-                // if ($request->has('on_linkedin')) {
-                //     if ($request->hasFile('media')) {
-                //         if ($media_type == 'image') {
-                //             $post = $this->linkedinService->postImage($mediaPath, $request->title);
-                //         } elseif ($media_type == 'video') {
-                //             $post = $this->linkedinService->postVideo($mediaPath, $request->title);
-                //         } else {
-                //             throw new Exception('Invalid file type.');
-                //         }
-                //     } else {
-                //         $post = $this->linkedinService->postText($request->title);
-                //     }
-                // }
+                if ($request->has('on_linkedin')) {
+                    if ($request->hasFile('media')) {
+                        if ($media_type == 'image') {
+                            $post = $this->linkedinService->postImage($mediaPath, $request->title);
+                        } elseif ($media_type == 'video') {
+                            $post = $this->linkedinService->postVideo($mediaPath, $request->title);
+                        } else {
+                            throw new Exception('Invalid file type.');
+                        }
+                    } else {
+                        $post = $this->linkedinService->postText($request->title);
+                    }
+                }
 
                 $data->posted = 1;
-            } else {
-                $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
             }
 
             $data->save();
@@ -306,9 +306,9 @@ class PostController extends Controller
             );
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
-
+            
             if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
-
+            
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
             $data->title = $request->title;
@@ -357,14 +357,14 @@ class PostController extends Controller
                 if ($request->has('on_facebook')) {
                     if ($mediaPath != null) {
                         if (str_starts_with($mediaType, 'image/')) {
-                            $post = $this->facebookService->postImage($mediaPath, $request->title);
+                            // $post = $this->facebookService->postImage($mediaPath, $request->title);
                         } elseif (str_starts_with($mediaType, 'video/')) {
-                            $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
+                            // $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
                         } else {
                             throw new Exception('Invalid file type.');
                         }
                     } else {
-                        $post = $this->facebookService->postText($request->title);
+                        // $post = $this->facebookService->postText($request->title);
                     }
                 }
 
@@ -372,14 +372,14 @@ class PostController extends Controller
 
                     if ($mediaPath != null) {
                         if ($media_type == 'image') {
-                            $post = $this->linkedinService->postImage($mediaPath, $request->title);
+                            // $post = $this->linkedinService->postImage($mediaPath, $request->title);
                         } elseif ($media_type == 'video') {
-                            $post = $this->linkedinService->postVideo($mediaPath, $request->title);
+                            // $post = $this->linkedinService->postVideo($mediaPath, $request->title);
                         } else {
                             throw new Exception('Invalid file type.');
                         }
                     } else {
-                        $post = $this->linkedinService->postText($request->title);
+                        // $post = $this->linkedinService->postText($request->title);
                     }
                 }
 

@@ -211,12 +211,12 @@
 
                 fetch(apiUrl)
                     .then(response => response.json())
-                    .then(data => {
+                    .then(response => {
                         html = `
-                        <p><strong>Title:</strong> ${data.title}</p>
-                        <p><strong>Description:</strong> ${data.description}</p>
-                        <p><strong>Media:</strong> <img src="${assetUrl}${data.media}" class="w-100" style="max-width: 200px;" /></p>
-                        <p><strong>Media Type:</strong> ${data.media_type}</p>
+                        <p><strong>Title:</strong> ${response.data.title}</p>
+                        <p><strong>Description:</strong> ${response.data.description}</p>
+                        <p><strong>Media:</strong> <img src="${assetUrl}${response.data.media}" class="w-100" style="max-width: 200px;" /></p>
+                        <p><strong>Media Type:</strong> ${response.data.media_type}</p>
                     `;
                         document.getElementById('modalBody').innerHTML = html;
                         var myModal = new bootstrap.Modal(document.getElementById('scheduleModal'));
@@ -237,12 +237,10 @@
                         button.innerHTML = '+';
                         button.className = 'schedule-button';
                         button.addEventListener('click', function() {
-                            document.getElementById('modalBody').innerHTML = `
-                            <p>Schedule post for ${cellDate.toDateString()}</p>
-                        `;
-                            var myModal = new bootstrap.Modal(document.getElementById(
-                                'scheduleModal'));
-                            myModal.show();
+                            $("#schedulePostModal").modal("show");
+                            $("#postDate").val(cellDate.toISOString().split('T')[0]);
+
+                            $("#schedulePostModal").modal("show");
                         });
 
                         cell.appendChild(button);
@@ -253,10 +251,34 @@
             // Close modal using JavaScript
             document.querySelectorAll('.close, .btn-secondary').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    var modal = bootstrap.Modal.getInstance(document.getElementById(
-                        'scheduleModal'));
-                    modal.hide();
+                    $("#schedulePostModal").modal("hide");
                 });
+            });
+        });
+
+
+        // Schedule Form
+        $("#schedulePostForm").submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: `{{ route('user.post.store') }}`,
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    $("#scheduleSaveBtn").attr('disabled', 'true');
+                },
+                success: function(response) {
+                    if (response.status == 200) {
+                        $("#schedulePostModal").modal('hide');
+                        toastr.success("Post scheduled successfully");
+                    } else {
+                        toastr.error(response.error);
+                    }
+
+                    $("#scheduleSaveBtn").removeAttr('disabled');
+                }
             });
         });
     </script>
@@ -268,20 +290,72 @@
 
         <div id="calendar"></div>
 
-        <!-- Modal -->
-        <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
+        {{-- Schedule Modal --}}
+        <div class="modal fade" id="schedulePostModal" tabindex="-1" aria-labelledby="schedulePostModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="scheduleModalLabel">Schedule Post</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title" id="schedulePostModalLabel">Schedule Post</h5>
+                        <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <div id="modalBody">Schedule post</div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                    <form id="schedulePostForm" enctype="multipart/form-data" method="POST">
+                        @method('POST')
+                        @csrf
+                        <input type="hidden" name="post_id" id="postID">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
+                                    name="title" placeholder="Enter your title here" required />
+                            </div>
+                            <div class="textarea-wrapper mb-3">
+                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
+                                    placeholder="Enter your post description"></textarea>
+                            </div>
+                            <div class="mb-3 date-time-inputs">
+                                <input type="date" class="form-control mb-3" id="postDate" name="schedule_date"
+                                    required>
+                                <input type="time" class="form-control" id="postTime" name="schedule_time" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="postMedia" class="form-label">Media</label>
+                                <input type="file" class="form-control" id="postMedia" name="media" accept="image/*">
+                            </div>
+                            <div class="mb-3">
+                                <label>Platforms</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
+                                        id="postFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
+                                    <label class="form-check-label" for="postFacebook">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline mb-3">
+                                    <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
+                                        id="postInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
+                                    <label class="form-check-label" for="postInstagram">
+                                        <i class="fab fa-instagram"></i>
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" name="on_linkedin" value="1"
+                                        id="postLinkedin" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
+                                    <label class="form-check-label" for="postLinkedin">
+                                        <i class="fab fa-linkedin-in"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div>
+                                <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-custom" id="scheduleSaveBtn">Schedule</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

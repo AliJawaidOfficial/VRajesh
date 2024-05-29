@@ -165,6 +165,18 @@
             background-image: linear-gradient(90deg, #d67f45 0%, #d89e33 100%) !important;
             color: #fff;
         }
+
+        .linkedin-post-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .linkedin-post-footer>div img {
+            width: 25px;
+        }
     </style>
 @endsection
 
@@ -509,6 +521,33 @@
                                 <span class="like-count">21</span>
                             </div>
                             <div>1 Repost</div>
+                        </div>
+                        <div class="linkedin-post-footer">
+
+                            <div class="">
+                                <img
+                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAA10lEQVR4nO2UrwrCUBSHP1DEbrL5CiaTD6DFImgSDAafQlbE6Eus+ARWq2VdTDoQuwZRvDI44eK/3bkdWPDAYXfb7/d9S4OcTh/wgYIGvAdcAQOMNOEGmGvBT3IdZwXvWvAJsJFzPWv4DKgAd+AMFNPCOxbck2dtuV+l/3bYP8GRs4nZqNeyQXEFe5YO+Wh3vwpc5qX3CWTyKGhIJ9QS+NKZagiqwAW4ATUNgSf5hSvIJBCUgIPkmxqCgWSDdy+zEKwlO/wmSLtHoJxEsJV1gYfyI/wPieYBtbOZBWuxK9EAAAAASUVORK5CYII=">
+                                like
+                            </div>
+
+                            <div class="">
+                                <img
+                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAADCklEQVR4nO2Zy29NURSHP7T1KAlK4jXy+gMoOmBAQlASERETjwEDaaJmjYaYlMYIKTERvZp0RBOphBkRA2aUjqoGQq4WbSQqVZPKTtaVlZVze88+9j1Hk/sle3Jz1mOfs/dav70vVKhQIQQzgQagFegB+oFR4LeMUfntPnAO2CI2mbMKaAc+AZOe4yNwGViZReJ1wC1gIkHidvwCbgKL00r+CPAtIpE8cBs4CmyQSVbLWAJsBI7JM/kI+6/A4XImXiVv3QZ+AuwFZnn4cs82Ak8j/N2QWEGZCzw0gQaAnQF87wbeGd+9EjMIVRHJdwLzQgUAaoGuiEkE+RJ22ZynfFwwsTpCbNi0ki82iUMkpM5Umxzp0aXifgEW/evSGZB1mha1ZmN3JOmwukntIn32mGa3wse4XRm7Wp0Vz1Qel3yajNY2ruFkxT6Vx4e4ArDByIPgXdGDKmBI5bM5jlGrMnC6pRhOSY4HEHPjJZZHp3q2Jc4EepSBE2ZRzAB+BEh+UobzVYzj6rl7cSbQrwycqixGW8Av0DZFnHr17Js4ExhRBq6ZZc1SI7lLout/Ddkz2/SDkuhlMYdpOIHPymAZ03AJ9SkDdwwMXUZLlU3LJt9NrJXgyTKV0anKpuWEbxltVgZ3ylBGS5VNS863ka1XBiNyq5CllBhW+bieEIu3yugA2bE/iZhznFWGL8mO5yoPn2XHAuC7MnZ3mWnTaPaN14HGMagcbCNd5gPvVfzrvg7WmpKXtqToVvGHkxzqm8wFU5pcNGX3YBInvcqBm0xWyV9L4qTGdNk1pLPmu03yDzwvjP+yXTlxdzNRuOa2NVB1ajQbtpB84svdK+aqu8Bq4LQ411/ohTS7as8O65qUrvO64iR68wVeKWdX5VZsIIbGGZED+ClRscvlPFEjf3DUizDLGXkwKWMo6Ya1/IwpygZNs0s6xuWtLyQQj4sEGpPq1CR9otCxm412ijuctmmTLxUU5/CRJPxa9sSOGM1sHXAGuCt2eXm7E7K8+kTPt8gh5b/4m7VCBaY5fwDlENrwg3MbPQAAAABJRU5ErkJggg==">
+                                Comment
+                            </div>
+
+                            <div class="">
+                                <img
+                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAqElEQVR4nO2UQQqDMBBF38obKO1desBcqi1UChVd1UVP4DksgQQ0NZMMzTIPBgTHPCckHyoFeAJrRi2AAZrYQh0wubLPnj5T4MvEFp83TXMgyeGymWRHC7wP/uQDnNHhv90xCOOOJQRXQXArIVA1JKiCJHWLDrkLx9xegb+P6SQIXiUErRA1p7B5cS9tcGnocsPSKKO5DySjq2gSN07iJ1kT9VBOWuGHLwJ0i8pnPs77AAAAAElFTkSuQmCC">
+                                Repost
+                            </div>
+
+                            <div class="">
+                                <img
+                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABMUlEQVR4nO3UzypFURTH8Y90BwZKKQM8gDKRl2BoYsyMmRE3KblznoIXkIxkZGJigiFFYSYKUVxHp/bN6Xb+3XvPRPnWGuy1d7/fOWvttfnnlyns4AaHKmIMqzhHlIjbXkQHMI8DfLYJt2K7U9F+zGAXrymC3/hIrONylWISW6GuUUa8Yz+YxOvLItFRrOAsR7QV91jCWyIX9ySVWRyhWUI4wimmcZfINUPjU3kqKRyFXgwFk2Q+/sBMNksIN1FHXzBp318oqn8jR/wFc+FcPWU/7sNgkUGWyXW4Ua1efaWc2SsjnmZygpGQn8Bzxh/Gc9IRi1hHLayHcZUh/hCGsWtqOM7pT/zI9cRGwe0q/TRksZwjfqEiGhkGa1UZpJnEgzeuYhpln4Ze2MRjN3f/7/EDz12xqRgiakMAAAAASUVORK5CYII=">
+                                Send
+                            </div>
+
                         </div>
                     </div>
 

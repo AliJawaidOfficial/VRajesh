@@ -119,11 +119,11 @@
 {{-- Content --}}
 @section('content')
     <section class="main-content-wrapper d-flex flex-column">
-        <div class="h3 p-3 mb-4 bg-white text-center rounded-8">
+        <div class="h3 p-3 mb-4 bg-white text-center rounded-6">
             <h3 class="mb-0">Published Posts</h3>
         </div>
 
-        <form id="filterForm" class="filter-section d-flex align-items-center justify-content-end bg-white rounded-8">
+        <form id="filterForm" class="filter-section d-flex align-items-center justify-content-end bg-white rounded-6">
             <div class="p-3">
                 <label for="filterMonth">Filter by Month: </label>
                 <select id="filterMonth" name="month" onchange="this.form.submit()">
@@ -136,7 +136,7 @@
             </div>
         </form>
 
-        <div class="table-wrapper bg-white rounded-8">
+        <div class="table-wrapper bg-white rounded-6">
             <table>
                 <thead>
                     <tr>
@@ -149,7 +149,7 @@
                 <tbody>
                     @if (count($dataSet) == 0)
                         <tr>
-                            <td colspan="3" class="text-center">Nothing to show you</td>
+                            <td colspan="4" class="text-center">Nothing to show you</td>
                         </tr>
                     @endif
                     @foreach ($dataSet as $post)
@@ -191,11 +191,11 @@
                     </div>
                     <div class="row align-items-stretch mt-2">
                         <div class="col-md-8">
-                            <div class="h3 p-3 mb-4 bg-white text-center rounded-8">
+                            <div class="h3 p-3 mb-4 bg-white text-center rounded-6">
                                 <h3>Create Post</h3>
                             </div>
 
-                            <form id="postForm" class="p-4 bg-white rounded-8" method="POST"
+                            <form id="postForm" class="p-4 bg-white rounded-6" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
                                 <input type="date" name="schedule_date" id="post_schedule_date" class="d-none" />
@@ -259,10 +259,10 @@
                         </div>
 
                         <div class="col-md-4">
-                            <div class="h3 p-3 mb-4 bg-white text-center rounded-8">
+                            <div class="h3 p-3 mb-4 bg-white text-center rounded-6">
                                 <h3>Post Preview</h3>
                             </div>
-                            <div class="w-100 bg-white p-4 rounded-8 overflow-scroll d-flex flex-column gap-3"
+                            <div class="w-100 bg-white p-4 rounded-6 overflow-scroll d-flex flex-column gap-3"
                                 id="postPreview">
                                 {{-- We will list facebook, instagram and linkedin post will look like --}}
                                 <div class="card rounded" id="facebook-post" style="display: none">

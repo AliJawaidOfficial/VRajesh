@@ -9,7 +9,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         #calendar {
-            max-width: 100%;
+            max-width: 900px;
             background-color: transparent;
             border-radius: 8px;
             padding: 20px;
@@ -41,6 +41,7 @@
             border-top-right-radius: 8px;
             border-top-left-radius: 8px;
             border-bottom: 0px solid #e0e0e0 !important;
+            width: 100% !important;
         }
 
         .fc-col-header th {
@@ -57,10 +58,15 @@
             border-bottom-left-radius: 8px;
             border: 1px solid #e0e0e0 !important;
             position: relative;
+            padding: 5px;
+        }
+
+        #calendar>.fc-view-harness-active>.fc-dayGridMonth-view>table>thead>tr.fc-scrollgrid-section-header>th>.fc-scroller-harness>.fc-scroller {
+            overflow: hidden !important;
         }
 
         #calendar tbody table td {
-            padding: 20px;
+            padding: 5px;
         }
 
         #calendar tbody table td:hover {
@@ -120,6 +126,16 @@
         .schedule-button:hover {
             background-color: #0056b3;
         }
+
+        .event-icons {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .event-icons i {
+            font-size: 16px;
+            margin-right: 2px;
+        }
     </style>
 @endsection
 
@@ -168,9 +184,15 @@
                     .then(data => {
                         const events = data.map((post, index) => {
                             const eventDate = new Date(post.scheduled_at);
+                            let icons = '';
+
+                            if (post.on_facebook) icons += '<i class="fab fa-facebook-f"></i>';
+                            if (post.on_instagram) icons += '<i class="fab fa-instagram"></i>';
+                            if (post.on_linkedin) icons += '<i class="fab fa-linkedin-in"></i>';
+
                             return {
                                 id: post.id,
-                                title: post.title,
+                                title: `${icons} ${post.title}`,
                                 start: eventDate.toISOString().split('T')[0],
                                 description: post.description
                             };

@@ -28,30 +28,51 @@
         }
 
         #myKanban {
-            max-height: 600px; /* Adjust as needed */
-            overflow-y: auto;
-            overflow-x: auto; /* Horizontal scrolling */
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: red blue; /* Firefox */
+            height: calc(100vh - (20px + 75px + 80px));
+            /* max-height: 600px; Adjust as needed */
+            overflow-x: auto;
+            /* Horizontal scrolling */
+            scrollbar-width: thin;
+            /* Firefox */
+            scrollbar-color: red blue;
+            /* Firefox */
         }
 
         /* Scrollbar styling for WebKit browsers (Chrome, Safari) */
         #myKanban::-webkit-scrollbar {
-            height: 12px; /* Horizontal scrollbar height */
+            height: 12px;
+            /* Horizontal scrollbar height */
         }
 
         #myKanban::-webkit-scrollbar-thumb {
-            background: red; /* Scrollbar thumb color */
-            border-radius: 10px; /* Scrollbar thumb rounded corners */
+            background: red;
+            /* Scrollbar thumb color */
+            border-radius: 10px;
+            /* Scrollbar thumb rounded corners */
         }
 
         #myKanban::-webkit-scrollbar-track {
-            background: blue; /* Scrollbar track color */
+            background: blue;
+            /* Scrollbar track color */
+        }
+
+        .kanban-container {
+            height: 100%;
+        }
+
+        .kanban-container>div:nth-child(1) {
+            margin-left: 0px !important;
+        }
+
+        .kanban-container>div:last-child {
+            margin-right: 0px !important;
         }
 
         .kanban-board {
             background-color: #fff;
-            max-height: 500px; /* Adjust as needed */
+            border-radius: 3px;
+            max-height: 100%;
+            /* Adjust as needed */
             overflow-y: auto;
         }
 
@@ -59,6 +80,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-direction: column;
         }
 
         .delete-board-btn,
@@ -89,34 +111,43 @@
 
     <script src="https://cdn.jsdelivr.net/npm/jkanban@1.3.1/dist/jkanban.min.js"></script>
     <script>
-        var kanban = new jKanban({
-            element: '#myKanban',
-            gutter: '15px',
-            widthBoard: '250px',
-            responsivePercentage: false,
-            dragItems: true,
-            boards: [],
-            dragEl: function(el, source) {
-                console.log('START DRAG: ' + el.dataset.eid);
-            },
-            dragendEl: function(el) {
-                console.log('END DRAG: ' + el.dataset.eid);
-                updateAllBoardCounts();
-            },
-            dropEl: function(el, target, source, sibling) {
-                console.log('DROPPED: ' + el.dataset.eid);
-                updateAllBoardCounts();
-            }
-        });
+        var kanban;
+        var boardsData = []; // Store the boards data
 
-        // Function to update the item count on a board
+        function generateRandomId() {
+            return 'id-' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function initializeKanban() {
+            kanban = new jKanban({
+                element: '#myKanban',
+                gutter: '15px',
+                widthBoard: '250px',
+                responsivePercentage: false,
+                dragItems: true,
+                boards: boardsData,
+                dragEl: function(el, source) {
+                    console.log('START DRAG: ' + el.dataset.eid);
+                },
+                dragendEl: function(el) {
+                    console.log('END DRAG: ' + el.dataset.eid);
+                    updateAllBoardCounts();
+                },
+                dropEl: function(el, target, source, sibling) {
+                    console.log('DROPPED: ' + el.dataset.eid);
+                    updateAllBoardCounts();
+                }
+            });
+            updateAllBoardCounts();
+        }
+
         function updateBoardCount(boardId) {
             var boardElement = document.querySelector(`[data-id="${boardId}"]`);
             if (boardElement) {
                 var itemCount = boardElement.querySelectorAll('.kanban-item').length;
-                var countElement = document.getElementById('count-' + boardId);
+                var countElement = boardElement.querySelector(`#count-${boardId}`);
                 if (countElement) {
-                    countElement.innerText = '(' + itemCount + ')';
+                    countElement.innerText = `(${itemCount})`;
                 }
             }
         }
@@ -127,78 +158,160 @@
             });
         }
 
-        // Function to add a new board
         function addNewBoard() {
             var newBoardTitle = document.getElementById('newBoardTitle').value;
             if (newBoardTitle) {
-                var newBoardId = 'board' + (kanban.options.boards.length + 1);
-                kanban.addBoards([{
+                var newBoardId = generateRandomId();
+                var newBoard = {
                     id: newBoardId,
-                    title: newBoardTitle + ' <span id="count-' + newBoardId +
-                        '">(0)</span> <button class="delete-board-btn" onclick="deleteBoard(\'' + newBoardId +
-                        '\')">Delete</button><input type="text" class="add-item-input" id="input-' +
-                        newBoardId +
-                        '" placeholder="New Item Title"><button class="add-item-btn" onclick="addNewItem(\'' +
-                        newBoardId + '\')">Add Item</button>',
+                    title: `
+                    <div class="d-flex">
+                        <span>${newBoardTitle}</span> 
+                        <span id="count-${newBoardId}">(0)</span>
+                        <button class="delete-board-btn" onclick="deleteBoard('${newBoardId}')">Delete</button>
+                        <button class="add-item-btn" data-board-id="${newBoardId}" data-bs-toggle="modal" data-bs-target="#updateListModal">Add Item</button>
+                    </div>
+                    `,
                     item: []
-                }]);
+                };
+                boardsData.push(newBoard);
                 document.getElementById('newBoardTitle').value = ''; // Clear the input field
-                updateBoardCount(newBoardId); // Initialize the item count
+                reRenderKanban(); // Re-render the Kanban board
             } else {
                 alert('Please enter a board title');
             }
         }
 
-        // Function to delete a board
         function deleteBoard(boardId) {
-            kanban.removeBoard(boardId);
+            boardsData = boardsData.filter(board => board.id !== boardId);
+            reRenderKanban(); // Re-render the Kanban board
         }
 
-        // Function to add a new item
         function addNewItem(boardId) {
             var inputId = 'input-' + boardId;
             var newItemTitle = document.getElementById(inputId).value;
             if (newItemTitle) {
-                kanban.addElement(boardId, {
-                    title: newItemTitle + ' <button class="delete-item-btn" onclick="deleteItem(this, \'' +
-                        boardId + '\')">Delete</button>'
-                });
-                document.getElementById(inputId).value = ''; // Clear the input field
-                updateBoardCount(boardId); // Update the item count
+                var board = boardsData.find(board => board.id === boardId);
+                if (board) {
+                    var newItemId = generateRandomId();
+                    board.item.push({
+                        id: newItemId,
+                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')">Delete</button>`
+                    });
+                    document.getElementById(inputId).value = ''; // Clear the input field
+                    kanban.addElement(boardId, {
+                        id: newItemId,
+                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')">Delete</button>`
+                    });
+                    updateBoardCount(boardId); // Update the board count
+                }
             } else {
                 alert('Please enter an item title');
             }
         }
 
-        // Function to delete an item
-        function deleteItem(button, boardId) {
-            var itemElement = button.parentElement;
-            var boardElement = document.querySelector(`[data-id="${boardId}"] .kanban-drag`);
-            boardElement.removeChild(itemElement);
-            updateBoardCount(boardId); // Update the item count
+        function deleteItem(itemId, boardId) {
+            var board = boardsData.find(board => board.id === boardId);
+            if (board) {
+                var itemIndex = board.item.findIndex(item => item.id === itemId);
+                if (itemIndex > -1) {
+                    board.item.splice(itemIndex, 1);
+                    kanban.removeElement(itemId);
+                    updateBoardCount(boardId); // Update the board count
+                }
+            }
         }
 
-        // Add event listeners to the button
+        function reRenderKanban() {
+            // Destroy the current instance by clearing the container
+            var kanbanContainer = document.getElementById('myKanban');
+            kanbanContainer.innerHTML = '';
+
+            // Reinitialize with updated data
+            initializeKanban();
+        }
+
+        // Set the board ID in the modal when the "Add Item" button is clicked
+        document.addEventListener('click', function(event) {
+            if (event.target.matches('.add-item-btn')) {
+                var boardId = event.target.getAttribute('data-board-id');
+                document.querySelector('#updateListModal').setAttribute('data-board-id', boardId);
+            }
+        });
+
+        // Add event listener to the button
         document.getElementById('addBoardBtn').addEventListener('click', addNewBoard);
 
-        // Initialize board counts
-        updateAllBoardCounts();
+        // Initialize Kanban for the first time
+        initializeKanban();
+
+        // Add event listener to the modal form
+        document.getElementById('addNewItemForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get the new item title and board ID from the form and modal attributes
+            var newItemTitle = document.getElementById('newItemTitle').value;
+            var boardId = document.querySelector('#updateListModal').getAttribute('data-board-id');
+
+            if (newItemTitle) {
+                // Find the board using the board ID
+                var board = boardsData.find(board => board.id === boardId);
+                if (board) {
+                    var newItemId = generateRandomId();
+                    // Add the new item to the board's item list
+                    board.item.push({
+                        id: newItemId,
+                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')">Delete</button>`
+                    });
+                    // Clear the input field and close the modal
+                    document.getElementById('newItemTitle').value = '';
+                    $('#updateListModal').modal('hide');
+                    // Add the new item to the Kanban board
+                    kanban.addElement(boardId, {
+                        id: newItemId,
+                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')">Delete</button>`
+                    });
+                    updateBoardCount(boardId); // Update the board count
+                }
+            } else {
+                alert('Please enter an item title');
+            }
+        });
     </script>
 @endsection
 
 {{-- Content --}}
 @section('content')
     <section class="main-content-wrapper d-flex flex-column">
-        <div class="h3 p-3 mb-4 bg-white text-center rounded-6">
-            <h3 class="mb-0">Published Posts</h3>
+        <div id="boardForm">
+            <input type="text" id="newBoardTitle" placeholder="New Board Title">
+            <button id="addBoardBtn">Add Board</button>
         </div>
-
-        <div>
-            <div id="boardForm">
-                <input type="text" id="newBoardTitle" placeholder="New Board Title">
-                <button id="addBoardBtn">Add Board</button>
-            </div>
-            <div id="myKanban"></div>
-        </div>
+        <div id="myKanban"></div>
     </section>
+
+    <!-- Modal -->
+    <div class="modal fade" id="updateListModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Add New Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addNewItemForm">
+                        <div class="mb-3">
+                            <label for="newItemTitle" class="form-label">New Item Title</label>
+                            <input type="text" class="form-control" id="newItemTitle" placeholder="Enter item title">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Item</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

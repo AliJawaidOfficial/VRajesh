@@ -1,4 +1,4 @@
-<div class="pagination bg-white rounded-8">
+<div class="pagination bg-white rounded-6">
     <ul class="pagination">
         {{-- Previous Page Link --}}
         @if ($paginator->onFirstPage())

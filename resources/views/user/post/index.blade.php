@@ -485,7 +485,7 @@
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                             <div>
-                                <button type="submit" class="btn btn-custom" id="draftSaveBtn">Draft Post</button>
+                                <button type="submit" class="btn btn-custom" id="draftSaveBtn">Save</button>
                             </div>
                         </div>
                     </form>

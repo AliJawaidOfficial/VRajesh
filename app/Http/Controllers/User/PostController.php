@@ -351,11 +351,13 @@ class PostController extends Controller
 
                     $mediaSize = filesize(public_path($onlyMediaPath));
                     $mediaPath = public_path('posts') . '/' . $mediaName;
+                    
+                    $media_type = $oldPost->media_type;
                     $data->media = $onlyMediaPath;
-                    $data->media_type = $oldPost->media_type;
+                    $data->media_type = $media_type;
                 }
             }
-
+            
             if ($request->has('on_facebook')) $data->on_facebook = 1;
             if ($request->has('on_instagram')) $data->on_instagram = 1;
             if ($request->has('on_linkedin')) $data->on_linkedin = 1;
@@ -365,9 +367,9 @@ class PostController extends Controller
             } else {
                 if ($request->has('on_facebook')) {
                     if ($mediaPath != null) {
-                        if (str_starts_with($mediaType, 'image/')) {
+                        if ($media_type == 'image') {
                             $post = $this->facebookService->postImage($mediaPath, $request->title);
-                        } elseif (str_starts_with($mediaType, 'video/')) {
+                        } elseif ($media_type == 'video') {
                             $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
                         } else {
                             throw new Exception('Invalid file type.');
@@ -382,6 +384,7 @@ class PostController extends Controller
                     if ($mediaPath != null) {
                         if ($media_type == 'image') {
                             $post = $this->linkedinService->postImage($mediaPath, $request->title);
+                
                         } elseif ($media_type == 'video') {
                             $post = $this->linkedinService->postVideo($mediaPath, $request->title);
                         } else {

@@ -200,7 +200,7 @@
                         $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
                         $('#postDetail').modal('show');
                     } else {
-                        toastr.error(response.message);
+                        toastr.error(response.error);
                     }
                 }
             });
@@ -244,9 +244,9 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#draftPostModal").modal('hide');
-                        toastr.success(response.message);
+                        toastr.success("Post saved as draft successfully");
                     } else {
-                        toastr.error(response.message);
+                        toastr.error(response.error);
                     }
 
                     $("#draftSaveBtn").removeAttr('disabled');
@@ -269,9 +269,9 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#schedulePostModal").modal('hide');
-                        toastr.success(response.message);
+                        toastr.success("Post scheduled successfully");
                     } else {
-                        toastr.error(response.message);
+                        toastr.error(response.error);
                     }
 
                     $("#scheduleSaveBtn").removeAttr('disabled');
@@ -294,9 +294,9 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#repostModal").modal('hide');
-                        toastr.success(response.message);
+                        toastr.success("Post reposted successfully");
                     } else {
-                        toastr.error(response.message);
+                        toastr.error(response.error);
                     }
 
                     $("#repostSaveBtn").removeAttr('disabled');

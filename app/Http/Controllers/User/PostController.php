@@ -109,7 +109,7 @@ class PostController extends Controller
 
             if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
 
-            $data = Post::find($request->post_id);
+            $data = Post::where('id', $request->post_id)->first();
             if (!$data) throw new Exception('Post not found.');
 
             $data->user_id = Auth::guard('web')->user()->id;
@@ -145,6 +145,11 @@ class PostController extends Controller
             $data->save();
 
             DB::commit();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Post updated successfully'
+            ]);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 500,
@@ -265,6 +270,7 @@ class PostController extends Controller
 
             return response()->json([
                 'status' => 200,
+                'message' => 'Posted successfully'
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -360,14 +366,14 @@ class PostController extends Controller
                 if ($request->has('on_facebook')) {
                     if ($mediaPath != null) {
                         if (str_starts_with($mediaType, 'image/')) {
-                            // $post = $this->facebookService->postImage($mediaPath, $request->title);
+                            $post = $this->facebookService->postImage($mediaPath, $request->title);
                         } elseif (str_starts_with($mediaType, 'video/')) {
-                            // $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
+                            $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
                         } else {
                             throw new Exception('Invalid file type.');
                         }
                     } else {
-                        // $post = $this->facebookService->postText($request->title);
+                        $post = $this->facebookService->postText($request->title);
                     }
                 }
 
@@ -375,14 +381,14 @@ class PostController extends Controller
 
                     if ($mediaPath != null) {
                         if ($media_type == 'image') {
-                            // $post = $this->linkedinService->postImage($mediaPath, $request->title);
+                            $post = $this->linkedinService->postImage($mediaPath, $request->title);
                         } elseif ($media_type == 'video') {
-                            // $post = $this->linkedinService->postVideo($mediaPath, $request->title);
+                            $post = $this->linkedinService->postVideo($mediaPath, $request->title);
                         } else {
                             throw new Exception('Invalid file type.');
                         }
                     } else {
-                        // $post = $this->linkedinService->postText($request->title);
+                        $post = $this->linkedinService->postText($request->title);
                     }
                 }
 

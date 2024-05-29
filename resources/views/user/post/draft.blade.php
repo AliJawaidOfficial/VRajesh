@@ -200,7 +200,7 @@
                         $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
                         $('#postDetail').modal('show');
                     } else {
-                        toastr.error(response.message);
+                        toastr.error(response.error);
                     }
                 }
             });
@@ -244,9 +244,9 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#draftPostModal").modal('hide');
-                        toastr.success(response.message);
+                        toastr.success("Post updated successfully");
                     } else {
-                        toastr.error(response.message);
+                        toastr.error(response.error);
                     }
 
                     $("#draftSaveBtn").removeAttr('disabled');
@@ -269,9 +269,9 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#schedulePostModal").modal('hide');
-                        toastr.success(response.message);
+                        toastr.success('Post scheduled successfully');
                     } else {
-                        toastr.error(response.message);
+                        toastr.error(response.error);
                     }
 
                     $("#scheduleSaveBtn").removeAttr('disabled');
@@ -294,9 +294,9 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#repostModal").modal('hide');
-                        toastr.success(response.message);
+                        toastr.success('Post reposted successfully');
                     } else {
-                        toastr.error(response.message);
+                        toastr.error(response.error);
                     }
 
                     $("#repostSaveBtn").removeAttr('disabled');
@@ -487,7 +487,7 @@
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             </div>
                             <div>
-                                <button type="submit" class="btn btn-custom" id="draftSaveBtn">Draft Post</button>
+                                <button type="submit" class="btn btn-custom" id="draftSaveBtn">Saves</button>
                             </div>
                         </div>
                     </form>

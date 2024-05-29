@@ -77,6 +77,7 @@ Route::name('user.')
 
                     Route::get('/draft', 'draft')->name('draft');
                     Route::post('/draft', 'draftStore')->name('draft.store');
+                    Route::post('/draft/new', 'draftNewStore')->name('draft.new.store');
 
                     Route::get('/create', 'create')->name('create');
                     Route::post('/', 'store')->name('store');

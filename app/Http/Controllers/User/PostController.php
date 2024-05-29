@@ -540,6 +540,98 @@ class PostController extends Controller
         }
     }
 
+    public function draftNewStore(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'post_id' => 'required|exists:posts,id',
+                    'title' => 'required',
+                    'description' => 'nullable|required_without:media',
+                    'media' => 'nullable',
+                    'on_facebook' => 'nullable|boolean',
+                    'on_instagram' => 'nullable|boolean',
+                    'on_linkedin' => 'nullable|boolean',
+                    'schedule_date' => 'nullable|date',
+                    'schedule_time' => 'nullable|date_format:H:i',
+                ],
+                [
+                    'title.required' => 'Title is required',
+
+                    'description.required' => 'Description is required',
+                    'description.required_without' => 'Description is required',
+
+                    'media.required' => 'Media is required',
+                    'media.required_if' => 'Media is required',
+                ]
+            );
+
+            if ($validator->fails()) throw new Exception($validator->errors()->first());
+
+            if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
+
+            $data = new Post;
+            $data->user_id = Auth::guard('web')->user()->id;
+            $data->title = $request->title;
+            $data->description = $request->description;
+
+            $mediaPath = null;
+            $mediaType = null;
+            $media_type = null;
+
+            if ($request->hasFile('media')) {
+                $media = $request->file('media');
+                $mediaName = time() . '.' . $media->getClientOriginalExtension();
+                $mediaType = $media->getMimeType();
+                $mediaSize = $media->getSize();
+                $media->move(public_path('posts'), $mediaName);
+                $onlyMediaPath = 'posts/' . $mediaName;
+                $mediaPath = public_path('posts') . '/' . $mediaName;
+
+                if (str_starts_with($mediaType, 'image/')) $media_type = 'image';
+                if (str_starts_with($mediaType, 'video/')) $media_type = 'video';
+
+                $data->media = $onlyMediaPath;
+                $data->media_type = $media_type;
+            } else {
+                $oldPost = Post::where('id', $request->post_id)->first();
+
+                if ($oldPost->media != null) {
+                    $mediaName = time() . '.' . pathinfo($oldPost->media, PATHINFO_EXTENSION);
+                    $onlyMediaPath = 'posts/' . $mediaName;
+                    copy(public_path($oldPost->media), public_path('posts') . '/' . $mediaName);
+
+                    $mediaSize = filesize(public_path($onlyMediaPath));
+                    $mediaPath = public_path('posts') . '/' . $mediaName;
+                    $data->media = $onlyMediaPath;
+                    $data->media_type = $oldPost->media_type;
+                }
+            }
+
+            $data->draft = 1;
+            if ($request->has('on_facebook')) $data->on_facebook = 1;
+            if ($request->has('on_instagram')) $data->on_instagram = 1;
+            if ($request->has('on_linkedin')) $data->on_linkedin = 1;
+
+            $data->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 200,
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 500,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
     public function newDraftStore(String $id, Request $request)
     {
         try {

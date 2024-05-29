@@ -159,117 +159,116 @@
 @endsection
 
 {{-- Vendor Scripts --}}
-<script>
-    // Function to show the post detail in a modal
-    function showPostDetail(id) {
-        $.ajax({
-            type: "GET",
-            url: `{{ route('user.post.index') }}/details/${id}`,
-            dataType: "json",
-            success: function(response) {
-                if (response.status == 200) {
-                    let mediaHtml = '';
-                    let asset = `{{ asset('') }}`;
-                    let mediaType = response.data.media_type;
-                    let mediaContent = response.data.media;
+@section('scripts')
+    <script>
+        // Function to show the post detail in a modal
+        function showPostDetail(id) {
+            $.ajax({
+                type: "GET",
+                url: `{{ route('user.post.index') }}/details/${id}`,
+                dataType: "json",
+                success: function(response) {
+                    if (response.status == 200) {
+                        let mediaHtml = '';
+                        let asset = `{{ asset('') }}`;
+                        let mediaType = response.data.media_type;
+                        let mediaContent = response.data.media;
 
-                    if (mediaType == 'image') {
-                        mediaHtml +=
-                            `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
-                    } else if (mediaType == 'video') {
-                        mediaHtml += `<video controls class="w-100 rounded mb-1">
+                        if (mediaType == 'image') {
+                            mediaHtml +=
+                                `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
+                        } else if (mediaType == 'video') {
+                            mediaHtml += `<video controls class="w-100 rounded mb-1">
                                 <source src="${asset}${mediaContent}" type="video/mp4">
                                 Your browser does not support the video tag.
                               </video>`;
+                        } else {
+                            mediaHtml +=
+                                `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                        }
+
+                        $("#facebook-post-detail").attr("checked", response.data.on_facebook ? true : false);
+                        $("#instagram-post-detail").attr("checked", response.data.on_instagram ? true : false);
+                        $("#linkedin-post-detail").attr("checked", response.data.on_linkedin ? true : false);
+
+                        $('#postDetail .media-preview').html(mediaHtml);
+                        $('#modalPostTitle').text(response.data.title);
+                        $('#modalPostDate').text(response.data.created_at);
+                        $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
+                        $('#postDetail').modal('show');
                     } else {
-                        mediaHtml +=
-                            `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                        toast.error(response.data.message);
                     }
-
-                    $("#facebook-post-detail").attr("checked", response.data.on_facebook ? true : false);
-                    $("#instagram-post-detail").attr("checked", response.data.on_instagram ? true : false);
-                    $("#linkedin-post-detail").attr("checked", response.data.on_linkedin ? true : false);
-
-                    $('#postDetail .media-preview').html(mediaHtml);
-                    $('#modalPostTitle').text(response.data.title);
-                    $('#modalPostDate').text(response.data.created_at);
-                    $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
-                    $('#postDetail').modal('show');
-                } else {
-                    toast.error(response.data.message);
                 }
-            }
-        });
-    }
+            });
+        }
 
-    // Function to transfer post data to the modal for editing, scheduling or reposting
-    function transferPostData(modalId) {
-        const title = $('#modalPostTitle').text();
-        const description = $('#modalPostDescription').html().replace(/<br>/g, '\n');
-
-
-        console.log($('#postDetail .platform-icons .fa-instagram'));
-
-        $('#' + modalId + ' #postTitle').val(title);
-        $('#' + modalId + ' #postDescription').val(description);
+        // Function to transfer post data to the modal for editing, scheduling or reposting
+        function transferPostData(modalId) {
+            const title = $('#modalPostTitle').text();
+            const description = $('#modalPostDescription').html().replace(/<br>/g, '\n');
 
 
+            console.log($('#postDetail .platform-icons .fa-instagram'));
 
-        $('#' + modalId + ' #PlatformFacebook').attr("checked", $("#facebook-post-detail").is(":checked"));
-        $('#' + modalId + ' #PlatformInstagram').attr("checked", $("#instagram-post-detail").is(":checked"));
-        $('#' + modalId + ' #PlatformLinkedIn').attr("checked", $("#linkedin-post-detail").is(":checked"));
+            $('#' + modalId + ' #postTitle').val(title);
+            $('#' + modalId + ' #postDescription').val(description);
+            $('#' + modalId + ' #PlatformFacebook').attr("checked", $("#facebook-post-detail").is(":checked"));
+            $('#' + modalId + ' #PlatformInstagram').attr("checked", $("#instagram-post-detail").is(":checked"));
+            $('#' + modalId + ' #PlatformLinkedIn').attr("checked", $("#linkedin-post-detail").is(":checked"));
 
 
 
 
-        $('#postDetail').modal('hide');
-        setTimeout(function() {
-            $('#' + modalId).modal('show');
-        }, 500);
-    }
+            $('#postDetail').modal('hide');
+            setTimeout(function() {
+                $('#' + modalId).modal('show');
+            }, 500);
+        }
 
 
-    $("#draftPostForm").submit(function(e) {
-        e.preventDefault();
-        $.ajax({
-            type: "POST",
-            url: `{{ route('user.post.draft.new.store') }}`,
-            data: new FormData(this),
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.status == 200) {
-                    let mediaHtml = '';
-                    let asset = `{{ asset('') }}`;
-                    let mediaType = response.data.media_type;
-                    let mediaContent = response.data.media;
+        $("#draftPostForm").submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: `{{ route('user.post.draft.new.store') }}`,
+                data: new FormData(this),
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.status == 200) {
+                        let mediaHtml = '';
+                        let asset = `{{ asset('') }}`;
+                        let mediaType = response.data.media_type;
+                        let mediaContent = response.data.media;
 
-                    if (mediaType == 'image') {
-                        mediaHtml +=
-                            `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
-                    } else if (mediaType == 'video') {
-                        mediaHtml += `<video controls class="w-100 rounded mb-1">
+                        if (mediaType == 'image') {
+                            mediaHtml +=
+                                `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
+                        } else if (mediaType == 'video') {
+                            mediaHtml += `<video controls class="w-100 rounded mb-1">
                                     <source src="${asset}${mediaContent}" type="video/mp4">
                                     Your browser does not support the video tag.
                                   </video>`;
-                    } else {
-                        mediaHtml +=
-                            `<p class="text-center text-muted my-auto">No image/video published</p>`;
-                    }
+                        } else {
+                            mediaHtml +=
+                                `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                        }
 
-                    $('#postDetail .media-preview').html(mediaHtml);
-                    $('#modalPostTitle').text(response.data.title);
-                    $('#modalPostDate').text(response.data.created_at);
-                    $('#modalPostDescription').html(response.data.description.replace(/\n/g,
-                        '<br>'));
-                    $('#postDetail').modal('show');
-                } else {
-                    toast.error(response.data.message);
+                        $('#postDetail .media-preview').html(mediaHtml);
+                        $('#modalPostTitle').text(response.data.title);
+                        $('#modalPostDate').text(response.data.created_at);
+                        $('#modalPostDescription').html(response.data.description.replace(/\n/g,
+                            '<br>'));
+                        $('#postDetail').modal('show');
+                    } else {
+                        toast.error(response.data.message);
+                    }
                 }
-            }
+            });
         });
-    });
-</script>
+    </script>
+@endsection
 
 
 {{-- Content --}}
@@ -353,7 +352,7 @@
                             <p class="text-center text-muted my-auto">No image/video published</p>
                             {{-- Placeholder for media preview --}}
                         </div>
-                        <div class="post-details ms-3 w-50"">
+                        <div class="post-details ms-3 w-50">
                             <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle"></span></h4>
                             <p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate"></span>
                             </p>

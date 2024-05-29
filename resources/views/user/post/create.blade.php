@@ -308,62 +308,68 @@
         // Schedule Form
         $("#scheduleForm").submit(function(e) {
             e.preventDefault();
-            $("#post_schedule_date").val($("#scheduleDate").val());
-            $("#post_schedule_time").val($("#scheduleTime").val());
-            $("#scheduleModal").modal("hide");
-            $("#postForm").submit();
+            if ($(this).valid()) {
+                $("#post_schedule_date").val($("#scheduleDate").val());
+                $("#post_schedule_time").val($("#scheduleTime").val());
+                $("#scheduleModal").modal("hide");
+                $("#postForm").submit();
+            }
         });
 
         // Post Form
         $("#postForm").submit(function(e) {
             e.preventDefault();
-            $.ajax({
-                type: "POST",
-                url: "{{ route('user.post.store') }}",
-                data: new FormData(this),
-                processData: false,
-                contentType: false,
-                beforeSend: function() {
-                    $("#exampleModal").modal("show");
-                },
-                success: function(response) {
-                    if (response.status == 200) {
-                        if ($("#post_schedule_date").val() != null) {
-                            toastr.success("Post scheduled successfully");
+            if ($(this).valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('user.post.store') }}",
+                    data: new FormData(this),
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $("#exampleModal").modal("show");
+                    },
+                    success: function(response) {
+                        if (response.status == 200) {
+                            if ($("#post_schedule_date").val() != null) {
+                                toastr.success("Post scheduled successfully");
+                            } else {
+                                toastr.success("Post created successfully");
+                            }
                         } else {
-                            toastr.success("Post created successfully");
+                            toastr.error(response.error);
                         }
-                    } else {
-                        toastr.error(response.error);
-                    }
 
-                    $("#exampleModal").modal("hide");
-                }
-            });
+                        $("#exampleModal").modal("hide");
+                    }
+                });
+            }
         });
 
         // Draft Form
         $('#postForm button[name="draft"]').click(function(e) {
             let form = $('#postForm')[0];
-            $.ajax({
-                type: "POST",
-                url: "{{ route('user.post.draft.store') }}",
-                data: new FormData(form),
-                processData: false,
-                contentType: false,
-                beforeSend: function() {
-                    $("#exampleModal").modal("show");
-                },
-                success: function(response) {
-                    if (response.status == 200) {
-                        toastr.success("Post saved as draft");
-                    } else {
-                        toastr.error(response.error);
-                    }
+            if ($(this).valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('user.post.draft.store') }}",
+                    data: new FormData(form),
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $("#exampleModal").modal("show");
+                    },
+                    success: function(response) {
+                        if (response.status == 200) {
+                            toastr.success("Post saved as draft");
+                        } else {
+                            toastr.error(response.error);
+                        }
 
-                    $("#exampleModal").modal("hide");
-                }
-            });
+                        $("#exampleModal").modal("hide");
+                    }
+                });
+            }
         });
     </script>
 @endsection

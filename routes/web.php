@@ -66,10 +66,10 @@ Route::name('user.')
              */
             Route::get('/post', [PostController::class, 'index'])->name('post.index');
             Route::get('/post/details/{id}', [PostController::class, 'show'])->name('post.show');
+            Route::put('/post/details/{id}', [PostController::class, 'update'])->name('post.update');
 
             Route::get('/post/scheduled', [PostController::class, 'scheduled'])->name('post.scheduled');
-            Route::get('/post/scheduled/response', [PostController::class, 'scheduledData'])->name('post.scheduled.response');
-            Route::get('/post/scheduled/response/{id}', [PostController::class, 'scheduledDataShow'])->name('post.scheduled.response.show');
+            Route::get('/post/scheduled/response', [PostController::class, 'scheduledPosts'])->name('post.scheduled.all');
 
             Route::get('/post/draft', [PostController::class, 'draft'])->name('post.draft');
             Route::post('/post/draft', [PostController::class, 'draftStore'])->name('post.draft.store');

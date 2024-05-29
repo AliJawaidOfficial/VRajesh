@@ -417,7 +417,7 @@
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
                             <button type="button" class="btn btn-custom"
-                                onclick="transferPostData('draftPostModal')">Draft</button>
+                                onclick="transferPostData('draftPostModal')">Edit</button>
                         </div>
                         <div>
                             <button type="button" class="btn btn-custom"

@@ -25,6 +25,19 @@
 	height: 3px !important;
 }
 
+/* Remove box-shadow from all inputs */
+.form-control,
+.form-check-input {
+	box-shadow: none !important;
+}
+
+/* Remove outline from all inputs */
+.form-control:focus,
+.form-check-input:focus {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
 /*scroll*/
 ::selection {
 	background: #895ffc;

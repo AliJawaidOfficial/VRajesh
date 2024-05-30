@@ -155,6 +155,35 @@
             border-top: 1px solid #dee2e6;
             background-color: #f8f9fa;
         }
+
+
+        .form-check {
+            height: max-content;
+        }
+
+        .modal-post-title {
+            font-size: 20px;
+            font-weight: bold;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 14px;
+            padding-top: 0px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .modal-post-date {
+            font-size: 14px;
+            border-bottom: 1px solid #dee2e6;
+            padding: 5px 0px;
+        }
+
+        .modal-post-description {
+            font-size: 14px;
+            border-bottom: 1px solid #dee2e6;
+            padding: 5px 0px;
+        }
     </style>
 @endsection
 
@@ -388,17 +417,20 @@
                             <p class="text-center text-muted my-auto">No image/video published</p>
                             {{-- Placeholder for media preview --}}
                         </div>
-                        <div class="post-details ms-3 w-50">
+                        <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
                             <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle"></span></h4>
                             <p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate"></span>
                             </p>
-                            <div class="modal-post-description" style="max-height: 200px; overflow-y: auto;">
+                            <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
+                                style="max-height: 200px; overflow-y: auto;">
                                 <strong>Description:</strong> <span id="modalPostDescription"></span>
                             </div>
                             <input type="hidden" id="postDetailId">
 
-
-                            <div class="d-flex gap-3">
+                            <div class="d-flex align-items-center gap-3 py-2">
+                                <div>
+                                    <strong>Platforms:</strong>
+                                </div>
                                 <div class="d-flex gap-2">
                                     <input type="checkbox" style="pointer-events: none" id="facebook-post-detail">
                                     <i class="fab fa-facebook"></i>
@@ -417,7 +449,7 @@
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
                             <button type="button" class="btn btn-custom"
-                                onclick="transferPostData('draftPostModal')">Edit</button>
+                                onclick="transferPostData('draftPostModal')">Draft</button>
                         </div>
                         <div>
                             <button type="button" class="btn btn-custom"
@@ -443,22 +475,24 @@
                         @method('POST')
                         @csrf
                         <input type="hidden" name="post_id" id="postID">
-                        <div class="modal-body">
-                            <div class="mb-3">
+                        <div class="modal-body d-flex align-items-stretch flex-column gap-3">
+                            <div>
+                                <label for="postTitle" class="form-label">Title</label>
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
                                     name="title" placeholder="Enter your title here" required />
                             </div>
-                            <div class="textarea-wrapper my-1">
-                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
+                            <div class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
+                                <label for="postDescription" class="form-label">Description</label>
+                                <textarea class="input-tag-description d-block h-100 w-100 form-control flex-grow-1" id="postDescription" name="description"
                                     placeholder="Enter your post description"></textarea>
                             </div>
-                            <div class="mb-3">
+                            <div>
                                 <label for="media" class="form-label">Media</label>
                                 <input type="file" class="form-control" id="media" name="media"
                                     accept="image/*">
                             </div>
-                            <div class="mb-3">
-                                <label>Platforms</label>
+                            <div class="d-flex align-items-center gap-3 py-2">
+                                <div><strong>Platforms</strong></div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
                                         id="PlatformFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
@@ -466,7 +500,7 @@
                                         <i class="fab fa-facebook-f"></i>
                                     </label>
                                 </div>
-                                <div class="form-check form-check-inline mb-3">
+                                <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
                                         id="PlatformInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformInstagram">
@@ -483,9 +517,6 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <div>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            </div>
                             <div>
                                 <button type="submit" class="btn btn-custom" id="draftSaveBtn">Save</button>
                             </div>
@@ -509,28 +540,32 @@
                         @method('POST')
                         @csrf
                         <input type="hidden" name="post_id" id="postID">
-                        <div class="modal-body">
-                            <div class="mb-3">
+                        <div class="modal-body d-flex align-items-stretch flex-column gap-3">
+                            <div>
+                                <label for="postTitle" class="form-label">Title</label>
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
                                     name="title" placeholder="Enter your title here" required />
                             </div>
-                            <div class="textarea-wrapper mb-3">
+                            <div class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
+                                <label for="postDescription" class="form-label">Description</label>
                                 <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
                                     placeholder="Enter your post description"></textarea>
                             </div>
-                            <div class="mb-3 date-time-inputs">
+                            <div class="date-time-inputs">
+                                <label for="schedulePostDate" class="form-label">Date</label>
                                 <input type="date" class="form-control mb-3" id="schedulePostDate"
                                     name="schedule_date" required>
+                                <label for="schedulePostTime" class="form-label">Time</label>
                                 <input type="time" class="form-control" id="schedulePostTime" name="schedule_time"
                                     required>
                             </div>
-                            <div class="mb-3">
+                            <div>
                                 <label for="media" class="form-label">Media</label>
                                 <input type="file" class="form-control" id="media" name="media"
                                     accept="image/*">
                             </div>
-                            <div class="mb-3">
-                                <label>Platforms</label>
+                            <div class="d-flex align-items-center gap-3 py-2">
+                                <div><strong>Platforms</strong></div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
                                         id="PlatformFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
@@ -538,7 +573,7 @@
                                         <i class="fab fa-facebook-f"></i>
                                     </label>
                                 </div>
-                                <div class="form-check form-check-inline mb-3">
+                                <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
                                         id="PlatformInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformInstagram">
@@ -555,9 +590,6 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <div>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            </div>
                             <div>
                                 <button type="submit" class="btn btn-custom" id="scheduleSaveBtn">Schedule</button>
                             </div>
@@ -580,22 +612,24 @@
                         @method('POST')
                         @csrf
                         <input type="hidden" name="post_id" id="postID">
-                        <div class="modal-body">
-                            <div class="mb-3">
+                        <div class="modal-body d-flex align-items-stretch flex-column gap-3">
+                            <div>
+                                <label for="postTitle" class="form-label">Title</label>
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
                                     name="title" placeholder="Enter your title here" required />
                             </div>
-                            <div class="textarea-wrapper mb-3">
+                            <div class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
+                                <label for="postDescription" class="form-label">Description</label>
                                 <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
                                     placeholder="Enter your post description"></textarea>
                             </div>
-                            <div class="mb-3">
+                            <div>
                                 <label for="media" class="form-label">Media</label>
                                 <input type="file" class="form-control" id="media" name="media"
                                     accept="image/*">
                             </div>
-                            <div class="mb-3">
-                                <label>Platforms</label>
+                            <div class="d-flex align-items-center gap-3 py-2">
+                                <div><strong>Platforms</strong></div>
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
                                         id="PlatformFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
@@ -603,7 +637,7 @@
                                         <i class="fab fa-facebook-f"></i>
                                     </label>
                                 </div>
-                                <div class="form-check form-check-inline mb-3">
+                                <div class="form-check form-check-inline">
                                     <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
                                         id="PlatformInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
                                     <label class="form-check-label" for="PlatformInstagram">
@@ -620,9 +654,6 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <div>
-                                <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            </div>
                             <div>
                                 <button type="submit" class="btn btn-custom" id="repostSaveBtn">Repost</button>
                             </div>

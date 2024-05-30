@@ -69,6 +69,18 @@ class LinkedInService
         }
     }
 
+    public function setAccessToken($user_id = null)
+    {
+        if ($user_id === null) {
+            $this->personUrn = Auth::guard('web')->user()->linkedin_urn;
+            $this->accessToken = Auth::guard('web')->user()->linkedin_access_token;
+        } else {
+            $user = User::find($user_id);
+            $this->personUrn = $user->linkedin_urn;
+            $this->accessToken = $user->linkedin_access_token;
+        }
+    }
+
     /**
      * User
      */
@@ -107,17 +119,8 @@ class LinkedInService
         try {
             $url = $this->baseUrl . 'ugcPosts';
 
-            if ($user_id === null) {
-                $personUrn = Auth::guard('web')->user()->linkedin_urn;
-                $accessToken = Auth::guard('web')->user()->linkedin_access_token;
-            } else {
-                $user = User::find($user_id);
-                $personUrn = $user->linkedin_urn;
-                $accessToken = $user->linkedin_access_token;
-            }
-
             $params = [
-                'author' => "urn:li:person:" . $personUrn,
+                'author' => "urn:li:person:" . $this->personUrn,
                 'lifecycleState' => 'PUBLISHED',
                 'specificContent' => [
                     'com.linkedin.ugc.ShareContent' => [
@@ -135,7 +138,7 @@ class LinkedInService
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
+                'Authorization: Bearer ' . $this->accessToken,
                 'Content-Type: application/json',
                 'x-li-format: json'
             ]);

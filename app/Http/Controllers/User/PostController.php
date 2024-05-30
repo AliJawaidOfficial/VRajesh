@@ -160,7 +160,8 @@ class PostController extends Controller
 
     public function create()
     {
-        return view('user.post.create');
+        $pages = $this->facebookService->getPages();
+        return view('user.post.create', compact('pages'));
     }
 
     public function store(Request $request)
@@ -179,6 +180,7 @@ class PostController extends Controller
                     'on_linkedin' => 'nullable|boolean',
                     'schedule_date' => 'nullable|date',
                     'schedule_time' => 'nullable|date_format:H:i',
+                    // 'page' => 'nullable|required_if:on_facebook',
                 ],
                 [
                     'title.required' => 'Title is required',
@@ -188,6 +190,8 @@ class PostController extends Controller
 
                     'media.required' => 'Media is required',
                     'media.required_if' => 'Media is required',
+
+                    'page.required_if' => 'Page is required',
                 ]
             );
 
@@ -231,16 +235,20 @@ class PostController extends Controller
                 $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
             } else {
                 if ($request->has('on_facebook')) {
+                    $page = explode(' - ', $request->page);
+                    $page_id = $page[0];
+                    $page_access_token = $page[1];
+
                     if ($request->hasFile('media')) {
                         if ($media_type == 'image') {
-                            $post = $this->facebookService->postImage($mediaPath, $request->title);
+                            $post = $this->facebookService->postImage($page_id, $page_access_token, $mediaPath, $request->title);
                         } elseif ($media_type == 'video') {
-                            $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
+                            $post = $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, $mediaPath, $request->title);
                         } else {
                             throw new Exception('Invalid file type.');
                         }
                     } else {
-                        $post = $this->facebookService->postText($request->title);
+                        $post = $this->facebookService->postText($page_id, $page_access_token, $request->title);
                     }
                 }
 
@@ -351,13 +359,13 @@ class PostController extends Controller
 
                     $mediaSize = filesize(public_path($onlyMediaPath));
                     $mediaPath = public_path('posts') . '/' . $mediaName;
-                    
+
                     $media_type = $oldPost->media_type;
                     $data->media = $onlyMediaPath;
                     $data->media_type = $media_type;
                 }
             }
-            
+
             if ($request->has('on_facebook')) $data->on_facebook = 1;
             if ($request->has('on_instagram')) $data->on_instagram = 1;
             if ($request->has('on_linkedin')) $data->on_linkedin = 1;
@@ -384,7 +392,6 @@ class PostController extends Controller
                     if ($mediaPath != null) {
                         if ($media_type == 'image') {
                             $post = $this->linkedinService->postImage($mediaPath, $request->title);
-                
                         } elseif ($media_type == 'video') {
                             $post = $this->linkedinService->postVideo($mediaPath, $request->title);
                         } else {

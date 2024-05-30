@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -13,10 +14,13 @@ class FacebookService
 {
     protected $baseUrl;
     protected $version;
+
     protected $appId;
     protected $appSecret;
+
+    protected $accessToken;
+
     protected $pageId;
-    protected $metaAccessToken;
     protected $pageAccessToken;
 
     public function __construct()
@@ -25,10 +29,18 @@ class FacebookService
         $this->version = env('FACEBOOK_GRAPH_VERSION');
         $this->appId = env('FACEBOOK_CLIENT_ID');
         $this->appSecret = env('FACEBOOK_CLIENT_SECRET');
-        $this->pageId = env('FACEBOOK_PAGE_ID');
-        $this->pageAccessToken = env('FACEBOOK_PAGE_ACCESS_TOKEN');
-        if (Auth::guard('web')->check()) $this->metaAccessToken = Auth::guard('web')->user()->meta_access_token;
     }
+
+    public function setAccessToken($user_id = null)
+    {
+        if ($user_id === null) {
+            $this->accessToken = Auth::guard('web')->user()->meta_access_token;
+        } else {
+            $user = User::find($user_id);
+            $this->accessToken = $user->meta_access_token;
+        }
+    }
+
 
     /**
      * Token Time
@@ -66,6 +78,29 @@ class FacebookService
 
 
     /**
+     * Get Pages
+     */
+    public function getPages($user_id = null)
+    {
+        $this->setAccessToken($user_id);
+
+        $url = "$this->baseUrl/$this->version/me/accounts?" . http_build_query([
+            'access_token' => $this->accessToken,
+        ]);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false,);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        $decodeResponse = json_decode($response, true);
+        return $decodeResponse['data'];
+    }
+
+
+    /**
      * Post
      * Text
      * Video
@@ -74,9 +109,12 @@ class FacebookService
     /**
      * Text
      */
-    public function postText($text, $user_id = null)
+    public function postText($page_id, $page_access_token, $text, $user_id = null)
     {
         try {
+            $this->pageId = $page_id;
+            $this->pageAccessToken = $page_access_token;
+
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "$this->baseUrl/$this->version/$this->pageId/feed");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -106,9 +144,12 @@ class FacebookService
     /**
      * Image
      */
-    public function postImage($imagePath, $title, $user_id = null)
+    public function postImage($page_id, $page_access_token, $imagePath, $title, $user_id = null)
     {
         try {
+            $this->pageId = $page_id;
+            $this->pageAccessToken = $page_access_token;
+
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "$this->baseUrl/$this->version/$this->pageId/photos");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -137,9 +178,12 @@ class FacebookService
     /**
      * Video
      */
-    public function postVideo($videoSize, $videoPath, $title, $user_id = null)
+    public function postVideo($page_id, $page_access_token, $videoSize, $videoPath, $title, $user_id = null)
     {
         try {
+            $this->pageId = $page_id;
+            $this->pageAccessToken = $page_access_token;
+
             // Step 1
             $response = $this->postVideo1($videoSize);
             if (isset($response['error'])) throw new Exception($response['error']['message']);

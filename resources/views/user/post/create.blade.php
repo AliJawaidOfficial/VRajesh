@@ -177,6 +177,32 @@
         .linkedin-post-footer>div img {
             width: 25px;
         }
+
+        /* Platform Checkbox Styles */
+        .platform-checkbox {
+            margin-right: 10px;
+            /* Adds space between checkboxes */
+            display: flex;
+            align-items: center;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .platform-checkbox input {
+            margin-right: 5px;
+            /* Adds space between the checkbox and the icon */
+        }
+
+        .platform-checkbox span {
+            margin-left: 5px;
+            /* Adds space between the icon and the text */
+        }
+
+        /* Align the icon properly */
+        .platform-checkbox i {
+            vertical-align: middle;
+        }
     </style>
 @endsection
 
@@ -348,6 +374,7 @@
 
         // Draft Form
         $('#postForm button[name="draft"]').click(function(e) {
+            e.preventDefault();
             let form = $('#postForm')[0];
             if ($(this).valid()) {
                 $.ajax({
@@ -357,16 +384,16 @@
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
-                        $("#exampleModal").modal("show");
+                        $("#exampleModal").show()
                     },
                     success: function(response) {
                         if (response.status == 200) {
                             toastr.success("Post saved as draft");
                         } else {
                             toastr.error(response.error);
+                            $("#exampleModal").modal("hide");
+                            $("#exampleModal").css("display", "none");
                         }
-
-                        $("#exampleModal").modal("hide");
                     }
                 });
             }
@@ -377,7 +404,6 @@
 {{-- Content --}}
 @section('content')
     <section class="main-content-wrapper d-flex flex-column">
-
         <div class="row align-items-stretch mt-2">
             <div class="col-md-8">
                 <form id="postForm" class="p-4 bg-white rounded-6" method="POST" enctype="multipart/form-data">
@@ -399,26 +425,29 @@
                             <div class="d-flex align-items-center gap-3">
                                 <p class="mb-0">Check to share on:</p>
 
-                                <label class="d-inline-block">
+                                <label class="d-inline-block platform-checkbox">
                                     <input type="checkbox" name="on_facebook" value="1" data-bs-toggle="facebook-post"
                                         class="form-check-input toggle-post"
                                         @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif />
+                                    -
                                     <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"
                                             style="font-size: 17px"></i></span>
                                 </label>
 
-                                <label class="d-inline-block">
+                                <label class="d-inline-block platform-checkbox">
                                     <input type="checkbox" name="on_linkedin" value="1" data-bs-toggle="linkedin-post"
                                         class="form-check-input toggle-post"
                                         @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif />
+                                    -
                                     <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
                                             style="font-size: 17px"></i></span>
                                 </label>
 
-                                <label class="d-inline-block">
+                                <label class="d-inline-block platform-checkbox">
                                     <input type="checkbox" name="on_instagram" value="1"
                                         data-bs-toggle="instagram-post" class="form-check-input toggle-post"
                                         @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif />
+                                    -
                                     <span class="d-inline-block ms-1"><i class="fab fa-instagram"
                                             style="font-size: 17px"></i></span>
                                 </label>
@@ -623,8 +652,8 @@
     <!-- Loading Modal -->
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content d-flex align-items-center justify-content-center p-5">
-                <div class="spinner-border" style="width: 3rem; height: 3rem;" role="status">
+            <div class="modal-content d-flex align-items-center justify-content-center p-5 bg-transparent border-0">
+                <div class="spinner-border text-white" style="width: 3rem; height: 3rem;" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>

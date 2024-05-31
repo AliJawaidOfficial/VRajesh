@@ -224,6 +224,11 @@
                         $("#instagram-post-detail").attr("checked", response.data.on_instagram ? true : false);
                         $("#linkedin-post-detail").attr("checked", response.data.on_linkedin ? true : false);
 
+
+                        $("#facebook-post-detail + i").css("display",response.data.on_facebook ? "block" : "none" );
+                        $("#instagram-post-detail + i").css("display",response.data.on_instagram ? "block" : "none" );
+                        $("#linkedin-post-detail + i").css("display",response.data.on_linkedin ? "block" : "none" );
+
                         $('#postDetail .media-preview').html(mediaHtml);
                         $('#modalPostTitle').text(response.data.title);
                         $('#modalPostDate').text(response.data.created_at);
@@ -432,15 +437,18 @@
                                     <strong>Platforms:</strong>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <input type="checkbox" style="pointer-events: none" id="facebook-post-detail">
+                                    <input type="checkbox" style="pointer-events: none;display: none"
+                                        id="facebook-post-detail">
                                     <i class="fab fa-facebook"></i>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <input type="checkbox" style="pointer-events: none" id="instagram-post-detail">
+                                    <input type="checkbox" style="pointer-events: none;display: none"
+                                        id="instagram-post-detail">
                                     <i class="fab fa-instagram"></i>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <input type="checkbox" style="pointer-events: none" id="linkedin-post-detail">
+                                    <input type="checkbox" style="pointer-events: none;display: none"
+                                        id="linkedin-post-detail">
                                     <i class="fab fa-linkedin"></i>
                                 </div>
                             </div>
@@ -547,14 +555,15 @@
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
                                     name="title" placeholder="Enter your title here" required />
                             </div>
-                            <div class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
+                            <div
+                                class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
                                 <label for="postDescription" class="form-label">Description</label>
                                 <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
                                     placeholder="Enter your post description"></textarea>
                             </div>
                             <div class="date-time-inputs">
                                 <label for="schedulePostDate" class="form-label">Schedule Date & Time</label>
-                                <input type="date" class="form-control mb-3" id="schedulePostDate"
+                                <input type="date" min="{{ date('Y-m-d') }}" class="form-control mb-3" id="schedulePostDate"
                                     name="schedule_date" required>
                                 <label for="schedulePostTime" class="form-label">Time</label>
                                 <input type="time" class="form-control" id="schedulePostTime" name="schedule_time"
@@ -619,7 +628,8 @@
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
                                     name="title" placeholder="Enter your title here" required />
                             </div>
-                            <div class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
+                            <div
+                                class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
                                 <label for="postDescription" class="form-label">Description</label>
                                 <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
                                     placeholder="Enter your post description"></textarea>

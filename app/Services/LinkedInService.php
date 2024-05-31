@@ -119,6 +119,8 @@ class LinkedInService
         try {
             $url = $this->baseUrl . 'ugcPosts';
 
+            $this->setAccessToken($user_id);
+
             $params = [
                 'author' => "urn:li:person:" . $this->personUrn,
                 'lifecycleState' => 'PUBLISHED',
@@ -166,18 +168,11 @@ class LinkedInService
         try {
             $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
 
-            if ($user_id === null) {
-                $personUrn = Auth::guard('web')->user()->linkedin_urn;
-                $accessToken = Auth::guard('web')->user()->linkedin_access_token;
-            } else {
-                $user = User::find($user_id);
-                $personUrn = $user->linkedin_urn;
-                $accessToken = $user->linkedin_access_token;
-            }
+            $this->setAccessToken($user_id);
 
             $params = [
                 'registerUploadRequest' => [
-                    'owner' => "urn:li:person:" . $personUrn,
+                    'owner' => "urn:li:person:" . $this->personUrn,
                     'recipes' => ['urn:li:digitalmediaRecipe:feedshare-image'],
                     'serviceRelationships' => [
                         [
@@ -193,7 +188,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
+                'Authorization: Bearer ' . $this->accessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -207,7 +202,7 @@ class LinkedInService
             $upload_url = $data['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
             $asset_id = $data['value']['asset'];
 
-            return $this->postImage2($upload_url, $imagePath, $asset_id, $title, $accessToken, $personUrn);
+            return $this->postImage2($upload_url, $imagePath, $asset_id, $title);
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -215,7 +210,7 @@ class LinkedInService
             ];
         }
     }
-    public function postImage2($upload_url, $imagePath, $asset_id, $title, $accessToken, $personUrn)
+    public function postImage2($upload_url, $imagePath, $asset_id, $title)
     {
         try {
             $image = file_get_contents($imagePath);
@@ -225,7 +220,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $image);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
+                'Authorization: Bearer ' . $this->accessToken,
                 'Content-Type: application/octet-stream',
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -234,7 +229,7 @@ class LinkedInService
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
-            return $this->postImage3($asset_id, $title, $accessToken, $personUrn);
+            return $this->postImage3($asset_id, $title);
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -243,7 +238,7 @@ class LinkedInService
         }
     }
 
-    public function postImage3($asset_id, $title, $accessToken, $personUrn)
+    public function postImage3($asset_id, $title)
     {
         try {
             $url = "https://api.linkedin.com/v2/assets/{$asset_id}/action=completeUpload";
@@ -251,7 +246,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
+                'Authorization: Bearer ' . $this->accessToken,
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
@@ -259,7 +254,7 @@ class LinkedInService
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
-            return $this->postImage4($asset_id, $title, $accessToken, $personUrn);
+            return $this->postImage4($asset_id, $title);
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -267,12 +262,12 @@ class LinkedInService
             ];
         }
     }
-    public function postImage4($asset_id, $title, $accessToken, $personUrn)
+    public function postImage4($asset_id, $title)
     {
         try {
             $url = 'https://api.linkedin.com/v2/ugcPosts';
             $params = [
-                'author' => "urn:li:person:" . $personUrn,
+                'author' => "urn:li:person:" . $this->personUrn,
                 'lifecycleState' => 'PUBLISHED',
                 'specificContent' => [
                     'com.linkedin.ugc.ShareContent' => [
@@ -300,7 +295,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
+                'Authorization: Bearer ' . $this->accessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -333,18 +328,11 @@ class LinkedInService
         try {
             $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
 
-            if ($user_id === null) {
-                $personUrn = Auth::guard('web')->user()->linkedin_urn;
-                $accessToken = Auth::guard('web')->user()->linkedin_access_token;
-            } else {
-                $user = User::find($user_id);
-                $personUrn = $user->linkedin_urn;
-                $accessToken = $user->linkedin_access_token;
-            }
+            $this->setAccessToken($user_id);
 
             $params = [
                 'registerUploadRequest' => [
-                    'owner' => "urn:li:person:" . $personUrn,
+                    'owner' => "urn:li:person:" . $this->personUrn,
                     'recipes' => ['urn:li:digitalmediaRecipe:feedshare-video'],
                     'serviceRelationships' => [
                         [
@@ -360,7 +348,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
+                'Authorization: Bearer ' . $this->accessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -375,7 +363,7 @@ class LinkedInService
             $upload_url = $data['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
             $asset_id = $data['value']['asset'];
 
-            $postVideo2 = $this->postVideo2($upload_url, $video, $asset_id, $title, $accessToken, $personUrn);
+            $postVideo2 = $this->postVideo2($upload_url, $video, $asset_id, $title);
             return $postVideo2;
         } catch (Exception $e) {
             return [
@@ -385,7 +373,7 @@ class LinkedInService
         }
     }
 
-    public function postVideo2($upload_url, $video_path, $asset_id, $title, $accessToken, $personUrn)
+    public function postVideo2($upload_url, $video_path, $asset_id, $title)
     {
         try {
             $video = file_get_contents($video_path);
@@ -395,7 +383,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $video);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
+                'Authorization: Bearer ' . $this->accessToken,
                 'Content-Type: application/octet-stream',
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -404,7 +392,7 @@ class LinkedInService
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
-            return $this->postVideo3($asset_id, $title, $accessToken, $personUrn);
+            return $this->postVideo3($asset_id, $title);
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -413,7 +401,7 @@ class LinkedInService
         }
     }
 
-    public function postVideo3($asset_id, $title, $accessToken, $personUrn)
+    public function postVideo3($asset_id, $title)
     {
         try {
             $url = "https://api.linkedin.com/v2/assets/{$asset_id}/action=completeUpload";
@@ -421,7 +409,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
+                'Authorization: Bearer ' . $this->accessToken,
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
@@ -433,7 +421,7 @@ class LinkedInService
 
             if ($error != null) throw new Exception($error);
 
-            $postVideo4 = $this->postVideo4($asset_id, $title, $accessToken, $personUrn);
+            $postVideo4 = $this->postVideo4($asset_id, $title);
             return $postVideo4;
         } catch (Exception $e) {
             return [
@@ -443,12 +431,12 @@ class LinkedInService
         }
     }
 
-    public function postVideo4($asset_id, $title, $accessToken, $personUrn)
+    public function postVideo4($asset_id, $title)
     {
         try {
             $url = 'https://api.linkedin.com/v2/ugcPosts';
             $params = [
-                'author' => "urn:li:person:" . $personUrn,
+                'author' => "urn:li:person:" . $this->personUrn,
                 'lifecycleState' => 'PUBLISHED',
                 'specificContent' => [
                     'com.linkedin.ugc.ShareContent' => [
@@ -476,7 +464,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $accessToken,
+                'Authorization: Bearer ' . $this->accessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));

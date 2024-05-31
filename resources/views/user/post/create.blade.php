@@ -462,26 +462,28 @@
                             </div>
                         </div>
 
-                        <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <p class="mb-0">Pages:</p>
+                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                            <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <p class="mb-0">Pages:</p>
 
-                                <div class="d-flex flex-column gap-1 w-100">
-                                    <select name="page" id="" class="form-select w-100" required>
-                                        <option value="">Select Page</option>
-                                        @if (count($pages) > 0)
-                                            @foreach ($pages as $page)
-                                                <option value="{{ $page['id'] }} - {{ $page['access_token'] }}">
-                                                    {{ $page['name'] }}
-                                                </option>
-                                            @endforeach
-                                        @else
-                                            <option value="">No Pages Found</option>
-                                        @endif
-                                    </select>
+                                    <div class="d-flex flex-column gap-1 w-100">
+                                        <select name="facebook_page" id="" class="form-select w-100" required>
+                                            <option value="">Select Page</option>
+                                            @if (count($pages) > 0)
+                                                @foreach ($pages as $page)
+                                                    <option value="{{ $page['id'] }} - {{ $page['access_token'] }}">
+                                                        {{ $page['name'] }}
+                                                    </option>
+                                                @endforeach
+                                            @else
+                                                <option value="">No Pages Found</option>
+                                            @endif
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
 
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">

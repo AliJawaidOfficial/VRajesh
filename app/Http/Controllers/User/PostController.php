@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Rules\AtLeastOnePlatform;
 use App\Services\FacebookService;
+use App\Services\InstagramService;
 use App\Services\LinkedInService;
 use Carbon\Carbon;
 use Exception;
@@ -19,13 +20,16 @@ class PostController extends Controller
 {
     protected $linkedinService;
     protected $facebookService;
+    protected $instagramService;
 
     public function __construct(
         private readonly LinkedInService $importLinkedinService,
-        private readonly FacebookService $importFacebookService
+        private readonly InstagramService $importinstagramService,
+        private readonly FacebookService $importFacebookService,
     ) {
         $this->linkedinService = $importLinkedinService;
         $this->facebookService = $importFacebookService;
+        $this->instagramService = $importinstagramService;
     }
 
     public function index(Request $request)
@@ -160,8 +164,12 @@ class PostController extends Controller
 
     public function create()
     {
-        $pages = $this->facebookService->getPages();
-        return view('user.post.create', compact('pages'));
+        if (Auth::guard('web')->user()->meta_access_token != null) {
+            $pages = $this->facebookService->getPages();
+            return view('user.post.create', compact('pages'));
+        } else {
+            return view('user.post.create');
+        }
     }
 
     public function store(Request $request)
@@ -235,37 +243,48 @@ class PostController extends Controller
                 $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
             } else {
                 if ($request->has('on_facebook')) {
-                    $page = explode(' - ', $request->page);
+                    $page = explode(' - ', $request->facebook_page);
                     $page_id = $page[0];
                     $page_access_token = $page[1];
 
                     if ($request->hasFile('media')) {
                         if ($media_type == 'image') {
-                            $post = $this->facebookService->postImage($page_id, $page_access_token, $mediaPath, $request->title);
+                            $post = $this->facebookService->postImage($page_id, $page_access_token, $mediaPath, $request->description);
                         } elseif ($media_type == 'video') {
-                            $post = $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, $mediaPath, $request->title);
+                            $post = $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, $mediaPath, $request->description);
                         } else {
                             throw new Exception('Invalid file type.');
                         }
                     } else {
-                        $post = $this->facebookService->postText($page_id, $page_access_token, $request->title);
+                        $post = $this->facebookService->postText($page_id, $page_access_token, $request->description);
                     }
                 }
 
                 if ($request->has('on_instagram')) {
+                    if ($request->hasFile('media')) {
+                        $page = explode(' - ', $request->facebook_page);
+                        $page_id = $page[0];
+                        $page_access_token = $page[1];
+
+                        $user_ig_account = $this->instagramService->getInstagramAccount($page_id, $page_access_token);
+                        if ($user_ig_account != null) {
+                            if ($media_type == 'image') $post = $this->instagramService->postImage($user_ig_account, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+                            if ($media_type == 'video') $post = $this->instagramService->postVideo($user_ig_account, env('APP_URL') . '/' . $onlyMediaPath, $mediaSize, $request->description);
+                        }
+                    }
                 }
 
                 if ($request->has('on_linkedin')) {
                     if ($request->hasFile('media')) {
                         if ($media_type == 'image') {
-                            $post = $this->linkedinService->postImage($mediaPath, $request->title);
+                            $post = $this->linkedinService->postImage($mediaPath, $request->description);
                         } elseif ($media_type == 'video') {
-                            $post = $this->linkedinService->postVideo($mediaPath, $request->title);
+                            $post = $this->linkedinService->postVideo($mediaPath, $request->description);
                         } else {
                             throw new Exception('Invalid file type.');
                         }
                     } else {
-                        $post = $this->linkedinService->postText($request->title);
+                        $post = $this->linkedinService->postText($request->description);
                     }
                 }
 

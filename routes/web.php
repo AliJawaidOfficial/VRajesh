@@ -9,6 +9,7 @@ use App\Http\Controllers\User\ConnectController;
 use App\Http\Controllers\User\PostController;
 
 use App\Http\Controllers\User\LinkedIn\PipelineController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -53,9 +54,11 @@ Route::name('user.')
              * Connect
              */
             Route::get('/connect', [ConnectController::class, 'index'])->name('connect');
+            // Facebook
             Route::get('/connect/facebook', [ConnectController::class, 'facebook'])->name('connect.facebook');
             Route::get('/connect/facebook/callback', [ConnectController::class, 'facebookCallback'])->name('connect.facebook.callback');
             Route::get('/connect/facebook/disconnect', [ConnectController::class, 'facebookDisconnect'])->name('connect.facebook.disconnect');
+            // Linkedin
             Route::get('/connect/linkedin', [ConnectController::class, 'linkedin'])->name('connect.linkedin');
             Route::get('/connect/linkedin/callback', [ConnectController::class, 'linkedinCallback'])->name('connect.linkedin.callback');
             Route::get('/connect/linkedin/disconnect', [ConnectController::class, 'linkedinDisconnect'])->name('connect.linkedin.disconnect');

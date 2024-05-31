@@ -364,7 +364,7 @@
                         <th class="text-center">S.No</th>
                         <th class="text-left">Title</th>
                         <th class="text-nowrap">Platforms</th>
-                        <th class="text-nowrap">Published Date</th>
+                        <th class="text-nowrap">Saved Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -449,7 +449,7 @@
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
                             <button type="button" class="btn btn-custom"
-                                onclick="transferPostData('draftPostModal')">Draft</button>
+                                onclick="transferPostData('draftPostModal')">Edit</button>
                         </div>
                         <div>
                             <button type="button" class="btn btn-custom"

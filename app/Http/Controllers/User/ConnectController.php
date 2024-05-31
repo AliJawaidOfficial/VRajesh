@@ -18,11 +18,11 @@ class ConnectController extends Controller
     protected $facebookService;
 
     public function __construct(
+        private readonly FacebookService $importFacebook,
         private readonly LinkedInService $importLinkedin,
-        private readonly FacebookService $importService
     ) {
+        $this->facebookService = $importFacebook;
         $this->linkedinService = $importLinkedin;
-        $this->facebookService = $importService;
     }
 
     public function index()
@@ -30,6 +30,9 @@ class ConnectController extends Controller
         return view('user.connect.index');
     }
 
+    /**
+     * Facebook
+     */
     public function facebook()
     {
         return Socialite::driver('facebook')
@@ -38,6 +41,9 @@ class ConnectController extends Controller
                 'public_profile',
                 'pages_show_list',
                 'pages_read_engagement',
+                'instagram_basic',
+                'instagram_content_publish',
+                'instagram_manage_media'
             ])
             ->redirect();
     }
@@ -45,7 +51,6 @@ class ConnectController extends Controller
     public function facebookCallback(Request $request)
     {
         try {
-            return $request->all();
             $user = Socialite::driver('facebook')->user();
 
             $response = [
@@ -81,6 +86,11 @@ class ConnectController extends Controller
         return redirect()->route('user.connect');
     }
 
+
+
+    /**
+     * Linkedin
+     */
     public function linkedin()
     {
         // return Socialite::driver('linkedin-openid')->redirect();

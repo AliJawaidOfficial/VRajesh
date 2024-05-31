@@ -362,21 +362,18 @@
                         if (response.status == 200) {
                             if ($("#post_schedule_date").val() != null) {
                                 toastr.success("Post scheduled successfully");
-                                $("#exampleModal").modal("hide");
-                                $("#exampleModal").css("display", "none");
                             } else {
                                 toastr.success("Post created successfully");
-                                $("#exampleModal").modal("hide");
-                                $("#exampleModal").css("display", "none");
                             }
                         } else {
                             toastr.error(response.error);
-                            $("#exampleModal").modal("hide");
-                            $("#exampleModal").css("display", "none");
                         }
 
                         $("#exampleModal").modal("hide");
                         $("#exampleModal").css("display", "none");
+
+                        $("#scheduleModal").modal("hide");
+                        $("#scheduleModal").css("display", "none");
                     }
                 });
             }
@@ -708,11 +705,13 @@
                         @csrf
                         <div class="mb-3">
                             <label for="scheduleDate" class="form-label">Date</label>
-                            <input type="date" min="{{ date('Y-m-d') }}" class="form-control" id="scheduleDate" name="schedule_date" required>
+                            <input type="date" min="{{ date('Y-m-d') }}" class="form-control" id="scheduleDate"
+                                name="schedule_date" required>
                         </div>
                         <div class="mb-3">
                             <label for="scheduleTime" class="form-label">Time</label>
-                            <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
+                            <input type="time" class="form-control" min="{{ date('H:i') }}" id="scheduleTime"
+                                name="schedule_time" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Schedule</button>
                     </form>

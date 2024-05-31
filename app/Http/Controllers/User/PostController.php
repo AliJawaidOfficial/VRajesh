@@ -186,8 +186,8 @@ class PostController extends Controller
                     'on_facebook' => 'nullable|boolean',
                     'on_instagram' => 'nullable|boolean',
                     'on_linkedin' => 'nullable|boolean',
-                    'schedule_date' => 'nullable|date',
-                    'schedule_time' => 'nullable|date_format:H:i',
+                    'schedule_date' => 'nullable|date|after:today',
+                    'schedule_time' => 'nullable|date_format:H:i|after:now',
                     // 'page' => 'nullable|required_if:on_facebook',
                 ],
                 [
@@ -200,6 +200,10 @@ class PostController extends Controller
                     'media.required_if' => 'Media is required',
 
                     'page.required_if' => 'Page is required',
+
+                    'schedule_date.after' => 'Schedule date should be a future date.',
+
+                    'schedule_time.after' => 'Schedule time should be a future time.',
                 ]
             );
 
@@ -249,11 +253,9 @@ class PostController extends Controller
 
                     if ($request->hasFile('media')) {
                         if ($media_type == 'image') {
-                            $post = $this->facebookService->postImage($page_id, $page_access_token, $mediaPath, $request->description);
+                            $post = $this->facebookService->postImage($page_id, $page_access_token, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
                         } elseif ($media_type == 'video') {
-                            $post = $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, $mediaPath, $request->description);
-                        } else {
-                            throw new Exception('Invalid file type.');
+                            $post = $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
                         }
                     } else {
                         $post = $this->facebookService->postText($page_id, $page_access_token, $request->description);
@@ -277,11 +279,9 @@ class PostController extends Controller
                 if ($request->has('on_linkedin')) {
                     if ($request->hasFile('media')) {
                         if ($media_type == 'image') {
-                            $post = $this->linkedinService->postImage($mediaPath, $request->description);
+                            $post = $this->linkedinService->postImage(env('APP_URL') . '/' . $onlyMediaPath, $request->description);
                         } elseif ($media_type == 'video') {
-                            $post = $this->linkedinService->postVideo($mediaPath, $request->description);
-                        } else {
-                            throw new Exception('Invalid file type.');
+                            // $post = $this->linkedinService->postVideo(env('APP_URL') . '/' . $onlyMediaPath, $request->description);
                         }
                     } else {
                         $post = $this->linkedinService->postText($request->description);

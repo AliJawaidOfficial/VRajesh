@@ -144,6 +144,7 @@ class InstagramService
 
 
 
+
     /**
      * Video
      */
@@ -156,9 +157,8 @@ class InstagramService
 
             $params = [
                 'media_type' => 'REELS',
-                'video_url' => $media,
+                'upload_type' => 'resumable',
                 'caption' => $title,
-                'share_to_feed' => true,
                 'access_token' => $this->access_token,
             ];
 
@@ -173,11 +173,12 @@ class InstagramService
             curl_close($ch);
             $data = json_decode($response, true);
 
+
             if (isset($data['error'])) throw new Exception($data['error']['message']);
 
-            $creation_id = $data['id'];
+            $uri = $data['uri'];
 
-            return $this->postVideo2($creation_id, $media, $mediaSize);
+            return $this->postVideo2($uri, $media, $mediaSize);
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -186,16 +187,15 @@ class InstagramService
         }
     }
 
-    public function postVideo2($creation_id, $media, $mediaSize)
+    public function postVideo2($url, $media, $mediaSize)
     {
         try {
-            $url = "https://rupload.facebook.com/ig-api-upload/$this->version/$creation_id/media_publish";
-
             $headers = [
-                'Authorization: Bearer ' . $this->access_token,
+                'Authorization: OAuth ' . $this->access_token,
+                'offset: 0',
+                'file_size: ' . $mediaSize,
                 'Content-Type: application/octet-stream',
                 'Content-Length: ' . $mediaSize,
-                'Offset: 0',
             ];
 
             $ch = curl_init();
@@ -207,12 +207,14 @@ class InstagramService
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
             curl_close($ch);
+            
+            $data = json_decode($response, true);
 
             if (isset($data['error'])) throw new Exception($data['error']['message']);
 
             return [
                 'status' => 200,
-                'data' => json_decode($response, true),
+                'data' => $data,
             ];
         } catch (Exception $e) {
             return [

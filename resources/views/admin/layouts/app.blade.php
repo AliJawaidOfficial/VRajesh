@@ -9,10 +9,7 @@
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png?v=0') }}" type="image/x-icon">
     <!---------------- SEO ---------------->
     <title>
-        @yield('title') -
-        {{ Str::is('agency.*', Route::currentRouteName()) ? '- Agency -' : '' }}
-        {{ Str::is('admin.*', Route::currentRouteName()) ? '- Admin -' : '' }}
-        {{ config('app.name') }}
+        @yield('title') - Admin - {{ config('app.name') }}
     </title>
     <meta name="description" content="" />
     <!--------------- Fonts --------------->
@@ -46,20 +43,20 @@
 <body>
 
     {{-- Content --}}
-    @if (request()->is('login') ||
-            request()->is('register') ||
-            request()->is('forget-password') ||
-            request()->is('reset-password/*'))
+    @if (request()->is('admin/login') ||
+            request()->is('admin/register') ||
+            request()->is('admin/forget-password') ||
+            request()->is('admin/reset-password/*'))
         @yield('content')
     @else
         <div class="dashboard">
             {{-- Sidebar --}}
-            @include('user.layouts.sidebar')
+            @include('admin.layouts.sidebar')
             {{-- /Sidebar --}}
 
             <main class="main-wrapper">
                 {{-- Header --}}
-                @include('user.layouts.header')
+                @include('admin.layouts.header')
                 {{-- .Header --}}
 
                 {{-- Content --}}

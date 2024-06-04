@@ -26,19 +26,18 @@
     <div class="user-dropdown-wrapper">
         <div class="d-flex align-items-center">
             <div class="user-info d-flex flex-column align-items-end">
-                {{-- <span class="user-name">{{ Auth::user()->first_name }}</span> --}}
-                {{-- <span class="user-role">Admin</span> --}}
+                <span class="user-name">{{ Auth::guard('admin')->user()->first_name }} {{ Auth::guard('admin')->user()->last_name }}</span>
+                <span class="user-role">Admin</span>
             </div>
             <button class="user-avatar position-relative" type="button" id="profileButton" data-bs-toggle="dropdown"
                 aria-expanded="false">
-                <!-- <img src="./assets/images/icons/user-profile-icon.png" alt="User Avatar"> -->
                 <span class="user-name-badge d-flex align-items-center justify-content-center">
-                    {{ substr(Auth::guard('web')->user()->first_name, 0, 1) . substr(Auth::guard('web')->user()->last_name, 0, 1) }}
+                    {{ substr(Auth::guard('admin')->user()->first_name, 0, 1) . substr(Auth::guard('admin')->user()->last_name, 0, 1) }}
                 </span>
                 <span class="online"></span>
             </button>
             <ul class="dropdown-menu profile-user-dropdown-content-wrapper" aria-labelledby="profileButton">
-                <li><a href="{{ route('user.logout') }}" class="dropdown-item">Logout</a></li>
+                <li><a href="{{ route('admin.logout') }}" class="dropdown-item">Logout</a></li>
             </ul>
 
         </div>

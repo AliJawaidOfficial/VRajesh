@@ -1,5 +1,5 @@
 {{-- Layout --}}
-@extends('user.layouts.app')
+@extends('admin.layouts.app')
 
 {{-- Title --}}
 @section('title', 'Login')
@@ -54,10 +54,9 @@
             </svg>
         </div>
 
-        <div
-            class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column rounded-6">
+        <div class="sign-up-wrapper position-relative d-flex align-items-center justify-content-center flex-column rounded-6">
             <h3 class="text-center">Log In</h3>
-            <form action={{ route('user.login') }} method="POST" id="login" class="w-100">
+            <form action={{ route('admin.login') }} method="POST" id="login" class="w-100">
                 @csrf
                 @method('POST')
                 <div class="input-icon-wrapper position-relative">
@@ -88,8 +87,7 @@
                                 fill="#8C8C8C" />
                         </svg>
                     </span>
-                    <input type="password" name="password" id="password_input" class="d-block w-100 rounded"
-                        placeholder="Password" required />
+                    <input type="password" name="password" id="password_input" class="d-block w-100 rounded" placeholder="Password" required />
                     <button type="button" class="show-password-btn position-absolute">
                         <svg xmlns="http://www.w3.org/2000/svg" height="16" width="18" viewBox="0 0 576 512">
                             <path fill="#8c8c8c"
@@ -99,18 +97,12 @@
                 </div>
                 <div class="extra-fields d-flex justify-content-end">
                     <p class="mb-0">
-                        <a href="{{ route('user.password.forget') }}">Forget Password?</a>
+                        <a href="{{ route('admin.password.forget') }}">Forget Password?</a>
                     </p>
                 </div>
 
                 <button type="submit" class="btn d-block w-100 rounded" type="submit">Login</button>
             </form>
-
-            <div class="extra-fields">
-                <p class="mb-0">Dont have an account?
-                    <a href="{{ route('user.register') }}">Register now</a>
-                </p>
-            </div>
         </div>
     </div>
     <!-- /Content -->

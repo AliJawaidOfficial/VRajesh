@@ -1,31 +1,31 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Mail\User\ForgetPasswordMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\User\RegisterMail;
+use App\Mail\User\ForgetPasswordMail;
 use App\Models\PasswordResetToken;
 use Illuminate\Support\Str;
 use Exception;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
+use App\Models\Admin;
 
 
 class AuthController extends Controller
 {
+    protected $view = "admin.auth.";
     /**
      * Login
      */
     public function login()
     {
-        return view('user.auth.login');
+        return view($this->view . '.login');
     }
 
     public function loginStore(Request $request)
@@ -34,7 +34,7 @@ class AuthController extends Controller
             $validator = Validator::make(
                 $request->all(),
                 [
-                    'email' => 'required|email|exists:users,email',
+                    'email' => 'required|email|exists:admins,email',
                     'password' => 'required',
                 ],
                 [
@@ -48,107 +48,16 @@ class AuthController extends Controller
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
-            if (User::where('email', $request->email)->first()->email_verified_at == null) throw new Exception('Please verify your email');
+            $data = Admin::where('email', $request->email)->first();
+            if (!Auth::guard('admin')->attempt($request->only('email', 'password'))) throw new Exception('Invalid email or password');
 
-            if (!Auth::attempt($request->only('email', 'password'))) throw new Exception('Invalid email or password');
+            $request->authenticate();
+            $request->session()->regenerate();
 
             Session::flash('success', ['text' => 'Login successfully']);
+
             return redirect()->route('user.dashboard');
         } catch (Exception $e) {
-            Session::flash('error', ['text' => $e->getMessage()]);
-            return redirect()->back()->withInput();
-        }
-    }
-
-
-    /**
-     * Register
-     */
-    public function register()
-    {
-        return view('user.auth.register');
-    }
-
-    public function registerStore(Request $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            $validator = Validator::make(
-                $request->all(),
-                [
-                    'first_name' => 'required|string|max:255',
-                    'last_name' => 'required|string|max:255',
-                    'email' => 'required|string|email|max:255|unique:users',
-                    'password' => 'required|string|min:8|max:20|confirmed',
-                ],
-                [
-                    'first_name.required' => 'First Name is required',
-                    'first_name.max' => 'First Name is too long',
-
-                    'last_name.required' => 'Last Name is required',
-                    'last_name.max' => 'Last Name is too long',
-
-                    'email.required' => 'Email is required',
-                    'email.email' => 'Email is invalid',
-                    'email.max' => 'Email is too long',
-                    'email.unique' => 'Email already exists',
-
-                    'password.required' => 'Password is required',
-                    'password.min' => 'Password must be at least 8 characters',
-                    'password.max' => 'Password must be less than 20 characters',
-                ]
-            );
-
-            if ($validator->fails()) throw new Exception($validator->errors()->first());
-
-            $token = Str::random(60);
-            $data = new User;
-            $data->first_name = $request->first_name;
-            $data->last_name = $request->last_name;
-            $data->email = $request->email;
-            $data->password = Hash::make($request->password);
-            $data->remember_token = $token;
-            $data->save();
-
-            Mail::to($data->email)->send(new RegisterMail([
-                'name' => $data->first_name . ' ' . $data->last_name,
-                'url' => route('user.register.verify', [
-                    'token' => $token,
-                    'email' => $data->email
-                ]),
-            ]));
-
-            DB::commit();
-
-            Session::flash('success', ['text' => 'Account registered successfully']);
-            return redirect()->route('user.login');
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            Session::flash('error', ['text' => $e->getMessage()]);
-            return redirect()->back()->withInput();
-        }
-    }
-
-    public function registerVerify(String $token, String $email)
-    {
-        try {
-            DB::beginTransaction();
-
-            $user = User::where('remember_token', $token)->where('email', $email)->first();
-            if (!$user) throw new Exception('Invalid Request');
-
-            $user->email_verified_at = now();
-            $user->save();
-
-            DB::commit();
-
-            Session::flash('success', ['text' => 'Your Account verified successfully']);
-            return redirect()->route('user.login');
-        } catch (Exception $e) {
-            DB::rollBack();
-
             Session::flash('error', ['text' => $e->getMessage()]);
             return redirect()->back()->withInput();
         }
@@ -160,7 +69,7 @@ class AuthController extends Controller
      */
     public function forgetPassword()
     {
-        return view('user.auth.forget-password');
+        return view($this->view . '.forget-password');
     }
 
     public function forgetPasswordStore(Request $request)
@@ -171,7 +80,7 @@ class AuthController extends Controller
             $validator = Validator::make(
                 $request->all(),
                 [
-                    'email' => 'required|string|email|max:255|exists:users,email',
+                    'email' => 'required|string|email|max:255|exists:admins,email',
                 ],
                 [
                     'email.required' => 'Email is required',
@@ -190,9 +99,9 @@ class AuthController extends Controller
                 ['token' => $token]
             );
 
-            $user = User::where('email', $request->email)->first();
+            $admin = Admin::where('email', $request->email)->first();
             Mail::to($request->email)->send(new ForgetPasswordMail([
-                'name' => $user->first_name . ' ' . $user->last_name,
+                'name' => $admin->first_name . ' ' . $admin->last_name,
                 'url' => route('user.password.reset', $data->token),
             ]));
 
@@ -215,10 +124,10 @@ class AuthController extends Controller
     public function resetPassword(String $token)
     {
         try {
-            $user = PasswordResetToken::where('token', $token)->first();
-            if (!$user) throw new Exception('Invalid Request');
+            $admin = PasswordResetToken::where('token', $token)->first();
+            if (!$admin) throw new Exception('Invalid Request');
 
-            return view('user.auth.reset-password', compact('token'));
+            return view($this->view . '.reset-password', compact('token'));
         } catch (Exception $e) {
             Session::flash('error', ['text' => $e->getMessage()]);
             return redirect()->route('user.login');
@@ -248,9 +157,9 @@ class AuthController extends Controller
             $passwordResetToken = PasswordResetToken::where('token', $request->token)->first();
             if (!$passwordResetToken) throw new Exception('Invalid Request');
 
-            $user = User::where('email', $passwordResetToken->email)->first();
-            $user->password = Hash::make($request->password);
-            $user->save();
+            $admin = Admin::where('email', $passwordResetToken->email)->first();
+            $admin->password = Hash::make($request->password);
+            $admin->save();
 
             $passwordResetToken->delete();
 
@@ -276,6 +185,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('admin.login');
+        return redirect('/');
     }
 }

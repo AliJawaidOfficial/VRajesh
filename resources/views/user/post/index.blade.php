@@ -381,9 +381,7 @@
                     @endif
                     @foreach ($dataSet as $post)
                         <tr onclick="showPostDetail({{ $post->id }})">
-                            <td class="text-center">
-                                {{ $loop->iteration != 10 ? $dataSet->currentPage() - 1 . $loop->iteration : $dataSet->currentPage() * $loop->iteration }}
-                            </td>
+                            <td class="text-center">{{ ($dataSet->currentPage() - 1) * $dataSet->perPage() + $loop->iteration }}</td>
                             <td>
                                 <p class="post-title mb-0">{{ $post->title }}</p>
                             </td>

@@ -315,7 +315,6 @@ class PostController extends Controller
                     } else {
                         $post = $this->linkedinService->postText($request->linkedin_organization, $request->description);
                     }
-                    return $post;
                 }
 
                 $data->posted = 1;
@@ -440,17 +439,11 @@ class PostController extends Controller
                 }
 
                 if ($request->has('on_linkedin')) {
-
-                    if ($mediaPath != null) {
-                        if ($media_type == 'image') {
-                            $post = $this->linkedinService->postImage($mediaPath, $request->title);
-                        } elseif ($media_type == 'video') {
-                            $post = $this->linkedinService->postVideo($mediaPath, $request->title);
-                        } else {
-                            throw new Exception('Invalid file type.');
-                        }
+                    if ($request->hasFile('media')) {
+                        if ($media_type == 'image') $post = $this->linkedinService->postImage($request->linkedin_organization, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+                        if ($media_type == 'video') $post = $this->linkedinService->postVideo($request->linkedin_organization, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
                     } else {
-                        $post = $this->linkedinService->postText($request->title);
+                        $post = $this->linkedinService->postText($request->linkedin_organization, $request->description);
                     }
                 }
 

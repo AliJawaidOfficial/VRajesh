@@ -28,7 +28,6 @@ use App\Http\Controllers\User\LinkedIn\PipelineController;
 Route::name('user.')
     ->group(function () {
 
-
         Route::middleware('guest')->group(function () {
             Route::get('login', [AuthController::class, 'login'])->name('login');
             Route::post('login', [AuthController::class, 'loginStore']);
@@ -63,6 +62,9 @@ Route::name('user.')
             Route::get('/connect/linkedin/callback', [ConnectController::class, 'linkedinCallback'])->name('connect.linkedin.callback');
             Route::get('/connect/linkedin/disconnect', [ConnectController::class, 'linkedinDisconnect'])->name('connect.linkedin.disconnect');
 
+            Route::get('/facebook-pages', [PostController::class, 'facebookPages'])->name('facebook.pages');
+            Route::get('instagram-accounts', [PostController::class, 'instagramAccounts'])->name('instagram.accounts');
+            Route::get('linkedin-accounts', [PostController::class, 'linkedinOrganizations'])->name('linkedin.organizations');
 
             /**
              * Post

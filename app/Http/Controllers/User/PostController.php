@@ -162,16 +162,51 @@ class PostController extends Controller
         }
     }
 
+
+
+    /**
+     * Post Create
+     */
     public function create()
     {
-        if (Auth::guard('web')->user()->meta_access_token != null) {
-            $pages = $this->facebookService->getPages();
-            return view('user.post.create', compact('pages'));
-        } else {
-            return view('user.post.create');
-        }
+        return view('user.post.create');
     }
 
+    public function facebookPages()
+    {
+        $facebookPages = [];
+        try {
+            if (Auth::guard('web')->user()->meta_access_token != null) $facebookPages = $this->facebookService->getPages();
+        } catch (Exception $e) {
+        }
+        return response()->json($facebookPages);
+    }
+
+    public function instagramAccounts()
+    {
+        $instagramPages = [];
+        try {
+            if (Auth::guard('web')->user()->meta_access_token != null) $instagramPages = $this->instagramService->getPages();
+        } catch (Exception $e) {
+        }
+        return response()->json($instagramPages);
+    }
+
+    public function linkedinOrganizations()
+    {
+        $linkedinOrganizations = [];
+        try {
+            if (Auth::guard('web')->user()->linkedin_access_token != null) $linkedinOrganizations = $this->linkedinService->getOrganizations();
+        } catch (Exception $e) {
+        }
+        return response()->json($linkedinOrganizations);
+    }
+
+
+
+    /**
+     * Post Store
+     */
     public function store(Request $request)
     {
         try {
@@ -184,8 +219,11 @@ class PostController extends Controller
                     'description' => 'nullable|required_without:media',
                     'media' => 'nullable',
                     'on_facebook' => 'nullable|boolean',
+                    'facebook_page' => 'nullable|required_if:on_facebook,1',
                     'on_instagram' => 'nullable|boolean',
+                    'instagram_account' => 'nullable|required_if:on_instagram,1',
                     'on_linkedin' => 'nullable|boolean',
+                    'linkedin_organization' => 'nullable|required_if:on_linkedin,1',
                     'schedule_date' => 'nullable|date|after:today',
                     'schedule_time' => 'nullable|date_format:H:i|after:now',
                     // 'page' => 'nullable|required_if:on_facebook',
@@ -199,7 +237,11 @@ class PostController extends Controller
                     'media.required' => 'Media is required',
                     'media.required_if' => 'Media is required',
 
-                    'page.required_if' => 'Page is required',
+                    'facebook_page.required_if' => 'Facebook Page is required.',
+
+                    'instagram_account.required_if' => 'Instagram Account is required.',
+
+                    'linkedin_organization.required_if' => 'Linkedin Organization is required.',
 
                     'schedule_date.after' => 'Schedule date should be a future date.',
 
@@ -252,40 +294,28 @@ class PostController extends Controller
                     $page_access_token = $page[1];
 
                     if ($request->hasFile('media')) {
-                        if ($media_type == 'image') {
-                            $post = $this->facebookService->postImage($page_id, $page_access_token, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                        } elseif ($media_type == 'video') {
-                            $post = $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                        }
+                        if ($media_type == 'image') $this->facebookService->postImage($page_id, $page_access_token, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+                        if ($media_type == 'video') $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
                     } else {
-                        $post = $this->facebookService->postText($page_id, $page_access_token, $request->description);
+                        $this->facebookService->postText($page_id, $page_access_token, $request->description);
                     }
                 }
 
                 if ($request->has('on_instagram')) {
                     if ($request->hasFile('media')) {
-                        $page = explode(' - ', $request->facebook_page);
-                        $page_id = $page[0];
-                        $page_access_token = $page[1];
-
-                        $user_ig_account = $this->instagramService->getInstagramAccount($page_id, $page_access_token);
-                        if ($user_ig_account != null) {
-                            if ($media_type == 'image') $post = $this->instagramService->postImage($user_ig_account, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                            if ($media_type == 'video') $post = $this->instagramService->postVideo($user_ig_account, env('APP_URL') . '/' . $onlyMediaPath, $mediaSize, $request->description);
-                        }
+                        if ($media_type == 'image') $post = $this->instagramService->postImage($request->instagram_account, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+                        // if ($media_type == 'video') $post = $this->instagramService->postVideo($request->instagram_account, env('APP_URL') . '/' . $onlyMediaPath, $mediaSize, $request->description);
                     }
                 }
 
                 if ($request->has('on_linkedin')) {
                     if ($request->hasFile('media')) {
-                        if ($media_type == 'image') {
-                            $post = $this->linkedinService->postImage(env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                        } elseif ($media_type == 'video') {
-                            // $post = $this->linkedinService->postVideo(env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                        }
+                        if ($media_type == 'image') $post = $this->linkedinService->postImage($request->linkedin_organization, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+                        if ($media_type == 'video') $post = $this->linkedinService->postVideo($request->linkedin_organization, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
                     } else {
-                        $post = $this->linkedinService->postText($request->description);
+                        $post = $this->linkedinService->postText($request->linkedin_organization, $request->description);
                     }
+                    return $post;
                 }
 
                 $data->posted = 1;
@@ -327,8 +357,8 @@ class PostController extends Controller
                     'on_facebook' => 'nullable|boolean',
                     'on_instagram' => 'nullable|boolean',
                     'on_linkedin' => 'nullable|boolean',
-                    'schedule_date' => 'nullable|date',
-                    'schedule_time' => 'nullable|date_format:H:i',
+                    'schedule_date' => 'nullable|date|after:today',
+                    'schedule_time' => 'nullable|date_format:H:i|after:now',
                 ],
                 [
                     'title.required' => 'Title is required',
@@ -336,8 +366,9 @@ class PostController extends Controller
                     'description.required' => 'Description is required',
                     'description.required_without' => 'Description is required',
 
-                    'media.required' => 'Media is required',
-                    'media.required_if' => 'Media is required',
+                    'schedule_date.after' => 'Schedule date should be a future date.',
+
+                    'schedule_time.after' => 'Schedule time should be a future time.',
                 ]
             );
 
@@ -393,16 +424,18 @@ class PostController extends Controller
                 $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
             } else {
                 if ($request->has('on_facebook')) {
-                    if ($mediaPath != null) {
+                    $page = explode(' - ', $request->facebook_page);
+                    $page_id = $page[0];
+                    $page_access_token = $page[1];
+
+                    if ($request->hasFile('media')) {
                         if ($media_type == 'image') {
-                            $post = $this->facebookService->postImage($mediaPath, $request->title);
+                            $post = $this->facebookService->postImage($page_id, $page_access_token, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
                         } elseif ($media_type == 'video') {
-                            $post = $this->facebookService->postVideo($mediaSize, $mediaPath, $request->title);
-                        } else {
-                            throw new Exception('Invalid file type.');
+                            $post = $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
                         }
                     } else {
-                        $post = $this->facebookService->postText($request->title);
+                        $post = $this->facebookService->postText($page_id, $page_access_token, $request->description);
                     }
                 }
 
@@ -512,8 +545,8 @@ class PostController extends Controller
                     'on_facebook' => 'nullable|boolean',
                     'on_instagram' => 'nullable|boolean',
                     'on_linkedin' => 'nullable|boolean',
-                    'schedule_date' => 'nullable|date',
-                    'schedule_time' => 'nullable|date_format:H:i',
+                    'schedule_date' => 'nullable|date|after:today',
+                    'schedule_time' => 'nullable|date_format:H:i|after:now',
                 ],
                 [
                     'title.required' => 'Title is required',
@@ -523,6 +556,10 @@ class PostController extends Controller
 
                     'media.required' => 'Media is required',
                     'media.required_if' => 'Media is required',
+
+                    'schedule_date.after' => 'Schedule date should be a future date.',
+
+                    'schedule_time.after' => 'Schedule time should be a future time.',
                 ]
             );
 
@@ -593,8 +630,8 @@ class PostController extends Controller
                     'on_facebook' => 'nullable|boolean',
                     'on_instagram' => 'nullable|boolean',
                     'on_linkedin' => 'nullable|boolean',
-                    'schedule_date' => 'nullable|date',
-                    'schedule_time' => 'nullable|date_format:H:i',
+                    'schedule_date' => 'nullable|date|after:today',
+                    'schedule_time' => 'nullable|date_format:H:i|after:now',
                 ],
                 [
                     'title.required' => 'Title is required',
@@ -604,6 +641,10 @@ class PostController extends Controller
 
                     'media.required' => 'Media is required',
                     'media.required_if' => 'Media is required',
+
+                    'schedule_date.after' => 'Schedule date should be a future date.',
+
+                    'schedule_time.after' => 'Schedule time should be a future time.',
                 ]
             );
 
@@ -683,8 +724,8 @@ class PostController extends Controller
                     'on_facebook' => 'nullable|boolean',
                     'on_instagram' => 'nullable|boolean',
                     'on_linkedin' => 'nullable|boolean',
-                    'schedule_date' => 'nullable|date',
-                    'schedule_time' => 'nullable|date_format:H:i',
+                    'schedule_date' => 'nullable|date|after:today',
+                    'schedule_time' => 'nullable|date_format:H:i|after:now',
                 ],
                 [
                     'title.required' => 'Title is required',
@@ -694,6 +735,10 @@ class PostController extends Controller
 
                     'media.required' => 'Media is required',
                     'media.required_if' => 'Media is required',
+
+                    'schedule_date.after' => 'Schedule date should be a future date.',
+
+                    'schedule_time.after' => 'Schedule time should be a future time.',
                 ]
             );
 

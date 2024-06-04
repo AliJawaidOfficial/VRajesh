@@ -369,11 +369,12 @@
                             toastr.error(response.error);
                         }
 
-                        $("#exampleModal").modal("hide");
+                        $("#exampleModal").removeClass("show");
                         $("#exampleModal").css("display", "none");
 
-                        $("#scheduleModal").modal("hide");
+                        $("#scheduleModal").removeClass("show");
                         $("#scheduleModal").css("display", "none");
+                        // $("#scheduleModal").hide();
                     }
                 });
             }
@@ -407,6 +408,84 @@
                 });
             }
         });
+
+        // Facbook Pages
+        function getFacebookPages(element) {
+            if (element.checked) {
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('user.facebook.pages') }}",
+                    beforeSend: function() {
+                        $("#facebookPagesSelect").html(`<option value="">Loading...</option>`);
+                    },
+                    success: function(response) {
+                        html = `<option value="">Select</option>`;
+
+                        if (response.length > 0) {
+                            response.forEach((page) => {
+                                html +=
+                                    `<option value="${page.id} - ${page.access_token}">${page.name}</option>`
+                            })
+                        } else {
+                            html = `<option value="">No Page Found</option>`;
+                        }
+                        $("#facebookPagesSelect").html(html);
+                    }
+                });
+            }
+        }
+
+        // Instagram Accounts
+        function getInstagramAccounts(element) {
+            if (element.checked) {
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('user.instagram.accounts') }}",
+                    beforeSend: function() {
+                        $("#instagramAccountSelect").html(`<option value="">Loading...</option>`);
+                    },
+                    success: function(response) {
+                        html = `<option value="">Select</option>`;
+
+                        if (response.length > 0) {
+                            response.forEach((account) => {
+                                html +=
+                                    `<option value="${account.ig_business_account}">${account.name}</option>`
+                            })
+                        } else {
+                            html = `<option value="">No Account Found</option>`;
+                        }
+                        $("#instagramAccountSelect").html(html);
+                    }
+                });
+            }
+        }
+
+        // LinkedIn Organizations
+        function getLinkedInOrganizations(element) {
+            if (element.checked) {
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('user.linkedin.organizations') }}",
+                    beforeSend: function() {
+                        $("#linkedinOrganizationsSelect").html(`<option value="">Loading...</option>`);
+                    },
+                    success: function(response) {
+                        html = `<option value="">Select</option>`;
+
+                        if (response.length > 0) {
+                            response.forEach((account) => {
+                                html +=
+                                    `<option value="${account.id}">${account.name} (${account.vanity_name})</option>`
+                            })
+                        } else {
+                            html = `<option value="">No Account Found</option>`;
+                        }
+                        $("#linkedinOrganizationsSelect").html(html);
+                    }
+                });
+            }
+        }
     </script>
 @endsection
 
@@ -435,8 +514,8 @@
                                 <p class="mb-0">Check to share on:</p>
 
                                 <label class="d-inline-block platform-checkbox">
-                                    <input type="checkbox" name="on_facebook" value="1" data-bs-toggle="facebook-post"
-                                        class="form-check-input toggle-post"
+                                    <input type="checkbox" name="on_facebook" onchange="getFacebookPages(this)"
+                                        value="1" data-bs-toggle="facebook-post" class="form-check-input toggle-post"
                                         @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif />
                                     -
                                     <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"
@@ -444,20 +523,20 @@
                                 </label>
 
                                 <label class="d-inline-block platform-checkbox">
-                                    <input type="checkbox" name="on_linkedin" value="1" data-bs-toggle="linkedin-post"
-                                        class="form-check-input toggle-post"
-                                        @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif />
+                                    <input type="checkbox" name="on_instagram" onchange="getInstagramAccounts(this)"
+                                        value="1" data-bs-toggle="instagram-post" class="form-check-input toggle-post"
+                                        @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif />
                                     -
-                                    <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
+                                    <span class="d-inline-block ms-1"><i class="fab fa-instagram"
                                             style="font-size: 17px"></i></span>
                                 </label>
 
                                 <label class="d-inline-block platform-checkbox">
-                                    <input type="checkbox" name="on_instagram" value="1"
-                                        data-bs-toggle="instagram-post" class="form-check-input toggle-post"
-                                        @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif />
+                                    <input type="checkbox" name="on_linkedin" onchange="getLinkedInOrganizations(this)"
+                                        value="1" data-bs-toggle="linkedin-post" class="form-check-input toggle-post"
+                                        @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif />
                                     -
-                                    <span class="d-inline-block ms-1"><i class="fab fa-instagram"
+                                    <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
                                             style="font-size: 17px"></i></span>
                                 </label>
                             </div>
@@ -471,28 +550,53 @@
                             </div>
                         </div>
 
+                        {{-- Facebook Pages --}}
                         @if (Auth::guard('web')->user()->meta_access_token != null)
                             <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
                                 <div class="d-flex align-items-center gap-3">
-                                    <p class="mb-0">Pages:</p>
+                                    <p class="mb-0">Facebook Pages:</p>
 
                                     <div class="d-flex flex-column gap-1 w-100">
-                                        <select name="facebook_page" id="" class="form-select w-100" required>
-                                            <option value="">Select Page</option>
-                                            @if (count($pages) > 0)
-                                                @foreach ($pages as $page)
-                                                    <option value="{{ $page['id'] }} - {{ $page['access_token'] }}">
-                                                        {{ $page['name'] }}
-                                                    </option>
-                                                @endforeach
-                                            @else
-                                                <option value="">No Pages Found</option>
-                                            @endif
+                                        <select name="facebook_page" id="facebookPagesSelect" class="form-select w-100">
+                                            <option value="">Select</option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
                         @endif
+
+                        {{-- Instagram Account --}}
+                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                            <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <p class="mb-0">Instagram Account:</p>
+
+                                    <div class="d-flex flex-column gap-1 w-100">
+                                        <select name="instagram_account" id="instagramAccountSelect"
+                                            class="form-select w-100">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- LinkedIn Organizations --}}
+                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                            <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <p class="mb-0">LinkedIn Organizations:</p>
+
+                                    <div class="d-flex flex-column gap-1 w-100">
+                                        <select name="linkedin_organization" id="linkedinOrganizationsSelect"
+                                            class="form-select w-100">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                     </div>
 
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">

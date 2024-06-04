@@ -12,6 +12,12 @@
             'active_url' => 'admin.user.*',
             'icon' => asset('assets/images/icons/user.png'),
         ],
+        [
+            'name' => 'Packages',
+            'url' => route('admin.package.index'),
+            'active_url' => 'admin.package.*',
+            'icon' => asset('assets/images/icons/user.png'),
+        ],
     ];
 @endphp
 

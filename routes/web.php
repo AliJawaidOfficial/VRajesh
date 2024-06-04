@@ -26,6 +26,7 @@ use App\Http\Controllers\User\LinkedIn\PipelineController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\PackageController as AdminPackageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -174,6 +175,23 @@ Route::prefix('/admin')
                         Route::get('/{id}/edit', 'edit')->name('edit');
                         Route::post('/{id}/edit', 'update')->name('update');
                         Route::delete('/{id}/delete', 'destroy')->name('destroy');
+                    });
+
+                /**
+                 * Packages
+                 */
+                Route::controller(AdminPackageController::class)
+                    ->prefix('/packages')
+                    ->name('package.')
+                    ->group(function () {
+                        Route::get('/', 'index')->name('index');
+                        Route::get('/create', 'create')->name('create');
+                        Route::post('/create', 'store')->name('store');
+                        Route::get('/{id}/edit', 'edit')->name('edit');
+                        Route::post('/{id}/edit', 'update')->name('update');
+                        Route::delete('/{id}/delete', 'destroy')->name('destroy');
+
+                        Route::get('/{id}/visibility/{visibility}', 'visibility')->name('visibility');
                     });
             });
     });

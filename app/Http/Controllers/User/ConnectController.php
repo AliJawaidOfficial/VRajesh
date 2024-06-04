@@ -41,9 +41,10 @@ class ConnectController extends Controller
                 'public_profile',
                 'pages_show_list',
                 'pages_read_engagement',
+                'pages_manage_posts',
                 'instagram_basic',
                 'instagram_content_publish',
-                'instagram_manage_media'
+                'instagram_manage_media',
             ])
             ->redirect();
     }
@@ -80,7 +81,6 @@ class ConnectController extends Controller
         $user = User::where('id', Auth::guard('web')->user()->id)->first();
         $user->meta_access_token = null;
         $user->meta_name = null;
-        $user->meta_email = null;
         $user->meta_avatar = null;
         $user->save();
         return redirect()->route('user.connect');
@@ -93,7 +93,6 @@ class ConnectController extends Controller
      */
     public function linkedin()
     {
-        // return Socialite::driver('linkedin-openid')->redirect();
         return redirect($this->linkedinService->generateAuthUrl());
     }
 
@@ -113,7 +112,6 @@ class ConnectController extends Controller
             $user->linkedin_urn = $getProfile['sub'];
             $user->linkedin_name = $getProfile['name'];
             $user->linkedin_avatar = $getProfile['picture'];
-            $user->linkedin_email = $getProfile['email'];
             $user->save();
 
             return redirect()->route('user.connect');

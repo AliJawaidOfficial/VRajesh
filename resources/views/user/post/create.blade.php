@@ -340,8 +340,6 @@
                 $("#scheduleModal").modal("hide");
                 $("#scheduleModal").css("display", "none");
                 $("#postForm").submit();
-                $("#exampleModal").modal("hide");
-                $("#exampleModal").css("display", "none");
             }
         });
 
@@ -360,7 +358,8 @@
                     },
                     success: function(response) {
                         if (response.status == 200) {
-                            if ($("#post_schedule_date").val() != null) {
+                            console.log($("#scheduleDate").val());
+                            if ($("#scheduleDate").val() != "") {
                                 toastr.success("Post scheduled successfully");
                             } else {
                                 toastr.success("Post created successfully");
@@ -368,13 +367,8 @@
                         } else {
                             toastr.error(response.error);
                         }
-
-                        $("#exampleModal").removeClass("show");
-                        $("#exampleModal").css("display", "none");
-
-                        $("#scheduleModal").removeClass("show");
-                        $("#scheduleModal").css("display", "none");
-                        // $("#scheduleModal").hide();
+                        
+                        $("#exampleModal").modal("hide");
                     }
                 });
             }
@@ -392,18 +386,16 @@
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
-                        $("#exampleModal").show()
+                        $("#exampleModal").modal("show");
                     },
                     success: function(response) {
                         if (response.status == 200) {
                             toastr.success("Post saved as draft");
-                            $("#exampleModal").modal("hide");
-                            $("#exampleModal").css("display", "none");
                         } else {
                             toastr.error(response.error);
-                            $("#exampleModal").modal("hide");
-                            $("#exampleModal").css("display", "none");
                         }
+                        
+                        $("#exampleModal").modal("hide");
                     }
                 });
             }
@@ -814,8 +806,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="scheduleTime" class="form-label">Time</label>
-                            <input type="time" class="form-control" min="{{ date('H:i') }}" id="scheduleTime"
-                                name="schedule_time" required>
+                            <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Schedule</button>
                     </form>

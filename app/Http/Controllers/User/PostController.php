@@ -225,7 +225,7 @@ class PostController extends Controller
                     'on_linkedin' => 'nullable|boolean',
                     'linkedin_organization' => 'nullable|required_if:on_linkedin,1',
                     'schedule_date' => 'nullable|date|after:today',
-                    'schedule_time' => 'nullable|date_format:H:i|after:now',
+                    'schedule_time' => 'nullable|date_format:H:i',
                     // 'page' => 'nullable|required_if:on_facebook',
                 ],
                 [
@@ -251,76 +251,76 @@ class PostController extends Controller
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
-            if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
+            // if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
 
-            $data = new Post;
-            $data->user_id = Auth::guard('web')->user()->id;
-            $data->title = $request->title;
-            $data->description = str_replace('\n', "\n", $request->description);
+            // $data = new Post;
+            // $data->user_id = Auth::guard('web')->user()->id;
+            // $data->title = $request->title;
+            // $data->description = str_replace('\n', "\n", $request->description);
 
-            $mediaPath = null;
-            $mediaType = null;
-            $media_type = null;
+            // $mediaPath = null;
+            // $mediaType = null;
+            // $media_type = null;
 
-            if ($request->hasFile('media')) {
-                $media = $request->file('media');
-                $mediaName = time() . '.' . $media->getClientOriginalExtension();
-                $mediaType = $media->getMimeType();
-                $mediaSize = $media->getSize();
-                $media->move(public_path('posts'), $mediaName);
-                $onlyMediaPath = 'posts/' . $mediaName;
-                $mediaPath = public_path('posts') . '/' . $mediaName;
+            // if ($request->hasFile('media')) {
+            //     $media = $request->file('media');
+            //     $mediaName = time() . '.' . $media->getClientOriginalExtension();
+            //     $mediaType = $media->getMimeType();
+            //     $mediaSize = $media->getSize();
+            //     $media->move(public_path('posts'), $mediaName);
+            //     $onlyMediaPath = 'posts/' . $mediaName;
+            //     $mediaPath = public_path('posts') . '/' . $mediaName;
 
-                if (str_starts_with($mediaType, 'image/')) {
-                    $media_type = 'image';
-                } elseif (str_starts_with($mediaType, 'video/')) {
-                    $media_type = 'video';
-                }
+            //     if (str_starts_with($mediaType, 'image/')) {
+            //         $media_type = 'image';
+            //     } elseif (str_starts_with($mediaType, 'video/')) {
+            //         $media_type = 'video';
+            //     }
 
-                $data->media = $onlyMediaPath;
-                $data->media_type = $media_type;
-            }
+            //     $data->media = $onlyMediaPath;
+            //     $data->media_type = $media_type;
+            // }
 
-            if ($request->has('on_facebook')) $data->on_facebook = 1;
-            if ($request->has('on_instagram')) $data->on_instagram = 1;
-            if ($request->has('on_linkedin')) $data->on_linkedin = 1;
+            // if ($request->has('on_facebook')) $data->on_facebook = 1;
+            // if ($request->has('on_instagram')) $data->on_instagram = 1;
+            // if ($request->has('on_linkedin')) $data->on_linkedin = 1;
 
-            if ($request->schedule_date != null && $request->schedule_time != null) {
-                $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
-            } else {
-                if ($request->has('on_facebook')) {
-                    $page = explode(' - ', $request->facebook_page);
-                    $page_id = $page[0];
-                    $page_access_token = $page[1];
+            // if ($request->schedule_date != null && $request->schedule_time != null) {
+            //     $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
+            // } else {
+            //     if ($request->has('on_facebook')) {
+            //         $page = explode(' - ', $request->facebook_page);
+            //         $page_id = $page[0];
+            //         $page_access_token = $page[1];
 
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->facebookService->postImage($page_id, $page_access_token, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                        if ($media_type == 'video') $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                    } else {
-                        $this->facebookService->postText($page_id, $page_access_token, $request->description);
-                    }
-                }
+            //         if ($request->hasFile('media')) {
+            //             if ($media_type == 'image') $this->facebookService->postImage($page_id, $page_access_token, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+            //             if ($media_type == 'video') $this->facebookService->postVideo($page_id, $page_access_token, $mediaSize, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+            //         } else {
+            //             $this->facebookService->postText($page_id, $page_access_token, $request->description);
+            //         }
+            //     }
 
-                if ($request->has('on_instagram')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $post = $this->instagramService->postImage($request->instagram_account, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                        // if ($media_type == 'video') $post = $this->instagramService->postVideo($request->instagram_account, env('APP_URL') . '/' . $onlyMediaPath, $mediaSize, $request->description);
-                    }
-                }
+            //     if ($request->has('on_instagram')) {
+            //         if ($request->hasFile('media')) {
+            //             if ($media_type == 'image') $post = $this->instagramService->postImage($request->instagram_account, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+            //             // if ($media_type == 'video') $post = $this->instagramService->postVideo($request->instagram_account, env('APP_URL') . '/' . $onlyMediaPath, $mediaSize, $request->description);
+            //         }
+            //     }
 
-                if ($request->has('on_linkedin')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $post = $this->linkedinService->postImage($request->linkedin_organization, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                        if ($media_type == 'video') $post = $this->linkedinService->postVideo($request->linkedin_organization, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
-                    } else {
-                        $post = $this->linkedinService->postText($request->linkedin_organization, $request->description);
-                    }
-                }
+            //     if ($request->has('on_linkedin')) {
+            //         if ($request->hasFile('media')) {
+            //             if ($media_type == 'image') $post = $this->linkedinService->postImage($request->linkedin_organization, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+            //             if ($media_type == 'video') $post = $this->linkedinService->postVideo($request->linkedin_organization, env('APP_URL') . '/' . $onlyMediaPath, $request->description);
+            //         } else {
+            //             $post = $this->linkedinService->postText($request->linkedin_organization, $request->description);
+            //         }
+            //     }
 
-                $data->posted = 1;
-            }
+            //     $data->posted = 1;
+            // }
 
-            $data->save();
+            // $data->save();
 
             DB::commit();
 
@@ -357,7 +357,7 @@ class PostController extends Controller
                     'on_instagram' => 'nullable|boolean',
                     'on_linkedin' => 'nullable|boolean',
                     'schedule_date' => 'nullable|date|after:today',
-                    'schedule_time' => 'nullable|date_format:H:i|after:now',
+                    'schedule_time' => 'nullable|date_format:H:i',
                 ],
                 [
                     'title.required' => 'Title is required',
@@ -539,7 +539,7 @@ class PostController extends Controller
                     'on_instagram' => 'nullable|boolean',
                     'on_linkedin' => 'nullable|boolean',
                     'schedule_date' => 'nullable|date|after:today',
-                    'schedule_time' => 'nullable|date_format:H:i|after:now',
+                    'schedule_time' => 'nullable|date_format:H:i',
                 ],
                 [
                     'title.required' => 'Title is required',
@@ -624,7 +624,7 @@ class PostController extends Controller
                     'on_instagram' => 'nullable|boolean',
                     'on_linkedin' => 'nullable|boolean',
                     'schedule_date' => 'nullable|date|after:today',
-                    'schedule_time' => 'nullable|date_format:H:i|after:now',
+                    'schedule_time' => 'nullable|date_format:H:i',
                 ],
                 [
                     'title.required' => 'Title is required',
@@ -718,7 +718,7 @@ class PostController extends Controller
                     'on_instagram' => 'nullable|boolean',
                     'on_linkedin' => 'nullable|boolean',
                     'schedule_date' => 'nullable|date|after:today',
-                    'schedule_time' => 'nullable|date_format:H:i|after:now',
+                    'schedule_time' => 'nullable|date_format:H:i',
                 ],
                 [
                     'title.required' => 'Title is required',

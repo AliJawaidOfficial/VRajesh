@@ -231,32 +231,37 @@
                                     <strong>Description:</strong> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
                                 </div>
                                 <input type="hidden" id="postDetailId" value="${response.data.id}"/>
-                                <div class="d-flex align-items-center gap-3 py-2">
-                                    <div>
+                                <div class="py-2">
+                                    <div class="mb-2">
                                         <strong>Platforms:</strong>
                                     </div>
                         `;
                         html += `
+                                <div class="d-flex flex-column gap-2">
                                     <div class="d-flex gap-2">
                                         <input type="checkbox" style="pointer-events: none; display: none"
                                             id="facebook-post-detail" ${(response.data.on_facebook) ? 'checked' : ''}>
                         `;
-                        if (response.data.on_facebook) html += `<i class="fab fa-facebook"></i>`;
+                        if (response.data.on_facebook) html +=
+                            `<i class="fab fa-facebook m-0"></i><span class="m-0 ms-2">${response.data.facebook_page_name}</span>`;
                         html += `
                                     </div>
                                     <div class="d-flex gap-2">
                                         <input type="checkbox" style="pointer-events: none; display: none"
                                             id="instagram-post-detail" ${(response.data.on_instagram) ? 'checked' : ''}>
                         `;
-                        if (response.data.on_instagram) html += `<i class="fab fa-instagram"></i>`;
+                        if (response.data.on_instagram) html +=
+                            `<i class="fab fa-instagram"></i><span class="m-0 ms-2">${response.data.instagram_account_name}</span>`;
                         html += `
                                     </div>
                                     <div class="d-flex gap-2">
                                         <input type="checkbox" style="pointer-events: none; display: none"
                                             id="linkedin-post-detail" ${(response.data.on_linkedin) ? 'checked' : ''}>
                         `;
-                        if (response.data.on_linkedin) html += `<i class="fab fa-linkedin"></i>`;
+                        if (response.data.on_linkedin) html +=
+                            `<i class="fab fa-linkedin"></i><span class="m-0 ms-2">${response.data.linkedin_company_name}</span>`;
                         html += `
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -387,76 +392,6 @@
                 }
             });
         });
-
-
-        // // Facbook Pages
-        // function getFacebookPages(element) {
-        //     if (element.checked) {
-        //         $.ajax({
-        //             type: "GET",
-        //             url: "{{ route('user.facebook.pages') }}",
-        //             success: function(response) {
-        //                 html = `<option value="">Select</option>`;
-
-        //                 if (response.length > 0) {
-        //                     response.forEach((page) => {
-        //                         html +=
-        //                             `<option value="${page.id} - ${page.access_token} - ${page.name}">${page.name}</option>`
-        //                     })
-        //                 } else {
-        //                     html = `<option value="">No Page Found</option>`;
-        //                 }
-        //                 return html;
-        //             }
-        //         });
-        //     }
-        // }
-
-        // // Instagram Accounts
-        // function getInstagramAccounts(element) {
-        //     if (element.checked) {
-        //         $.ajax({
-        //             type: "GET",
-        //             url: "{{ route('user.instagram.accounts') }}",
-        //             success: function(response) {
-        //                 html = `<option value="">Select</option>`;
-
-        //                 if (response.length > 0) {
-        //                     response.forEach((account) => {
-        //                         html +=
-        //                             `<option value="${account.ig_business_account} - ${account.name}">${account.name}</option>`
-        //                     })
-        //                 } else {
-        //                     html = `<option value="">No Account Found</option>`;
-        //                 }
-        //                 return html;
-        //             }
-        //         });
-        //     }
-        // }
-
-        // // LinkedIn Organizations
-        // function getLinkedInOrganizations(element) {
-        //     if (element.checked) {
-        //         $.ajax({
-        //             type: "GET",
-        //             url: "{{ route('user.linkedin.organizations') }}",
-        //             success: function(response) {
-        //                 html = `<option value="">Select</option>`;
-
-        //                 if (response.length > 0) {
-        //                     response.forEach((account) => {
-        //                         html +=
-        //                             `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
-        //                     })
-        //                 } else {
-        //                     html = `<option value="">No Account Found</option>`;
-        //                 }
-        //                 return html;
-        //             }
-        //         });
-        //     }
-        // }
 
         // Facebook Pages
         function getFacebookPages(element) {

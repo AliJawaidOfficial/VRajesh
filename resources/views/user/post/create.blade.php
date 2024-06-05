@@ -467,6 +467,7 @@
         // Facbook Pages
         function getFacebookPages(element) {
             if (element.checked) {
+                $("#facebookSelectSection").fadeIn();
                 $.ajax({
                     type: "GET",
                     url: "{{ route('user.facebook.pages') }}",
@@ -487,12 +488,15 @@
                         $("#facebookPagesSelect").html(html);
                     }
                 });
+            } else {
+                $("#facebookSelectSection").fadeOut();
             }
         }
 
         // Instagram Accounts
         function getInstagramAccounts(element) {
             if (element.checked) {
+                $("#instagramSelectSection").fadeIn();
                 $.ajax({
                     type: "GET",
                     url: "{{ route('user.instagram.accounts') }}",
@@ -513,12 +517,15 @@
                         $("#instagramAccountSelect").html(html);
                     }
                 });
+            } else {
+                $("#instagramSelectSection").fadeOut();
             }
         }
 
         // LinkedIn Organizations
         function getLinkedInOrganizations(element) {
             if (element.checked) {
+                $("#linkedinSelectSection").fadeIn();
                 $.ajax({
                     type: "GET",
                     url: "{{ route('user.linkedin.organizations') }}",
@@ -539,6 +546,8 @@
                         $("#linkedinOrganizationsSelect").html(html);
                     }
                 });
+            } else {
+                $("#linkedinSelectSection").fadeOut();
             }
         }
     </script>
@@ -605,53 +614,61 @@
                             </div>
                         </div>
 
-                        {{-- Facebook Pages --}}
-                        @if (Auth::guard('web')->user()->meta_access_token != null)
-                            <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <p class="mb-0">Facebook Pages:</p>
+                        <div class="row">
+                            {{-- Facebook Pages --}}
+                            @if (Auth::guard('web')->user()->meta_access_token != null)
+                                <div class="col-md-4">
+                                    <div class="m-0" style="display: none;" id="facebookSelectSection">
+                                        <div class="d-flex flex-column gap-1">
+                                            <p class="mb-0">Facebook Pages:</p>
 
-                                    <div class="d-flex flex-column gap-1 w-100">
-                                        <select name="facebook_page" id="facebookPagesSelect" class="form-select w-100">
-                                            <option value="">Select</option>
-                                        </select>
+                                            <div class="d-flex flex-column gap-1 w-100">
+                                                <select name="facebook_page" id="facebookPagesSelect"
+                                                    class="form-select w-100">
+                                                    <option value="">Select</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
 
-                        {{-- Instagram Account --}}
-                        @if (Auth::guard('web')->user()->meta_access_token != null)
-                            <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <p class="mb-0">Instagram Account:</p>
+                            {{-- Instagram Account --}}
+                            @if (Auth::guard('web')->user()->meta_access_token != null)
+                                <div class="col-md-4">
+                                    <div class="m-0" style="display: none;" id="instagramSelectSection">
+                                        <div class="d-flex flex-column gap-1">
+                                            <p class="mb-0">Instagram Account:</p>
 
-                                    <div class="d-flex flex-column gap-1 w-100">
-                                        <select name="instagram_account" id="instagramAccountSelect"
-                                            class="form-select w-100">
-                                            <option value="">Select</option>
-                                        </select>
+                                            <div class="d-flex flex-column gap-1 w-100">
+                                                <select name="instagram_account" id="instagramAccountSelect"
+                                                    class="form-select w-100">
+                                                    <option value="">Select</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
+                            @endif
 
-                        {{-- LinkedIn Organizations --}}
-                        @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                            <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <p class="mb-0">LinkedIn Organizations:</p>
+                            {{-- Instagram Account --}}
+                            @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                <div class="col-md-4">
+                                    <div class="m-0" style="display: none;" id="linkedinSelectSection">
+                                        <div class="d-flex flex-column gap-1">
+                                            <p class="mb-0">LinkedIn Organizations:</p>
 
-                                    <div class="d-flex flex-column gap-1 w-100">
-                                        <select name="linkedin_organization" id="linkedinOrganizationsSelect"
-                                            class="form-select w-100">
-                                            <option value="">Select</option>
-                                        </select>
+                                            <div class="d-flex flex-column gap-1 w-100">
+                                                <select name="linkedin_organization" id="linkedinOrganizationsSelect"
+                                                    class="form-select w-100">
+                                                    <option value="">Select</option>
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endif
-
+                            @endif
+                        </div>
                     </div>
 
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">
@@ -736,7 +753,7 @@
                                 <img src="#" alt="Post Image" style="display: none" class="img-fluid"
                                     id="postImage">
                                 <video controls class="w-100" style="display: none" id="postVideo">
-                                    <source src="video.mp4" type="video/mp4">
+                                    <source src="" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
                             </div>
@@ -782,7 +799,8 @@
                         <div
                             class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
                             <div class="d-flex align-items-center">
-                                <img src="{{ Auth::guard('web')->user()->meta_avatar }}" alt="Profile Picture" class="rounded-circle">
+                                <img src="{{ Auth::guard('web')->user()->meta_avatar }}" alt="Profile Picture"
+                                    class="rounded-circle">
                                 <div class="ms-2">
                                     <h6 class="mb-0">{{ Auth::guard('web')->user()->meta_name }}</h6>
                                     <small class="text-muted">Original audio</small>
@@ -805,8 +823,7 @@
                         <div class="card-footer d-flex flex-column">
                             <div class="actions">
                                 <span><svg aria-label="Like" class="x1lliihq x1n2onr6 xyb1xck" fill="currentColor"
-                                        height="24" role="img" vie
-                                        wBox="0 0 24 24" width="24">
+                                        height="24" role="img" vie wBox="0 0 24 24" width="24">
                                         <title>Like</title>
                                         <path
                                             d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z">

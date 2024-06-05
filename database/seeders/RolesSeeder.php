@@ -15,7 +15,7 @@ class RolesSeeder extends Seeder
         Role::create([
             'name' => 'Basic',
             'guard_name' => 'web',
-            'visibility' => 1,
+            'is_visible' => 1,
         ])->givePermissionTo([
             'connect_facebook',
             'facebook_text_post',
@@ -26,7 +26,7 @@ class RolesSeeder extends Seeder
         Role::create([
             'name' => 'Premium',
             'guard_name' => 'web',
-            'visibility' => 1,
+            'is_visible' => 1,
         ])->givePermissionTo([
             'connect_facebook',
             'connect_linkedin',

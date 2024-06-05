@@ -41,7 +41,7 @@ return new class extends Migration
             }
             $table->string('name');       // For MySQL 8.0 use string('name', 125);
             $table->string('guard_name'); // For MySQL 8.0 use string('guard_name', 125);
-            $table->boolean('visibility')->default(1); // For MySQL 8.0 use boolean('visibility', 1);
+            $table->boolean('is_visible')->default(1); // For MySQL 8.0 use boolean('visibility', 1);
             $table->timestamps();
             if ($teams || config('permission.testing')) {
                 $table->unique([$columnNames['team_foreign_key'], 'name', 'guard_name']);

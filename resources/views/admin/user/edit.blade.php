@@ -61,6 +61,17 @@
                                     class="form-control" placeholder="Enter LinkedIn Email" />
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="package" class="form-label">Packages</label>
+                                <select type="text" name="package" id="package" class="form-select">
+                                    <option value="">Select</option>
+                                    @foreach ($packages as $package)
+                                        <option value="{{ $package->id }}" {{ $data->hasRole($package->id) ? 'selected' : '' }}>{{ $package->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer">

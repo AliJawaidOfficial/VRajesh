@@ -145,7 +145,7 @@ class PackageController extends Controller
         try {
             if ($visibility != 0 && $visibility != 1) throw new Exception('Invalid visibility');
             
-            $data = Role::find($id)->update(['visibility' => $visibility]);
+            $data = Role::find($id)->update(['is_visible' => $visibility]);
 
             Session::flash('success', ['text' => 'Package visibility updated successfully']);
             return redirect()->route('admin.package.index');

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -25,7 +26,7 @@ class UserController extends Controller
         $dataSet = User::query();
         if ($q) $dataSet = $dataSet->where(function ($query) use ($q) {
             $query->where(DB::raw('CONCAT(first_name, " ", last_name)'), 'like', "%$q%")
-                  ->orWhere('email', 'like', "%$q%");
+                ->orWhere('email', 'like', "%$q%");
         });
 
         $dataSet = $dataSet->OrderBy('id', 'desc')
@@ -39,7 +40,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        return view($this->view . 'create');
+        $packages = Role::all();
+        return view($this->view . 'create', compact('packages'));
     }
 
     /**
@@ -57,6 +59,7 @@ class UserController extends Controller
                     'password' => 'required|string|min:8|max:20|confirmed',
                     'meta_email' => 'nullable|string|email|max:255',
                     'linkedin_email' => 'nullable|string|email|max:255',
+                    'package' => 'required|exists:roles,id',
                 ],
                 [
                     'first_name.required' => 'First Name is required',
@@ -80,6 +83,9 @@ class UserController extends Controller
 
                     'linkedin_email.email' => 'Linkedin Email is invalid',
                     'linkedin_email.max' => 'Linkedin Email is too long',
+
+                    'package.required' => 'Package is required',
+                    'package.exists' => 'Package not found',
                 ]
             );
 
@@ -94,6 +100,9 @@ class UserController extends Controller
             $data->meta_email = $request->meta_email;
             $data->linkedin_email = $request->linkedin_email;
             $data->save();
+
+            $role = Role::where('id', $request->package)->first();
+            $data->syncRoles($role);
 
             Session::flash('success', ['text' => 'User created successfully']);
             return redirect()->route('admin.user.index');
@@ -111,7 +120,11 @@ class UserController extends Controller
         try {
             $data = User::find($id);
             if (!$data) throw new Exception('User not found');
-            return view($this->view . 'edit', compact('data'));
+
+            $userRole = $data->getRoleNames()->first();
+            $packages = Role::all();
+
+            return view($this->view . 'edit', compact('data', 'packages'));
         } catch (Exception $e) {
             Session::flash('error', ['text' => $e->getMessage()]);
             return redirect()->back();
@@ -155,6 +168,7 @@ class UserController extends Controller
                         'email' => 'required|string|email|max:255|unique:users,email,' . $id,
                         'meta_email' => 'nullable|string|email|max:255',
                         'linkedin_email' => 'nullable|string|email|max:255',
+                        'package' => 'required|exists:roles,id',
                     ],
                     [
                         'first_name.required' => 'First Name is required',
@@ -173,6 +187,8 @@ class UserController extends Controller
 
                         'linkedin_email.email' => 'Linkedin Email is invalid',
                         'linkedin_email.max' => 'Linkedin Email is too long',
+                        'package.required' => 'Package is required',
+                        'package.exists' => 'Package not found',
                     ]
                 );
 
@@ -186,6 +202,9 @@ class UserController extends Controller
                 $data->meta_email = $request->meta_email;
                 $data->linkedin_email = $request->linkedin_email;
                 $data->save();
+
+                $role = Role::where('id', $request->package)->first();
+                $data->syncRoles($role);
 
                 Session::flash('success', ['text' => 'User updated successfully']);
             }

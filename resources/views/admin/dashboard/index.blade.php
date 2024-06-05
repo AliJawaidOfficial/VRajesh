@@ -15,10 +15,8 @@
 {{-- Content --}}
 @section('content')
     <section class="main-content-wrapper d-flex flex-column">
-        <div class="main-inventory-heading d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center justify-content-center">
-                <span class="heading">Dashboard</span>
-            </div>
+        <div class="h3 p-3 bg-white text-center rounded-6">
+            <h3>Dashboard</h3>
         </div>
     </section>
 @endsection

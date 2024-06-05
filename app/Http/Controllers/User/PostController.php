@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
@@ -405,6 +406,12 @@ class PostController extends Controller
 
             $data->save();
 
+            $oldPost = Post::where('id', $request->post_id)->first();
+            if ($oldPost->draft == 1) {
+                unlink(public_path($oldPost->media));
+                $oldPost->delete();
+            }
+
             DB::commit();
 
             return response()->json([
@@ -412,6 +419,37 @@ class PostController extends Controller
             ]);
         } catch (Exception $e) {
             DB::rollBack();
+            return response()->json([
+                'status' => 500,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function destroy(Request $request)
+    {
+        try {
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'post_id' => 'required|exists:posts,id',
+                ],
+                [
+                    'post_id.required' => 'Invalid Request',
+                    'post_id.exists' => 'Invalid Request',
+                ]
+            );
+
+            if ($validator->fails()) throw new Exception($validator->errors()->first());
+
+            $user = Auth::guard('web')->user();
+            $data = Post::where('user_id', $user->id)->where('id', $request->post_id)->first();
+            if ($data->media != null) if (file_exists(public_path($data->media))) unlink(public_path($data->media));
+            $data->delete();
+
+            Session::flash('success', 'Post deleted successfully');
+            return redirect()->back();
+        } catch (Exception $e) {
             return response()->json([
                 'status' => 500,
                 'error' => $e->getMessage()

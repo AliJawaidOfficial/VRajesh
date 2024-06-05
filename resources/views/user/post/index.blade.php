@@ -199,40 +199,70 @@
                 dataType: "json",
                 success: function(response) {
                     if (response.status == 200) {
-                        let mediaHtml = '';
+                        let html = '';
                         let asset = `{{ asset('') }}`;
                         let mediaType = response.data.media_type;
                         let mediaContent = response.data.media;
 
+
+                        html += `
+                            <div class="media-preview w-50 p-3">
+                        `;
+
                         if (mediaType == 'image') {
-                            mediaHtml +=
+                            html +=
                                 `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
                         } else if (mediaType == 'video') {
-                            mediaHtml += `<video controls class="w-100 rounded mb-1">
+                            html += `<video controls class="w-100 rounded mb-1">
                                 <source src="${asset}${mediaContent}" type="video/mp4">
                                 Your browser does not support the video tag.
                               </video>`;
                         } else {
-                            mediaHtml +=
-                                `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                            html += `<p class="text-center text-muted my-auto">No image/video published</p>`;
                         }
+                        html += `
+                            </div>
+                            <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
+                                <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
+                                <p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate">${response.data.created_at}</span></p>
+                                <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
+                                    style="max-height: 200px; overflow-y: auto;">
+                                    <strong>Description:</strong> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
+                                </div>
+                                <input type="hidden" id="postDetailId" value="${response.data.id}"/>
+                                <div class="d-flex align-items-center gap-3 py-2">
+                                    <div>
+                                        <strong>Platforms:</strong>
+                                    </div>
+                        `;
+                        html += `
+                                    <div class="d-flex gap-2">
+                                        <input type="checkbox" style="pointer-events: none; display: none"
+                                            id="facebook-post-detail" ${(response.data.on_facebook) ? 'checked' : ''}>
+                        `;
+                        if (response.data.on_facebook) html += `<i class="fab fa-facebook"></i>`;
+                        html += `
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <input type="checkbox" style="pointer-events: none; display: none"
+                                            id="instagram-post-detail" ${(response.data.on_instagram) ? 'checked' : ''}>
+                        `;
+                        if (response.data.on_instagram) html += `<i class="fab fa-instagram"></i>`;
+                        html += `
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <input type="checkbox" style="pointer-events: none; display: none"
+                                            id="linkedin-post-detail" ${(response.data.on_linkedin) ? 'checked' : ''}>
+                        `;
+                        if (response.data.on_linkedin) html += `<i class="fab fa-linkedin"></i>`;
+                        html += `
+                                    </div>
+                                </div>
+                            </div>
+                        `;
 
-                        $("#postDetailId").val(response.data.id);
 
-
-                        $("#facebook-post-detail").attr("checked", response.data.on_facebook ? true : false);
-                        $("#instagram-post-detail").attr("checked", response.data.on_instagram ? true : false);
-                        $("#linkedin-post-detail").attr("checked", response.data.on_linkedin ? true : false);
-
-
-                        $("#facebook-post-detail + i").css("display",response.data.on_facebook ? "block" : "none" );
-                        $("#instagram-post-detail + i").css("display",response.data.on_instagram ? "block" : "none" );
-                        $("#linkedin-post-detail + i").css("display",response.data.on_linkedin ? "block" : "none" );
-
-                        $('#postDetail .media-preview').html(mediaHtml);
-                        $('#modalPostTitle').text(response.data.title);
-                        $('#modalPostDate').text(response.data.created_at);
-                        $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
+                        $('#postDetail .modal-body').html(html);
                         $('#postDetail').modal('show');
                     } else {
                         toastr.error(response.error);
@@ -269,7 +299,7 @@
             e.preventDefault();
             $.ajax({
                 type: "POST",
-                url: `{{ route('user.post.draft.new.store') }}`,
+                url: `{{ route('user.post.draft.store.new') }}`,
                 data: new FormData(this),
                 processData: false,
                 contentType: false,
@@ -279,7 +309,7 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#draftPostModal").modal('hide');
-                        toastr.success("Post saved as draft successfully");
+                        toastr.success(response.message);
                     } else {
                         toastr.error(response.error);
                     }
@@ -381,7 +411,8 @@
                     @endif
                     @foreach ($dataSet as $post)
                         <tr onclick="showPostDetail({{ $post->id }})">
-                            <td class="text-center">{{ ($dataSet->currentPage() - 1) * $dataSet->perPage() + $loop->iteration }}</td>
+                            <td class="text-center">
+                                {{ ($dataSet->currentPage() - 1) * $dataSet->perPage() + $loop->iteration }}</td>
                             <td>
                                 <p class="post-title mb-0">{{ $post->title }}</p>
                             </td>
@@ -416,42 +447,7 @@
                         <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-                    <div class="modal-body d-flex">
-                        <div class="media-preview w-50 p-3">
-                            <p class="text-center text-muted my-auto">No image/video published</p>
-                            {{-- Placeholder for media preview --}}
-                        </div>
-                        <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
-                            <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle"></span></h4>
-                            <p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate"></span>
-                            </p>
-                            <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
-                                style="max-height: 200px; overflow-y: auto;">
-                                <strong>Description:</strong> <span id="modalPostDescription"></span>
-                            </div>
-                            <input type="hidden" id="postDetailId">
-                            <div class="d-flex align-items-center gap-3 py-2">
-                                <div>
-                                    <strong>Platforms:</strong>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <input type="checkbox" style="pointer-events: none;display: none"
-                                        id="facebook-post-detail">
-                                    <i class="fab fa-facebook"></i>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <input type="checkbox" style="pointer-events: none;display: none"
-                                        id="instagram-post-detail">
-                                    <i class="fab fa-instagram"></i>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <input type="checkbox" style="pointer-events: none;display: none"
-                                        id="linkedin-post-detail">
-                                    <i class="fab fa-linkedin"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="modal-body d-flex"></div>
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
                             <button type="button" class="btn btn-custom"
@@ -495,8 +491,7 @@
                             </div>
                             <div>
                                 <label for="media" class="form-label">Media</label>
-                                <input type="file" class="form-control" id="media" name="media"
-                                    accept="image/*">
+                                <input type="file" class="form-control" id="media" name="media" accept="image/*">
                             </div>
                             <div class="d-flex align-items-center gap-3 py-2">
                                 <div><strong>Platforms</strong></div>
@@ -561,8 +556,8 @@
                             </div>
                             <div class="date-time-inputs">
                                 <label for="schedulePostDate" class="form-label">Schedule Date & Time</label>
-                                <input type="date" min="{{ date('Y-m-d') }}" class="form-control mb-3" id="schedulePostDate"
-                                    name="schedule_date" required>
+                                <input type="date" min="{{ date('Y-m-d') }}" class="form-control mb-3"
+                                    id="schedulePostDate" name="schedule_date" required>
                                 <label for="schedulePostTime" class="form-label">Time</label>
                                 <input type="time" class="form-control" id="schedulePostTime" name="schedule_time"
                                     required>

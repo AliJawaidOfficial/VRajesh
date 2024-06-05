@@ -27,6 +27,8 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PackageController as AdminPackageController;
+use App\Http\Controllers\User\DraftPostController;
+use App\Http\Controllers\User\ScheduledPostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,7 +87,7 @@ Route::name('user.')
 
 
             /**
-             * Pages
+             * User Accounts
              */
             Route::get('/facebook-pages', [PostController::class, 'facebookPages'])->name('facebook.pages');
             Route::get('instagram-accounts', [PostController::class, 'instagramAccounts'])->name('instagram.accounts');
@@ -107,12 +109,28 @@ Route::name('user.')
                     Route::post('/', 'store')->name('store');
                     Route::post('/new', 'newStore')->name('new.store');
 
-                    Route::get('/draft', 'draft')->name('draft');
-                    Route::post('/draft', 'draftStore')->name('draft.store');
-                    Route::post('/draft/new', 'draftNewStore')->name('draft.new.store');
+                    /**
+                     * Draft Post
+                     */
+                    Route::prefix('/draft')
+                        ->controller(DraftPostController::class)
+                        ->name('draft')
+                        ->group(function () {
+                            Route::get('/', 'index');
+                            Route::post('/', 'store')->name('.store');
+                            Route::post('/new', 'storeAsDraft')->name('.store.new');
+                        });
 
-                    Route::get('/scheduled', 'scheduled')->name('scheduled');
-                    Route::get('/scheduled/response', 'scheduledPosts')->name('scheduled.all');
+                    /**
+                     * Scheduled Post
+                     */
+                    Route::prefix('/scheduled')
+                        ->controller(ScheduledPostController::class)
+                        ->name('scheduled')
+                        ->group(function () {
+                            Route::get('/', 'index');
+                            Route::get('/response', 'all')->name('.all');
+                        });
                 });
 
 

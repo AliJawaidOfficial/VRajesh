@@ -18,9 +18,20 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('media')->nullable();
             $table->string('media_type')->nullable();
+
             $table->boolean('on_facebook')->default(0);
-            $table->boolean('on_linkedin')->default(0);
+            $table->string('facebook_page_id')->nullable();
+            $table->text('facebook_page_access_token')->nullable();
+            $table->string('facebook_page_name')->nullable();
+
             $table->boolean('on_instagram')->default(0);
+            $table->string('instagram_account_id')->nullable();
+            $table->string('instagram_account_name')->nullable();
+
+            $table->boolean('on_linkedin')->default(0);
+            $table->string('linkedin_company_id')->nullable();
+            $table->string('linkedin_company_name')->nullable();
+
             $table->dateTime('scheduled_at')->nullable();
             $table->boolean('draft')->default(0);
             $table->boolean('posted')->default(0);

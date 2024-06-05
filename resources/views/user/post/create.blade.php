@@ -479,7 +479,7 @@
                         if (response.length > 0) {
                             response.forEach((page) => {
                                 html +=
-                                    `<option value="${page.id} - ${page.access_token}">${page.name}</option>`
+                                    `<option value="${page.id} - ${page.access_token} - ${page.name}">${page.name}</option>`
                             })
                         } else {
                             html = `<option value="">No Page Found</option>`;
@@ -505,7 +505,7 @@
                         if (response.length > 0) {
                             response.forEach((account) => {
                                 html +=
-                                    `<option value="${account.ig_business_account}">${account.name}</option>`
+                                    `<option value="${account.ig_business_account} - ${account.name}">${account.name}</option>`
                             })
                         } else {
                             html = `<option value="">No Account Found</option>`;
@@ -531,7 +531,7 @@
                         if (response.length > 0) {
                             response.forEach((account) => {
                                 html +=
-                                    `<option value="${account.id}">${account.name} (${account.vanity_name})</option>`
+                                    `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
                             })
                         } else {
                             html = `<option value="">No Account Found</option>`;
@@ -557,7 +557,7 @@
                     <div class="d-flex flex-column flex-grow-1">
                         <div class="mb-3">
                             <input class="input-tag-title d-block h-100 w-100 form-control" name="title"
-                                placeholder="Enter your title here" required />
+                                placeholder="Enter your title here" />
                         </div>
                         <div class="textarea-wrapper my-1">
                             <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
@@ -782,9 +782,9 @@
                         <div
                             class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
                             <div class="d-flex align-items-center">
-                                <img src="https://via.placeholder.com/50" alt="Profile Picture" class="rounded-circle">
+                                <img src="{{ Auth::guard('web')->user()->meta_avatar }}" alt="Profile Picture" class="rounded-circle">
                                 <div class="ms-2">
-                                    <h6 class="mb-0">karuneshtalwar</h6>
+                                    <h6 class="mb-0">{{ Auth::guard('web')->user()->meta_name }}</h6>
                                     <small class="text-muted">Original audio</small>
                                 </div>
                             </div>
@@ -877,8 +877,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="scheduleTime" class="form-label">Time</label>
-                            <input type="time" class="form-control" id="scheduleTime"
-                                name="schedule_time" required>
+                            <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Schedule</button>
                     </form>

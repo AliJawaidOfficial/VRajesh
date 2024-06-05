@@ -103,23 +103,23 @@ Route::name('user.')
                 ->group(function () {
                     Route::get('/', 'index')->name('index');
                     Route::get('/details/{id}', 'show')->name('show');
-                    Route::post('/update', 'update')->name('update');
-
+                    
                     Route::get('/create', 'create')->name('create');
                     Route::post('/', 'store')->name('store');
                     Route::post('/new', 'newStore')->name('new.store');
-
+                    
                     /**
                      * Draft Post
                      */
                     Route::prefix('/draft')
-                        ->controller(DraftPostController::class)
-                        ->name('draft')
-                        ->group(function () {
-                            Route::get('/', 'index');
-                            Route::post('/', 'store')->name('.store');
-                            Route::post('/new', 'storeAsDraft')->name('.store.new');
-                        });
+                    ->controller(DraftPostController::class)
+                    ->name('draft')
+                    ->group(function () {
+                        Route::get('/', 'index');
+                        Route::post('/', 'store')->name('.store');
+                        Route::post('/new', 'storeAsDraft')->name('.store.new');
+                        Route::post('/update', 'update')->name('.update');
+                    });
 
                     /**
                      * Scheduled Post

@@ -231,12 +231,12 @@
                                 <input type="hidden" id="postDetailId" value="${response.data.id}"/>
                                 <div class="py-2">
                                     <div class="mb-2">
-                                        <strong>Platforms:</strong>
+                                        <strong>Platforms & Pages:</strong>
                                     </div>
                         `;
                         html += `
                                 <div class="d-flex flex-column gap-2">
-                                    <div class="d-flex gap-2">
+                                    <div class="d-flex gap-2 align-items-center">
                                         <input type="checkbox" style="pointer-events: none; display: none"
                                             id="facebook-post-detail" ${(response.data.on_facebook) ? 'checked' : ''}>
                         `;
@@ -244,7 +244,7 @@
                             `<i class="fab fa-facebook m-0"></i><span class="m-0 ms-2">${response.data.facebook_page_name}</span>`;
                         html += `
                                     </div>
-                                    <div class="d-flex gap-2">
+                                    <div class="d-flex gap-2 align-items-center">
                                         <input type="checkbox" style="pointer-events: none; display: none"
                                             id="instagram-post-detail" ${(response.data.on_instagram) ? 'checked' : ''}>
                         `;
@@ -252,7 +252,7 @@
                             `<i class="fab fa-instagram"></i><span class="m-0 ms-2">${response.data.instagram_account_name}</span>`;
                         html += `
                                     </div>
-                                    <div class="d-flex gap-2">
+                                    <div class="d-flex gap-2 align-items-center">
                                         <input type="checkbox" style="pointer-events: none; display: none"
                                             id="linkedin-post-detail" ${(response.data.on_linkedin) ? 'checked' : ''}>
                         `;
@@ -295,25 +295,68 @@
             $('#' + modalId + ' #PlatformInstagram').attr("checked", $("#instagram-post-detail").is(":checked"));
             $('#' + modalId + ' #PlatformLinkedIn').attr("checked", $("#linkedin-post-detail").is(":checked"));
 
+
+            $('#' + modalId + ' #PlatformFacebook').change(async function() {
+                console.log(this)
+                if (this.checked) {
+                    var facebook_pages = await getFacebookPages($('#' + modalId + ' #PlatformFacebook'));
+                    $('#' + modalId + " #facebookPage").html(facebook_pages);
+                } else {
+                    $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
+                }
+
+            });
+
+            $('#' + modalId + ' #PlatformInstagram').change(async function() {
+                console.log(this)
+                if (this.checked) {
+                    var instagram_pages = await getInstagramAccounts($('#' + modalId + ' #PlatformInstagram'));
+                    $('#' + modalId + " #instagramPage").html(instagram_pages);
+                } else {
+
+                    $('#' + modalId + " #instagramPage").html('<option value="">Select</option>');
+                }
+            });
+
+            $('#' + modalId + ' #PlatformLinkedIn').change(async function() {
+
+                console.log(this)
+                if (this.checked) {
+                    var linkedin_organizations = await getLinkedInOrganizations($('#' + modalId + ' #PlatformLinkedIn'));
+                    $('#' + modalId + " #linkedInPage").html(linkedin_organizations);
+                } else {
+
+                    $('#' + modalId + " #linkedInPage").html('<option value="">Select</option>');
+                }
+
+            });
+
             $('#' + modalId + ' #postID').val($("#postDetailId").val());
 
             if ($("#facebook-post-detail").is(":checked")) {
                 var facebook_pages = await getFacebookPages($("#facebook-post-detail"));
+                $('#' + modalId + " #facebookPage").html(facebook_pages);
+            } else {
+                $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
             }
             if ($("#instagram-post-detail").is(":checked")) {
                 var instagram_pages = await getInstagramAccounts($("#instagram-post-detail"));
+                $('#' + modalId + " #instagramPage").html(instagram_pages);
+            } else {
+
+                $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
             }
             if ($("#linkedin-post-detail").is(":checked")) {
                 var linkedin_organizations = await getLinkedInOrganizations($("#linkedin-post-detail"));
+                $('#' + modalId + " #linkedInPage").html(linkedin_organizations);
+            } else {
+
+                $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
             }
 
-            $('#' + modalId + " #facebookPage").html(facebook_pages);
-            $('#' + modalId + " #instagramPage").html(instagram_pages);
-            $('#' + modalId + " #linkedInPage").html(linkedin_organizations);
 
             $('#postDetail').modal('hide');
             $('#' + modalId).modal('show');
-
         }
 
         // Draft Form
@@ -548,7 +591,7 @@
                                 <p class="post-title mb-0">{{ $post->title }}</p>
                             </td>
                             <td>
-                                <div class="d-flex gap-2">
+                                <div class="d-flex gap-2 align-items-center">
                                     @if ($post->on_facebook)
                                         <i class="fab fa-facebook"></i>
                                     @endif

@@ -204,6 +204,7 @@
                         let mediaType = response.data.media_type;
                         let mediaContent = response.data.media;
 
+                        console.log(response.data);
 
                         html += `
                             <div class="media-preview w-50 p-3">
@@ -261,6 +262,15 @@
                             </div>
                         `;
 
+                        html += ` 
+                            <input type="hidden" id="facebook_page_access_token" value="${response.data.facebook_page_access_token}"/>
+                            <input type="hidden" id="facebook_page_id" value="${response.data.facebook_page_id}"/>
+                            <input type="hidden" id="facebook_page_name" value="${response.data.facebook_page_name}"/>
+                            <input type="hidden" id="instagram_account_id" value="${response.data.instagram_account_id}"/>
+                            <input type="hidden" id="instagram_account_name" value="${response.data.instagram_account_name}"/>
+                            <input type="hidden" id="linkedin_company_id" value="${response.data.linkedin_company_id}"/>
+                            <input type="hidden" id="linkedin_company_name" value="${response.data.linkedin_company_name}"/>
+                        `
 
                         $('#postDetail .modal-body').html(html);
                         $('#postDetail').modal('show');
@@ -272,12 +282,9 @@
         }
 
         // Function to transfer post data to the modal for editing, scheduling or reposting
-        function transferPostData(modalId) {
+        async function transferPostData(modalId) {
             const title = $('#modalPostTitle').text();
             const description = $('#modalPostDescription').html().replace(/<br>/g, '\n');
-
-
-            console.log($('#postDetail .platform-icons .fa-instagram'));
 
             $('#' + modalId + ' #postTitle').val(title);
             $('#' + modalId + ' #postDescription').val(description);
@@ -287,11 +294,23 @@
 
             $('#' + modalId + ' #postID').val($("#postDetailId").val());
 
+            if ($("#facebook-post-detail").is(":checked")) {
+                var facebook_pages = await getFacebookPages($("#facebook-post-detail"));
+            }
+            if ($("#instagram-post-detail").is(":checked")) {
+                var instagram_pages = await getInstagramAccounts($("#instagram-post-detail"));
+            }
+            if ($("#linkedin-post-detail").is(":checked")) {
+                var linkedin_organizations = await getLinkedInOrganizations($("#linkedin-post-detail"));
+            }
+
+            $('#' + modalId + " #facebookPage").html(facebook_pages);
+            $('#' + modalId + " #instagramPage").html(instagram_pages);
+            $('#' + modalId + " #linkedInPage").html(linkedin_organizations);
 
             $('#postDetail').modal('hide');
-            setTimeout(function() {
-                $('#' + modalId).modal('show');
-            }, 500);
+            $('#' + modalId).modal('show');
+
         }
 
         // Draft Form
@@ -368,6 +387,185 @@
                 }
             });
         });
+
+
+        // // Facbook Pages
+        // function getFacebookPages(element) {
+        //     if (element.checked) {
+        //         $.ajax({
+        //             type: "GET",
+        //             url: "{{ route('user.facebook.pages') }}",
+        //             success: function(response) {
+        //                 html = `<option value="">Select</option>`;
+
+        //                 if (response.length > 0) {
+        //                     response.forEach((page) => {
+        //                         html +=
+        //                             `<option value="${page.id} - ${page.access_token} - ${page.name}">${page.name}</option>`
+        //                     })
+        //                 } else {
+        //                     html = `<option value="">No Page Found</option>`;
+        //                 }
+        //                 return html;
+        //             }
+        //         });
+        //     }
+        // }
+
+        // // Instagram Accounts
+        // function getInstagramAccounts(element) {
+        //     if (element.checked) {
+        //         $.ajax({
+        //             type: "GET",
+        //             url: "{{ route('user.instagram.accounts') }}",
+        //             success: function(response) {
+        //                 html = `<option value="">Select</option>`;
+
+        //                 if (response.length > 0) {
+        //                     response.forEach((account) => {
+        //                         html +=
+        //                             `<option value="${account.ig_business_account} - ${account.name}">${account.name}</option>`
+        //                     })
+        //                 } else {
+        //                     html = `<option value="">No Account Found</option>`;
+        //                 }
+        //                 return html;
+        //             }
+        //         });
+        //     }
+        // }
+
+        // // LinkedIn Organizations
+        // function getLinkedInOrganizations(element) {
+        //     if (element.checked) {
+        //         $.ajax({
+        //             type: "GET",
+        //             url: "{{ route('user.linkedin.organizations') }}",
+        //             success: function(response) {
+        //                 html = `<option value="">Select</option>`;
+
+        //                 if (response.length > 0) {
+        //                     response.forEach((account) => {
+        //                         html +=
+        //                             `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
+        //                     })
+        //                 } else {
+        //                     html = `<option value="">No Account Found</option>`;
+        //                 }
+        //                 return html;
+        //             }
+        //         });
+        //     }
+        // }
+
+        // Facebook Pages
+        function getFacebookPages(element) {
+            return new Promise((resolve, reject) => {
+                if (element.is(":checked")) {
+                    $.ajax({
+                        type: "GET",
+                        url: "{{ route('user.facebook.pages') }}",
+                        success: function(response) {
+                            let html = `<option value="">Select</option>`;
+
+                            let pageId = $('#facebook_page_id').val();
+
+
+                            if (response.length > 0) {
+                                response.forEach((page) => {
+                                    html +=
+                                        `<option value="${page.id} - ${page.access_token} - ${page.name}"`;
+                                    if (page.id == pageId) html += ` selected `;
+                                    html += `>${page.name}</option>`;
+                                });
+                            } else {
+                                html = `<option value="">No Page Found</option>`;
+                            }
+                            resolve(html);
+                        },
+                        error: function(err) {
+                            reject("Failed to load Facebook pages: " + err);
+                        }
+                    });
+                } else {
+                    reject("Checkbox is not checked");
+                }
+            });
+        }
+
+        // Instagram Accounts
+        function getInstagramAccounts(element) {
+            return new Promise((resolve, reject) => {
+                if (element.is(":checked")) {
+                    $.ajax({
+                        type: "GET",
+                        url: "{{ route('user.instagram.accounts') }}",
+                        success: function(response) {
+                            let html = `<option value="">Select</option>`;
+
+
+                            let account_id = $('#instagram_account_id').val();
+
+                            if (response.length > 0) {
+                                response.forEach((account) => {
+                                    html +=
+                                        `<option value="${account.ig_business_account} - ${account.name}"`
+                                    if (account.ig_business_account == account_id) html +=
+                                        ` selected `
+                                    html += `>${account.name}</option>`;
+                                });
+                            } else {
+                                html = `<option value="">No Account Found</option>`;
+                            }
+                            resolve(html);
+                        },
+                        error: function(err) {
+                            reject("Failed to load Instagram accounts: " + err);
+                        }
+                    });
+                } else {
+                    reject("Checkbox is not checked");
+                }
+            });
+        }
+
+        // LinkedIn Organizations
+        function getLinkedInOrganizations(element) {
+            return new Promise((resolve, reject) => {
+                if (element.is(":checked")) {
+                    $.ajax({
+                        type: "GET",
+                        url: "{{ route('user.linkedin.organizations') }}",
+                        success: function(response) {
+                            let html = `<option value="">Select</option>`;
+
+
+                            let pageId = $('#linkedin_company_id').val();
+
+
+                            if (response.length > 0) {
+                                response.forEach((account) => {
+                                    html +=
+                                        `<option value="${account.id} - ${account.name}"`
+                                    if (account.id == pageId) html +=
+                                        ` selected `
+                                    html +=
+                                        `>${account.name} (${account.vanity_name})</option>`;
+                                });
+                            } else {
+                                html = `<option value="">No Account Found</option>`;
+                            }
+                            resolve(html);
+                        },
+                        error: function(err) {
+                            reject("Failed to load LinkedIn organizations: " + err);
+                        }
+                    });
+                } else {
+                    reject("Checkbox is not checked");
+                }
+            });
+        }
     </script>
 @endsection
 
@@ -517,6 +715,30 @@
                                     </label>
                                 </div>
                             </div>
+
+                            <div class="d-flex align-items-center gap-3 w-100">
+                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                    <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
+                                    <select name="" class="d-block w-100 form-select text-black"
+                                        id="facebookPage">
+                                        <option value="">Select Page</option>
+                                    </select>
+                                </div>
+                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                    <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
+                                    <select name="" class="d-block w-100 form-select text-black"
+                                        id="instagramPage">
+                                        <option value="">Select Page</option>
+                                    </select>
+                                </div>
+                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                    <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
+                                    <select name="" class="d-block w-100 form-select text-black"
+                                        id="linkedInPage">
+                                        <option value="">Select Page</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <div>
@@ -591,6 +813,29 @@
                                     </label>
                                 </div>
                             </div>
+                            <div class="d-flex align-items-center gap-3 w-100">
+                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                    <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
+                                    <select name="" class="d-block w-100 form-select text-black"
+                                        id="facebookPage">
+                                        <option value="">Select Page</option>
+                                    </select>
+                                </div>
+                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                    <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
+                                    <select name="" class="d-block w-100 form-select text-black"
+                                        id="instagramPage">
+                                        <option value="">Select Page</option>
+                                    </select>
+                                </div>
+                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                    <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
+                                    <select name="" class="d-block w-100 form-select text-black"
+                                        id="linkedInPage">
+                                        <option value="">Select Page</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <div>
@@ -654,6 +899,29 @@
                                     <label class="form-check-label" for="PlatformLinkedIn">
                                         <i class="fab fa-linkedin-in"></i>
                                     </label>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3 w-100">
+                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                    <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
+                                    <select name="" class="d-block w-100 form-select text-black"
+                                        id="facebookPage">
+                                        <option value="">Select Page</option>
+                                    </select>
+                                </div>
+                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                    <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
+                                    <select name="" class="d-block w-100 form-select text-black"
+                                        id="instagramPage">
+                                        <option value="">Select Page</option>
+                                    </select>
+                                </div>
+                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                    <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
+                                    <select name="" class="d-block w-100 form-select text-black"
+                                        id="linkedInPage">
+                                        <option value="">Select Page</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>

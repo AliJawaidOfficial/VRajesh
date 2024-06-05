@@ -204,8 +204,6 @@
                         let mediaType = response.data.media_type;
                         let mediaContent = response.data.media;
 
-                        console.log(response.data);
-
                         html += `
                             <div class="media-preview w-50 p-3">
                         `;
@@ -654,21 +652,21 @@
                             <div class="d-flex align-items-center gap-3 w-100">
                                 <div class="w-100 d-flex align-items-center gap-1 flex-column">
                                     <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
-                                    <select name="" class="d-block w-100 form-select text-black"
+                                    <select name="facebook_page" class="d-block w-100 form-select text-black"
                                         id="facebookPage">
                                         <option value="">Select Page</option>
                                     </select>
                                 </div>
                                 <div class="w-100 d-flex align-items-center gap-1 flex-column">
                                     <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
-                                    <select name="" class="d-block w-100 form-select text-black"
+                                    <select name="instagram_account" class="d-block w-100 form-select text-black"
                                         id="instagramPage">
                                         <option value="">Select Page</option>
                                     </select>
                                 </div>
                                 <div class="w-100 d-flex align-items-center gap-1 flex-column">
                                     <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
-                                    <select name="" class="d-block w-100 form-select text-black"
+                                    <select name="linkedin_organization" class="d-block w-100 form-select text-black"
                                         id="linkedInPage">
                                         <option value="">Select Page</option>
                                     </select>
@@ -751,21 +749,21 @@
                             <div class="d-flex align-items-center gap-3 w-100">
                                 <div class="w-100 d-flex align-items-center gap-1 flex-column">
                                     <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
-                                    <select name="" class="d-block w-100 form-select text-black"
+                                    <select name="facebook_page" class="d-block w-100 form-select text-black"
                                         id="facebookPage">
                                         <option value="">Select Page</option>
                                     </select>
                                 </div>
                                 <div class="w-100 d-flex align-items-center gap-1 flex-column">
                                     <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
-                                    <select name="" class="d-block w-100 form-select text-black"
+                                    <select name="on_instagram" class="d-block w-100 form-select text-black"
                                         id="instagramPage">
                                         <option value="">Select Page</option>
                                     </select>
                                 </div>
                                 <div class="w-100 d-flex align-items-center gap-1 flex-column">
                                     <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
-                                    <select name="" class="d-block w-100 form-select text-black"
+                                    <select name="on_linkedin" class="d-block w-100 form-select text-black"
                                         id="linkedInPage">
                                         <option value="">Select Page</option>
                                     </select>
@@ -839,21 +837,21 @@
                             <div class="d-flex align-items-center gap-3 w-100">
                                 <div class="w-100 d-flex align-items-center gap-1 flex-column">
                                     <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
-                                    <select name="" class="d-block w-100 form-select text-black"
+                                    <select name="facebook_page" class="d-block w-100 form-select text-black"
                                         id="facebookPage">
                                         <option value="">Select Page</option>
                                     </select>
                                 </div>
                                 <div class="w-100 d-flex align-items-center gap-1 flex-column">
                                     <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
-                                    <select name="" class="d-block w-100 form-select text-black"
+                                    <select name="instagram_account" class="d-block w-100 form-select text-black"
                                         id="instagramPage">
                                         <option value="">Select Page</option>
                                     </select>
                                 </div>
                                 <div class="w-100 d-flex align-items-center gap-1 flex-column">
                                     <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
-                                    <select name="" class="d-block w-100 form-select text-black"
+                                    <select name="linkedin_organization" class="d-block w-100 form-select text-black"
                                         id="linkedInPage">
                                         <option value="">Select Page</option>
                                     </select>

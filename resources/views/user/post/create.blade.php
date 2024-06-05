@@ -203,12 +203,58 @@
         .platform-checkbox i {
             vertical-align: middle;
         }
+
+
+        #loadingModal {
+            display: none;
+            /* Initially hidden */
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Semi-transparent background */
+        }
+
+        #loadingSpinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
     </style>
 @endsection
 
 {{-- Scripts --}}
 @section('scripts')
     <script>
+        // Loading Modal (Custom)
+        function showLoadingModal() {
+            document.getElementById("loadingModal").style.display = "block";
+        }
+
+        function hideLoadingModal() {
+            document.getElementById("loadingModal").style.display = "none";
+        }
+
         document.querySelectorAll('.toggle-post').forEach((toggleBtn) => {
             toggleBtn.addEventListener('click', (e) => {
                 const target = document.getElementById(e.target.dataset.bsToggle);
@@ -340,6 +386,8 @@
                 $("#scheduleModal").modal("hide");
                 $("#scheduleModal").css("display", "none");
                 $("#postForm").submit();
+                $("#exampleModal").modal("hide");
+                $("#exampleModal").css("display", "none");
             }
         });
 
@@ -354,21 +402,28 @@
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
-                        $("#exampleModal").modal("show");
+                        // $("#exampleModal").modal("show");
+                        showLoadingModal()
                     },
                     success: function(response) {
                         if (response.status == 200) {
-                            console.log($("#scheduleDate").val());
-                            if ($("#scheduleDate").val() != "") {
-                                toastr.success("Post scheduled successfully");
+                            if ($("#post_schedule_date").val() != null) {
+                                toastr.success("Post has been published successfully");
                             } else {
-                                toastr.success("Post created successfully");
+                                toastr.success("An error occurred");
                             }
                         } else {
                             toastr.error(response.error);
                         }
-                        
-                        $("#exampleModal").modal("hide");
+
+                        // $("#exampleModal").removeClass("show");
+                        // $("#exampleModal").css("display", "none");
+
+                        hideLoadingModal()
+
+                        $("#scheduleModal").removeClass("show");
+                        $("#scheduleModal").css("display", "none");
+                        // $("#scheduleModal").hide();
                     }
                 });
             }
@@ -386,16 +441,24 @@
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
-                        $("#exampleModal").modal("show");
+                        // $("#exampleModal").show()
+
+                        showLoadingModal()
                     },
                     success: function(response) {
                         if (response.status == 200) {
                             toastr.success("Post saved as draft");
+                            // $("#exampleModal").modal("hide");
+                            // $("#exampleModal").css("display", "none");
+
+                            hideLoadingModal()
                         } else {
                             toastr.error(response.error);
+                            // $("#exampleModal").modal("hide");
+                            // $("#exampleModal").css("display", "none");
+
+                            hideLoadingModal()
                         }
-                        
-                        $("#exampleModal").modal("hide");
                     }
                 });
             }
@@ -778,15 +841,23 @@
     </section>
 
     <!-- Loading Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content d-flex align-items-center justify-content-center p-5 bg-transparent border-0">
-                <div class="spinner-border text-white" style="width: 3rem; height: 3rem;" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
+    <!--<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">-->
+    <!--    <div class="modal-dialog modal-dialog-centered">-->
+    <!--        <div class="modal-content d-flex align-items-center justify-content-center p-5 bg-transparent border-0">-->
+    <!--            <div class="spinner-border text-white" style="width: 3rem; height: 3rem;" role="status">-->
+    <!--                <span class="visually-hidden">Loading...</span>-->
+    <!--            </div>-->
+    <!--        </div>-->
+    <!--    </div>-->
+    <!--</div>-->
+
+    <section class="main-content-wrapper d-flex flex-column">
+        {{-- ... (Rest of your Blade content) ... --}}
+
+        <div id="loadingModal">
+            <div id="loadingSpinner"></div>
         </div>
-    </div>
+    </section>
 
     <!-- Schedule Modal -->
     <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
@@ -806,7 +877,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="scheduleTime" class="form-label">Time</label>
-                            <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
+                            <input type="time" class="form-control" id="scheduleTime"
+                                name="schedule_time" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Schedule</button>
                     </form>

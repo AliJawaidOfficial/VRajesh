@@ -162,10 +162,7 @@
                                     <div class="accordion-body">
                                         <ul class="accordion inner-menu" id="secondLevel">
                                             @foreach ($item['submenu'] as $key => $item)
-                                                {{-- @if (isset($item['permissions'])) --}}
-                                                {{-- @if (Auth::user()->can($item['permissions'])) --}}
-                                                <li
-                                                    class="menu-item {{ Str::is($item['active_url'], Route::currentRouteName()) ? 'active' : '' }}">
+                                                <li class="menu-item {{ Str::is($item['active_url'], Route::currentRouteName()) ? 'active' : '' }}">
                                                     <a href="{{ $item['url'] }}">
                                                         <span class="menu-icon">
                                                             <img src="{{ asset('assets/images/icons/arrow-right.png') }}"
@@ -174,8 +171,6 @@
                                                         <span>{{ $item['name'] }}</span>
                                                     </a>
                                                 </li>
-                                                {{-- @endif --}}
-                                                {{-- @endif --}}
                                             @endforeach
                                         </ul>
                                     </div>

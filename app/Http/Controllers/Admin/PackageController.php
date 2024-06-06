@@ -15,6 +15,68 @@ use App\Models\User;
 class PackageController extends Controller
 {
     protected $view = 'admin.package.';
+    protected $facebookPermissions = [
+        [
+            'name' => 'connect_facebook',
+            'title' => 'Connect With Facebook'
+        ],
+        [
+            'name' => 'meta_facebook_text_post',
+            'title' => 'Text Post - Facebook'
+        ],
+        [
+            'name' => 'meta_facebook_image_post',
+            'title' => 'Image Post - Facebook'
+        ],
+        [
+            'name' => 'meta_facebook_video_post',
+            'title' => 'Video Post - Facebook'
+        ],
+        [
+            'name' => 'meta_instagram_image_post',
+            'title' => 'Image Post - Instagram'
+        ],
+        [
+            'name' => 'meta_instagram_video_post',
+            'title' => 'Video Post - Instagram'
+        ],
+    ];
+    protected $linkedInPermissions = [
+        [
+            'name' => 'connect_linkedin',
+            'title' => 'Connect With LinkedIn'
+        ],
+        [
+            'name' => 'linkedin_text_post',
+            'title' => 'Text Post - LinkedIn'
+        ],
+        [
+            'name' => 'linkedin_image_post',
+            'title' => 'Image Post - LinkedIn'
+        ],
+        [
+            'name' => 'linkedin_video_post',
+            'title' => 'Video Post - LinkedIn'
+        ],
+    ];
+    protected $otherPermissions = [
+        [
+            'name' => 'immediate_post',
+            'title' => 'Immediate Post'
+        ],
+        [
+            'name' => 'scheduled_post',
+            'title' => 'Scheduled Post'
+        ],
+        [
+            'name' => 'draft_post',
+            'title' => 'Draft Post'
+        ],
+        [
+            'name' => 're_post',
+            'title' => 'Re-Post'
+        ],
+    ];
 
     /**
      * Display a listing of the resource.
@@ -36,8 +98,18 @@ class PackageController extends Controller
      */
     public function create()
     {
-        $permissions = Permission::all();
-        return view($this->view . 'create', compact('permissions'));
+        $facebookPermissions = $this->facebookPermissions;
+        $linkedInPermissions = $this->linkedInPermissions;
+        $otherPermissions = $this->otherPermissions;
+
+        return view(
+            $this->view . 'create',
+            compact(
+                'facebookPermissions',
+                'linkedInPermissions',
+                'otherPermissions'
+            )
+        );
     }
 
     /**
@@ -89,7 +161,21 @@ class PackageController extends Controller
             $permissions = Permission::all();
             $rolePermissions = $data->permissions->pluck('id')->toArray();
 
-            return view($this->view . 'edit', compact('data', 'permissions', 'rolePermissions'));
+            $facebookPermissions = $this->facebookPermissions;
+            $linkedInPermissions = $this->linkedInPermissions;
+            $otherPermissions = $this->otherPermissions;    
+
+            return view(
+                $this->view . 'edit',
+                compact(
+                    'data',
+                    'permissions',
+                    'rolePermissions',
+                    'facebookPermissions',
+                    'linkedInPermissions',
+                    'otherPermissions'
+                )
+            );
         } catch (Exception $e) {
             Session::flash('error', ['text' => $e->getMessage()]);
             return redirect()->back();

@@ -110,6 +110,91 @@
 
 {{-- Vendor Scripts --}}
 @section('scripts')
+    <script>
+        function deleteRecord(id) {
+            const record = $("#record_" + id);
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-success",
+                    cancelButton: "btn btn-danger"
+                },
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: `{{ route('admin.package.index') }}/${id}/delete`,
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            _method: "DELETE",
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            if (response.status == 200) {
+                                swalWithBootstrapButtons.fire({
+                                    title: "Deleted!",
+                                    text: "Package deleted successfully.",
+                                    icon: "success",
+                                    showConfirmButton: false,
+                                    timer: 700
+                                }).then(() => {
+                                    record.fadeOut();
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 200);
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Oops...",
+                                    text: response.error,
+                                });
+                            }
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    $("#postDetail").modal("show");
+                }
+            });
+        }
+
+        function updateVisibility(id, visibility) {
+            $.ajax({
+                type: "POST",
+                url: `{{ route('admin.package.index') }}/${id}/visibility`,
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    _method: "POST",
+                    visibility: visibility
+                },
+                success: function(response) {
+                    console.log(response);
+                    if (response.status == 200) {
+                        Swal.fire({
+                            title: "Success!",
+                            text: response.message,
+                            icon: "success",
+                            showConfirmButton: false,
+                            timer: 700
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        toastr.error(response.error);
+                    }
+                }
+            });
+        }
+    </script>
 @endsection
 
 {{-- Content --}}
@@ -156,34 +241,29 @@
                         </tr>
                     @else
                         @foreach ($dataSet as $data)
-                            <tr>
+                            <tr id="record_{{ $data->id }}">
                                 <td>{{ ($dataSet->currentPage() - 1) * $dataSet->perPage() + $loop->iteration }}</td>
                                 <td>{{ ucWords($data->name) }}</td>
                                 <td>
                                     <div class="d-flex gap-1">
                                         @if ($data->is_visible == 1)
-                                            <a href="{{ route('admin.package.visibility', ['id' => $data->id, 'visibility' => 0]) }}"
+                                            <button type="button" onclick="updateVisibility({{ $data->id }}, 0)"
                                                 class="btn btn-dark btn-sm">
                                                 <i class="fas fa-eye-slash"></i>
-                                            </a>
+                                            </button>
                                         @else
-                                            <a href="{{ route('admin.package.visibility', ['id' => $data->id, 'visibility' => 1]) }}"
+                                            <button type="button" onclick="updateVisibility({{ $data->id }}, 1)"
                                                 class="btn btn-dark btn-sm">
                                                 <i class="fas fa-eye"></i>
-                                            </a>
+                                            </button>
                                         @endif
                                         <a href="{{ route('admin.package.edit', $data->id) }}" class="btn btn-dark btn-sm">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('admin.package.destroy', $data->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                onclick="return confirm('Are you sure you want to delete {{ $data->first_name . ' ' . $data->last_name }}?')"
-                                                class="btn btn-dark btn-sm">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" onclick="deleteRecord({{ $data->id }})"
+                                            class="btn btn-dark btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

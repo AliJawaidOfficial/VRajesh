@@ -27,7 +27,26 @@ class ConnectController extends Controller
 
     public function index()
     {
-        return view('user.connect.index');
+        $platforms = [
+            [
+                'image' => 'assets/images/icons/icons-facebook.png',
+                'text' => 'Connect With Facebook',
+                'is_connected' => (Auth::guard('web')->user()->meta_access_token != null)? 1: 0,
+                'connect_route' => 'user.connect.facebook',
+                'disconnect_route' => 'user.connect.facebook.disconnect',
+                'permission' => 'connect_facebook'
+            ],
+            [
+                'image' => 'assets/images/icons/icons-linkedin.png',
+                'text' => 'Connect With LinkedIn',
+                'is_connected' => (Auth::guard('web')->user()->linkedin_access_token != null)? 1: 0,
+                'connect_route' => 'user.connect.linkedin',
+                'disconnect_route' => 'user.connect.linkedin.disconnect',
+                'permission' => 'connect_linkedin'
+            ]
+        ];
+        // return $platforms;
+        return view('user.connect.index', compact('platforms'));
     }
 
     /**
@@ -62,13 +81,16 @@ class ConnectController extends Controller
                 'token' => $this->facebookService->tokenTime($user->token),
             ];
 
-            $user = User::where('id', Auth::guard('web')->user()->id)->first();
+            $user = User::where('id', Auth::guard('web')->user()->id)->where('meta_email', $response['email'])->first();
+
+            if (!$user) throw new Exception('Sorry this facebook account is not register with us.');
+
             $user->meta_access_token = $response['token'];
             $user->meta_name = $response['name'];
-            $user->meta_email = $response['email'];
             $user->meta_avatar = $response['avatar'];
             $user->save();
 
+            Session::flash('success', ['text' => 'Your Facebook account connected successfully.']);
             return redirect()->route('user.connect');
         } catch (Exception $e) {
             Session::flash('error', ['text' => $e->getMessage()]);
@@ -83,6 +105,8 @@ class ConnectController extends Controller
         $user->meta_name = null;
         $user->meta_avatar = null;
         $user->save();
+
+        Session::flash('success', ['text' => 'Your Facebook account disconnected.']);
         return redirect()->route('user.connect');
     }
 
@@ -107,13 +131,20 @@ class ConnectController extends Controller
             $getProfile = $this->linkedinService->getProfile();
             if ($getProfile === false) throw new Exception('Failed to get profile');
 
-            $user = User::where('id', Auth::guard('web')->user()->id)->first();
+            $user = User::where('id', Auth::guard('web')->user()->id)->where('linkedin_email', $getProfile['email'])->first();
+
+            if (!$user) {
+                Session::flash('error', ['text' => 'Sorry this linkedin account is not register with us.']);
+                return redirect()->route('user.connect');
+            }
+
             $user->linkedin_access_token = $generateAccessToken;
             $user->linkedin_urn = $getProfile['sub'];
             $user->linkedin_name = $getProfile['name'];
             $user->linkedin_avatar = $getProfile['picture'];
             $user->save();
 
+            Session::flash('success', ['text' => 'Your Linkedin account connected successfully.']);
             return redirect()->route('user.connect');
         } catch (Exception $e) {
             Session::flash('error', ['text' => 'Something went wrong. Please try again.']);
@@ -127,12 +158,8 @@ class ConnectController extends Controller
         $user->linkedin_access_token = null;
         $user->linkedin_urn = null;
         $user->save();
-        return redirect()->route('user.connect');
-    }
 
-    public function logout()
-    {
-        Session::flush();
+        Session::flash('success', ['text' => 'Your Linkedin account disconnected successfully.']);
         return redirect()->route('user.connect');
     }
 }

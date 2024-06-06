@@ -16,7 +16,7 @@ use Illuminate\Support\Str;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
-
+use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller
 {
@@ -66,7 +66,8 @@ class AuthController extends Controller
      */
     public function register()
     {
-        return view('user.auth.register');
+        $packages = Role::where('is_visible', 1)->get();
+        return view('user.auth.register', compact('packages'));
     }
 
     public function registerStore(Request $request)
@@ -80,6 +81,7 @@ class AuthController extends Controller
                     'first_name' => 'required|string|max:255',
                     'last_name' => 'required|string|max:255',
                     'email' => 'required|string|email|max:255|unique:users',
+                    'package' => 'required|exists:roles,id',
                     'password' => 'required|string|min:8|max:20|confirmed',
                 ],
                 [
@@ -97,6 +99,9 @@ class AuthController extends Controller
                     'password.required' => 'Password is required',
                     'password.min' => 'Password must be at least 8 characters',
                     'password.max' => 'Password must be less than 20 characters',
+
+                    'package.required' => 'Package is required',
+                    'package.exists' => 'Package not found',
                 ]
             );
 
@@ -108,8 +113,13 @@ class AuthController extends Controller
             $data->last_name = $request->last_name;
             $data->email = $request->email;
             $data->password = Hash::make($request->password);
+            $data->meta_email = $request->meta_email;
+            $data->linkedin_email = $request->linkedin_email;
             $data->remember_token = $token;
             $data->save();
+
+            $role = Role::where('id', $request->package)->first();
+            $data->syncRoles($role);
 
             Mail::to($data->email)->send(new RegisterMail([
                 'name' => $data->first_name . ' ' . $data->last_name,
@@ -272,10 +282,8 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
+        Auth::guard('web')->logout();
         $request->session()->regenerateToken();
-
-        return redirect('admin.login');
+        return redirect()->route('user.login');
     }
 }

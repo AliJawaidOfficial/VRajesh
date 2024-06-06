@@ -105,8 +105,9 @@ Route::name('user.')
                     Route::get('/details/{id}', 'show')->name('show');
                     
                     Route::get('/create', 'create')->name('create');
-                    Route::post('/', 'store')->name('store');
-                    Route::post('/new', 'newStore')->name('new.store');
+                    Route::post('/create', 'store')->name('store');
+                    Route::post('/create/new', 'newStore')->name('new.store');
+                    Route::post('/{id}/delete', 'destroy')->name('destroy');
                     
                     /**
                      * Draft Post
@@ -193,6 +194,7 @@ Route::prefix('/admin')
                         Route::get('/{id}/edit', 'edit')->name('edit');
                         Route::post('/{id}/edit', 'update')->name('update');
                         Route::delete('/{id}/delete', 'destroy')->name('destroy');
+                        Route::post('/{id}/login', 'login')->name('login');
                     });
 
                 /**
@@ -208,8 +210,7 @@ Route::prefix('/admin')
                         Route::get('/{id}/edit', 'edit')->name('edit');
                         Route::post('/{id}/edit', 'update')->name('update');
                         Route::delete('/{id}/delete', 'destroy')->name('destroy');
-
-                        Route::get('/{id}/visibility/{visibility}', 'visibility')->name('visibility');
+                        Route::post('/{id}/visibility', 'visibility')->name('visibility');
                     });
             });
     });

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
@@ -187,6 +188,7 @@ class UserController extends Controller
 
                         'linkedin_email.email' => 'Linkedin Email is invalid',
                         'linkedin_email.max' => 'Linkedin Email is too long',
+
                         'package.required' => 'Package is required',
                         'package.exists' => 'Package not found',
                     ]
@@ -226,11 +228,34 @@ class UserController extends Controller
             if (!$data) throw new Exception('User not found');
             $data->delete();
 
-            Session::flash('success', ['text' => 'User deleted successfully']);
-            return redirect()->route('admin.user.index');
+            return response()->json([
+                'status' => '200',
+            ]);
         } catch (Exception $e) {
-            Session::flash('error', ['text' => $e->getMessage()]);
-            return redirect()->back();
+            return response()->json([
+                'status' => '500',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function login(String $id)
+    {
+        try {
+            $user = User::find($id);
+
+            if (!$user) throw new Exception('User not found');
+
+            Auth::login($user);
+            
+            return response()->json([
+                'status' => '200',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => '500',
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 }

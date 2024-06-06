@@ -15,3 +15,17 @@ if (cancelNavBtn && toggleNavBtn) {
 $("form").each(function () {
     $(this).validate();
 });
+
+function standardDateTimeFormat(date) {
+    const options = { 
+        weekday: 'short', 
+        day: '2-digit', 
+        month: 'short', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        hour12: true 
+    };
+
+    return new Date(date).toLocaleString('en-US', options);
+}

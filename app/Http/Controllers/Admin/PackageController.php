@@ -140,18 +140,40 @@ class PackageController extends Controller
     /**
      * Update visibility of the specified resource in storage.
      */
-    public function visibility(String $id, String $visibility)
+    public function visibility(String $id, Request $request)
     {
         try {
-            if ($visibility != 0 && $visibility != 1) throw new Exception('Invalid visibility');
-            
-            $data = Role::find($id)->update(['is_visible' => $visibility]);
+            $validator = Validator::make(
+                $request->all(),
+                [
+                    'visibility' => 'required|boolean',
+                ],
+                [
+                    'visibility.required' => 'Invalid visibility',
+                    'visibility.boolean' => 'Invalid visibility',
+                ]
+            );
 
-            Session::flash('success', ['text' => 'Package visibility updated successfully']);
-            return redirect()->route('admin.package.index');
+            if ($validator->fails()) throw new Exception($validator->errors()->first());
+
+            $data = Role::find($id)->update(['is_visible' => $request->visibility]);
+
+            if ($request->visibility == 1) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Package visible successfully'
+                ]);
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Package hidden successfully'
+            ]);
         } catch (Exception $e) {
-            Session::flash('error', ['text' => $e->getMessage()]);
-            return redirect()->back()->withInput();
+            return response()->json([
+                'status' => 500,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 
@@ -167,11 +189,15 @@ class PackageController extends Controller
             if ($data->users->count() > 0) throw new Exception('Users is assigned to this role');
             $data->delete();
 
-            Session::flash('success', ['text' => 'User deleted successfully']);
-            return redirect()->route('admin.package.index');
+            return response()->json([
+                'status' => 200,
+                'message' => 'Package deleted successfully'
+            ]);
         } catch (Exception $e) {
-            Session::flash('error', ['text' => $e->getMessage()]);
-            return redirect()->back();
+            return response()->json([
+                'status' => 500,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 }

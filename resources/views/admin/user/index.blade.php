@@ -110,6 +110,85 @@
 
 {{-- Vendor Scripts --}}
 @section('scripts')
+    <script>
+        function deleteRecord(id) {
+            const record = $("#record_" + id);
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-success",
+                    cancelButton: "btn btn-danger"
+                },
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: `{{ route('admin.user.index') }}/${id}/delete`,
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            _method: "DELETE",
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            if (response.status == 200) {
+                                swalWithBootstrapButtons.fire({
+                                    title: "Deleted!",
+                                    text: "User deleted successfully.",
+                                    icon: "success",
+                                    showConfirmButton: false,
+                                    timer: 700
+                                }).then(() => {
+                                    record.fadeOut();
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 200);
+                                });
+                            } else {
+                                toastr.error(response.error);
+                            }
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    $("#postDetail").modal("show");
+                }
+            });
+        }
+
+        function login(id) {
+            $.ajax({
+                type: "POST",
+                url: `{{ route('admin.user.index') }}/${id}/login`,
+                data: {
+                    _token: "{{ csrf_token() }}",
+                },
+                success: function(response) {
+                    console.log(response);
+                    if (response.status == 200) {
+                        Swal.fire({
+                            title: "Success!",
+                            text: "User logged in successfully.",
+                            icon: "success",
+                            showConfirmButton: false,
+                            timer: 700
+                        }).then(() => {
+                            window.open(`{{ route('user.dashboard') }}`, '_blank');
+                        });
+                    } else {
+                        toastr.error(response.error);
+                    }
+                }
+            });
+        }
+    </script>
 @endsection
 
 {{-- Content --}}
@@ -157,11 +236,13 @@
                         </tr>
                     @else
                         @foreach ($dataSet as $data)
-                            <tr>
+                            <tr id="record_{{ $data->id }}">
                                 <td>{{ ($dataSet->currentPage() - 1) * $dataSet->perPage() + $loop->iteration }}</td>
                                 <td>
-                                    <div class="d-flex">
-                                        <span class="user-name-badge d-flex align-items-center justify-content-center">
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <span
+                                            class="bg-theme text-light rounded-circle fw-bold d-flex align-items-center justify-content-center"
+                                            style="width: 45px; height: 45px;">
                                             {{ substr($data->first_name, 0, 1) . substr($data->last_name, 0, 1) }}
                                         </span>
                                         <div class="d-flex flex-column gap-1">
@@ -175,16 +256,14 @@
                                     <div class="d-flex gap-1">
                                         <a href="{{ route('admin.user.edit', $data->id) }}" class="btn btn-dark btn-sm"><i
                                                 class="fas fa-edit"></i></a>
-
-                                        <form action="{{ route('admin.user.destroy', $data->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                onclick="return confirm('Are you sure you want to delete {{ $data->first_name . ' ' . $data->last_name }}?')"
-                                                class="btn btn-dark btn-sm">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" onclick="login({{ $data->id }})"
+                                            class="btn btn-dark btn-sm">
+                                            <i class="fas fa-sign-in-alt"></i>
+                                        </button>
+                                        <button type="button" onclick="deleteRecord({{ $data->id }})"
+                                            class="btn btn-dark btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

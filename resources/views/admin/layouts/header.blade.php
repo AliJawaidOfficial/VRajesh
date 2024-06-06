@@ -1,4 +1,4 @@
-<header class="top-header d-flex w-100 justify-content-between">
+<header class="top-header d-flex w-100 align-items-end justify-content-end gap-3">
 
 
     <div class="d-flex align-items-center alert-wrapper">

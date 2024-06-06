@@ -221,7 +221,7 @@
                             </div>
                             <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
                                 <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
-                                <p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate">${response.data.created_at}</span></p>
+                                <p class="modal-post-date mb-1"><strong>Saved on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.created_at)}</span></p>
                                 <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
                                     style="max-height: 200px; overflow-y: auto;">
                                     <strong>Description:</strong> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
@@ -282,6 +282,54 @@
             });
         }
 
+        function deletePost() {
+            $("#postDetail").modal("hide");
+            const postId = $("#postDetailId").val();
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-success",
+                    cancelButton: "btn btn-danger"
+                },
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: `{{ route('user.post.index') }}/${postId}/delete`,
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            post_id: postId
+                        },
+                        success: function(response) {
+                            if (response.status == 200) {
+                                swalWithBootstrapButtons.fire({
+                                    title: "Deleted!",
+                                    text: "Post has been deleted.",
+                                    icon: "success",
+                                    timer: 700
+                                    showConfirmButton: false,
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                toastr.error(response.error);
+                            }
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    $("#postDetail").modal("show");
+                }
+            });
+        }
 
         // Function to transfer post data to the modal for editing, scheduling or reposting
         async function transferPostData(modalId) {
@@ -379,7 +427,14 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#draftPostModal").modal('hide');
-                        toastr.success(response.message);
+                        Swal.fire({
+                            icon: 'success',
+                            title: response.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            location.reload();
+                        })
                     } else {
                         toastr.error(response.error);
                     }
@@ -404,7 +459,12 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#schedulePostModal").modal('hide');
-                        toastr.success("Post scheduled successfully");
+                        Swal.fire({
+                            icon: 'success',
+                            title: "Post scheduled successfully",
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
                     } else {
                         toastr.error(response.error);
                     }
@@ -429,7 +489,12 @@
                 success: function(response) {
                     if (response.status == 200) {
                         $("#repostModal").modal('hide');
-                        toastr.success("Post reposted successfully");
+                        Swal.fire({
+                            icon: 'success',
+                            title: "Post reposted successfully",
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
                     } else {
                         toastr.error(response.error);
                     }
@@ -602,15 +667,30 @@
                                 <p class="post-title mb-0">{{ $post->title }}</p>
                             </td>
                             <td>
-                                <div class="d-flex gap-2 align-items-center">
+                                <div class="d-flex gap-2">
                                     @if ($post->on_facebook)
-                                        <i class="fab fa-facebook"></i>
+                                        <div
+                                            class="badge p-1 bg-facebook rounded-2 text-light d-flex gap-1 align-items-start">
+                                            <i class="fab fa-facebook"></i>
+                                            <span
+                                                class="m-0 lh-1 border-start border-light ps-1">{{ $post->facebook_page_name }}</span>
+                                        </div>
                                     @endif
                                     @if ($post->on_instagram)
-                                        <i class="fab fa-instagram"></i>
+                                        <div
+                                            class="badge p-1 bg-instagram rounded-2 text-light d-flex gap-1 align-items-start">
+                                            <i class="fab fa-instagram"></i>
+                                            <span
+                                                class="m-0 lh-1 border-start border-light ps-1">{{ $post->instagram_account_name }}</span>
+                                        </div>
                                     @endif
                                     @if ($post->on_linkedin)
-                                        <i class="fab fa-linkedin-in"></i>
+                                        <div
+                                            class="badge p-1 bg-linkedin rounded-2 text-light d-flex gap-1 align-items-start">
+                                            <i class="fab fa-linkedin-in"></i>
+                                            <span
+                                                class="m-0 lh-1 border-start border-light ps-1">{{ $post->linkedin_company_name }}</span>
+                                        </div>
                                     @endif
                                 </div>
                             </td>
@@ -635,6 +715,7 @@
                     <div class="modal-body d-flex"></div>
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
+                            <button type="button" class="btn btn-custom" onclick="deletePost()">Delete</button>
                             <button type="button" class="btn btn-custom"
                                 onclick="transferPostData('draftPostModal')">Edit</button>
                         </div>
@@ -642,7 +723,7 @@
                             <button type="button" class="btn btn-custom"
                                 onclick="transferPostData('schedulePostModal')">Schedule</button>
                             <button type="button" class="btn btn-custom"
-                                onclick="transferPostData('repostModal')">Repost</button>
+                                onclick="transferPostData('repostModal')">Post</button>
                         </div>
                     </div>
                 </div>
@@ -680,51 +761,63 @@
                             </div>
                             <div class="d-flex align-items-center gap-3 py-2">
                                 <div><strong>Platforms</strong></div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
-                                        id="PlatformFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="PlatformFacebook">
-                                        <i class="fab fa-facebook-f"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
-                                        id="PlatformInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="PlatformInstagram">
-                                        <i class="fab fa-instagram"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_linkedin" value="1"
-                                        id="PlatformLinkedIn" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="PlatformLinkedIn">
-                                        <i class="fab fa-linkedin-in"></i>
-                                    </label>
-                                </div>
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_facebook"
+                                            value="1" id="PlatformFacebook">
+                                        <label class="form-check-label" for="PlatformFacebook">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_instagram"
+                                            value="1" id="PlatformInstagram">
+                                        <label class="form-check-label" for="PlatformInstagram">
+                                            <i class="fab fa-instagram"></i>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_linkedin"
+                                            value="1" id="PlatformLinkedIn">
+                                        <label class="form-check-label" for="PlatformLinkedIn">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </label>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="d-flex align-items-center gap-3 w-100">
-                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                    <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
-                                    <select name="facebook_page" class="d-block w-100 form-select text-black"
-                                        id="facebookPage">
-                                        <option value="">Select Page</option>
-                                    </select>
-                                </div>
-                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                    <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
-                                    <select name="instagram_account" class="d-block w-100 form-select text-black"
-                                        id="instagramPage">
-                                        <option value="">Select Page</option>
-                                    </select>
-                                </div>
-                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                    <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
-                                    <select name="linkedin_organization" class="d-block w-100 form-select text-black"
-                                        id="linkedInPage">
-                                        <option value="">Select Page</option>
-                                    </select>
-                                </div>
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                        <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
+                                        <select name="facebook_page" class="d-block w-100 form-select text-black"
+                                            id="facebookPage">
+                                            <option value="">Select Page</option>
+                                        </select>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                        <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
+                                        <select name="instagram_account" class="d-block w-100 form-select text-black"
+                                            id="instagramPage">
+                                            <option value="">Select Page</option>
+                                        </select>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                        <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
+                                        <select name="linkedin_organization" class="d-block w-100 form-select text-black"
+                                            id="linkedInPage">
+                                            <option value="">Select Page</option>
+                                        </select>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -778,50 +871,65 @@
                             </div>
                             <div class="d-flex align-items-center gap-3 py-2">
                                 <div><strong>Platforms</strong></div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
-                                        id="PlatformFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="PlatformFacebook">
-                                        <i class="fab fa-facebook-f"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
-                                        id="PlatformInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="PlatformInstagram">
-                                        <i class="fab fa-instagram"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_linkedin" value="1"
-                                        id="PlatformLinkedIn" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="PlatformLinkedIn">
-                                        <i class="fab fa-linkedin-in"></i>
-                                    </label>
-                                </div>
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_facebook"
+                                            value="1" id="PlatformFacebook"
+                                            @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
+                                        <label class="form-check-label" for="PlatformFacebook">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_instagram"
+                                            value="1" id="PlatformInstagram"
+                                            @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
+                                        <label class="form-check-label" for="PlatformInstagram">
+                                            <i class="fab fa-instagram"></i>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_linkedin"
+                                            value="1" id="PlatformLinkedIn"
+                                            @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
+                                        <label class="form-check-label" for="PlatformLinkedIn">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </label>
+                                    </div>
+                                @endif
                             </div>
                             <div class="d-flex align-items-center gap-3 w-100">
-                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                    <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
-                                    <select name="facebook_page" class="d-block w-100 form-select text-black"
-                                        id="facebookPage">
-                                        <option value="">Select Page</option>
-                                    </select>
-                                </div>
-                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                    <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
-                                    <select name="on_instagram" class="d-block w-100 form-select text-black"
-                                        id="instagramPage">
-                                        <option value="">Select Page</option>
-                                    </select>
-                                </div>
-                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                    <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
-                                    <select name="on_linkedin" class="d-block w-100 form-select text-black"
-                                        id="linkedInPage">
-                                        <option value="">Select Page</option>
-                                    </select>
-                                </div>
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                        <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
+                                        <select name="facebook_page" class="d-block w-100 form-select text-black"
+                                            id="facebookPage">
+                                            <option value="">Select Page</option>
+                                        </select>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                        <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
+                                        <select name="instagram_account" class="d-block w-100 form-select text-black"
+                                            id="instagramPage">
+                                            <option value="">Select Page</option>
+                                        </select>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                        <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
+                                        <select name="linkedin_organization" class="d-block w-100 form-select text-black"
+                                            id="linkedInPage">
+                                            <option value="">Select Page</option>
+                                        </select>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -866,50 +974,62 @@
                             </div>
                             <div class="d-flex align-items-center gap-3 py-2">
                                 <div><strong>Platforms</strong></div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
-                                        id="PlatformFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="PlatformFacebook">
-                                        <i class="fab fa-facebook-f"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
-                                        id="PlatformInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="PlatformInstagram">
-                                        <i class="fab fa-instagram"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_linkedin" value="1"
-                                        id="PlatformLinkedIn" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="PlatformLinkedIn">
-                                        <i class="fab fa-linkedin-in"></i>
-                                    </label>
-                                </div>
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_facebook"
+                                            value="1" id="PlatformFacebook">
+                                        <label class="form-check-label" for="PlatformFacebook">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_instagram"
+                                            value="1" id="PlatformInstagram">
+                                        <label class="form-check-label" for="PlatformInstagram">
+                                            <i class="fab fa-instagram"></i>
+                                        </label>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_linkedin"
+                                            value="1" id="PlatformLinkedIn">
+                                        <label class="form-check-label" for="PlatformLinkedIn">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </label>
+                                    </div>
+                                @endif
                             </div>
                             <div class="d-flex align-items-center gap-3 w-100">
-                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                    <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
-                                    <select name="facebook_page" class="d-block w-100 form-select text-black"
-                                        id="facebookPage">
-                                        <option value="">Select Page</option>
-                                    </select>
-                                </div>
-                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                    <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
-                                    <select name="instagram_account" class="d-block w-100 form-select text-black"
-                                        id="instagramPage">
-                                        <option value="">Select Page</option>
-                                    </select>
-                                </div>
-                                <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                    <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
-                                    <select name="linkedin_organization" class="d-block w-100 form-select text-black"
-                                        id="linkedInPage">
-                                        <option value="">Select Page</option>
-                                    </select>
-                                </div>
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                        <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
+                                        <select name="facebook_page" class="d-block w-100 form-select text-black"
+                                            id="facebookPage">
+                                            <option value="">Select Page</option>
+                                        </select>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                        <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
+                                        <select name="instagram_account" class="d-block w-100 form-select text-black"
+                                            id="instagramPage">
+                                            <option value="">Select Page</option>
+                                        </select>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                        <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
+                                        <select name="linkedin_organization" class="d-block w-100 form-select text-black"
+                                            id="linkedInPage">
+                                            <option value="">Select Page</option>
+                                        </select>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="modal-footer">

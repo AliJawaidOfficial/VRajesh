@@ -960,3 +960,31 @@ body {
 @media (min-width: 440px) and (max-width: 740px) {}
 
 @media (max-width: 425px) {}
+
+
+
+.bg-facebook {
+	background-color: #1877F2;
+}
+
+.bg-instagram {
+	background-color: #E1306C;
+}
+
+.bg-linkedin {
+	background-color: #0077B5;
+}
+
+label.error {
+	color: #F00;
+	font-size: 12px;
+}
+
+.bg-theme {
+	background: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important;
+}
+
+.swal2-confirm.btn.btn-success {
+	background: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important;
+	margin-left: 10px !important;
+}

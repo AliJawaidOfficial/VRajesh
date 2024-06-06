@@ -402,28 +402,29 @@
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
-                        // $("#exampleModal").modal("show");
                         showLoadingModal()
                     },
                     success: function(response) {
-                        if (response.status == 200) {
-                            if ($("#post_schedule_date").val() != null) {
-                                toastr.success("Post has been published successfully");
-                            } else {
-                                toastr.success("An error occurred");
-                            }
-                        } else {
-                            toastr.error(response.error);
-                        }
 
-                        // $("#exampleModal").removeClass("show");
-                        // $("#exampleModal").css("display", "none");
-
+                        $("#post_schedule_date").val("");
+                        $("#post_schedule_time").val("");
                         hideLoadingModal()
 
                         $("#scheduleModal").removeClass("show");
                         $("#scheduleModal").css("display", "none");
-                        // $("#scheduleModal").hide();
+
+                        if (response.status == 200) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: response.message,
+                                showConfirmButton: false,
+                                timer: 700
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            toastr.error(response.error);
+                        }
                     }
                 });
             }
@@ -441,21 +442,21 @@
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
-                        // $("#exampleModal").show()
-
                         showLoadingModal()
                     },
                     success: function(response) {
                         if (response.status == 200) {
-                            toastr.success("Post saved as draft");
-                            // $("#exampleModal").modal("hide");
-                            // $("#exampleModal").css("display", "none");
-
                             hideLoadingModal()
+                            Swal.fire({
+                                icon: 'success',
+                                title: "Post saved as draft",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                location.reload();
+                            });
                         } else {
                             toastr.error(response.error);
-                            // $("#exampleModal").modal("hide");
-                            // $("#exampleModal").css("display", "none");
 
                             hideLoadingModal()
                         }
@@ -577,41 +578,65 @@
                             <div class="d-flex align-items-center gap-3">
                                 <p class="mb-0">Check to share on:</p>
 
-                                <label class="d-inline-block platform-checkbox">
-                                    <input type="checkbox" name="on_facebook" onchange="getFacebookPages(this)"
-                                        value="1" data-bs-toggle="facebook-post" class="form-check-input toggle-post"
-                                        @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif />
-                                    -
-                                    <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"
-                                            style="font-size: 17px"></i></span>
-                                </label>
+                                @if (Auth::guard('web')->user()->can('meta_facebook_text_post') ||
+                                        Auth::guard('web')->user()->can('meta_facebook_image_post') ||
+                                        Auth::guard('web')->user()->can('meta_facebook_video_post'))
+                                    @if (Auth::guard('web')->user()->meta_access_token != null)
+                                        <label class="d-inline-block platform-checkbox">
+                                            <input type="checkbox" name="on_facebook" onchange="getFacebookPages(this)"
+                                                value="1" data-bs-toggle="facebook-post"
+                                                class="form-check-input toggle-post" />
+                                            -
+                                            <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"
+                                                    style="font-size: 17px"></i></span>
+                                        </label>
+                                    @endif
+                                @endif
 
-                                <label class="d-inline-block platform-checkbox">
-                                    <input type="checkbox" name="on_instagram" onchange="getInstagramAccounts(this)"
-                                        value="1" data-bs-toggle="instagram-post" class="form-check-input toggle-post"
-                                        @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif />
-                                    -
-                                    <span class="d-inline-block ms-1"><i class="fab fa-instagram"
-                                            style="font-size: 17px"></i></span>
-                                </label>
+                                @if (Auth::guard('web')->user()->can('meta_instagram_image_post') ||
+                                        Auth::guard('web')->user()->can('meta_instagram_video_post'))
+                                    @if (Auth::guard('web')->user()->meta_access_token != null)
+                                        <label class="d-inline-block platform-checkbox">
+                                            <input type="checkbox" name="on_instagram" onchange="getInstagramAccounts(this)"
+                                                value="1" data-bs-toggle="instagram-post"
+                                                class="form-check-input toggle-post" />
+                                            -
+                                            <span class="d-inline-block ms-1"><i class="fab fa-instagram"
+                                                    style="font-size: 17px"></i></span>
+                                        </label>
+                                    @endif
+                                @endif
 
-                                <label class="d-inline-block platform-checkbox">
-                                    <input type="checkbox" name="on_linkedin" onchange="getLinkedInOrganizations(this)"
-                                        value="1" data-bs-toggle="linkedin-post" class="form-check-input toggle-post"
-                                        @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif />
-                                    -
-                                    <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
-                                            style="font-size: 17px"></i></span>
-                                </label>
+                                @if (Auth::guard('web')->user()->can('linkedin_text_post') ||
+                                        Auth::guard('web')->user()->can('linkedin_image_post') ||
+                                        Auth::guard('web')->user()->can('linkedin_video_post'))
+                                    @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                        <label class="d-inline-block platform-checkbox">
+                                            <input type="checkbox" name="on_linkedin"
+                                                onchange="getLinkedInOrganizations(this)" value="1"
+                                                data-bs-toggle="linkedin-post" class="form-check-input toggle-post" />
+                                            -
+                                            <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
+                                                    style="font-size: 17px"></i></span>
+                                        </label>
+                                    @endif
+                                @endif
                             </div>
 
-                            <div class="d-flex align-items-center">
-                                <label for="mediaInput" class="btn btn-transparent text-primary"><i class="fas fa-paperclip"
-                                        style="font-size: 20px"></i></label>
-                                <input class="d-block w-100 form-control d-none" type="file" name="media"
-                                    accept="video/*, image/*" id="mediaInput" />
-                                <button type="button" class="remove-media-btn" style="display: none;">&times;</button>
-                            </div>
+                            @if (Auth::guard('web')->user()->can('meta_facebook_image_post') ||
+                                    Auth::guard('web')->user()->can('meta_facebook_video_post') ||
+                                    Auth::guard('web')->user()->can('meta_instagram_image_post') ||
+                                    Auth::guard('web')->user()->can('meta_instagram_video_post') ||
+                                    Auth::guard('web')->user()->can('linkedin_image_post') ||
+                                    Auth::guard('web')->user()->can('linkedin_video_post'))
+                                <div class="d-flex align-items-center">
+                                    <label for="mediaInput" class="btn btn-transparent text-primary"><i
+                                            class="fas fa-paperclip" style="font-size: 20px"></i></label>
+                                    <input class="d-block w-100 form-control d-none" type="file" name="media"
+                                        accept="video/*, image/*" id="mediaInput" />
+                                    <button type="button" class="remove-media-btn" style="display: none;">&times;</button>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="row">
@@ -672,14 +697,21 @@
                     </div>
 
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">
+
                         <div>
-                            <button type="button" name="draft" class="btn btn-custom">Save as Draft</button>
+                            @can('draft_post')
+                                <button type="button" name="draft" class="btn btn-custom">Save as Draft</button>
+                            @endcan
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
-                            <button type="button" class="btn btn-custom" data-bs-toggle="modal"
-                                data-bs-target="#scheduleModal">Schedule</button>
-                            <button type="submit" name="post" class="btn btn-custom">Post</button>
+                            @can('scheduled_post')
+                                <button type="button" class="btn btn-custom" data-bs-toggle="modal"
+                                    data-bs-target="#scheduleModal">Schedule</button>
+                            @endcan
+                            @can('immediate_post')
+                                <button type="submit" name="post" class="btn btn-custom">Post</button>
+                            @endcan
                         </div>
                     </div>
                 </form>

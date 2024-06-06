@@ -23,23 +23,23 @@ class PermissionsSeeder extends Seeder
                 'guard_name' => 'web'
             ],
             [
-                'name' => 'facebook_text_post',
+                'name' => 'meta_facebook_text_post',
                 'guard_name' => 'web'
             ],
             [
-                'name' => 'facebook_image_post',
+                'name' => 'meta_facebook_image_post',
                 'guard_name' => 'web'
             ],
             [
-                'name' => 'facebook_video_post',
+                'name' => 'meta_facebook_video_post',
                 'guard_name' => 'web'
             ],
             [
-                'name' => 'instagram_image_post',
+                'name' => 'meta_instagram_image_post',
                 'guard_name' => 'web'
             ],
             [
-                'name' => 'instagram_video_post',
+                'name' => 'meta_instagram_video_post',
                 'guard_name' => 'web'
             ],
             [
@@ -52,6 +52,22 @@ class PermissionsSeeder extends Seeder
             ],
             [
                 'name' => 'linkedin_video_post',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'immediate_post',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'scheduled_post',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'draft_post',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 're_post',
                 'guard_name' => 'web'
             ],
         ];

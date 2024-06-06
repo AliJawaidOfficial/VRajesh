@@ -130,7 +130,7 @@
         .fc-event-main {
             display: -webkit-box;
             -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;  
+            -webkit-box-orient: vertical;
             overflow: hidden;
             font-size: 12px;
             display: flex;
@@ -312,7 +312,7 @@
             padding-top: 0px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;  
+            -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
@@ -320,7 +320,7 @@
             font-size: 14px;
             border-bottom: 1px solid #dee2e6;
             padding: 5px 0px;
-        } 
+        }
 
         .modal-post-description {
             font-size: 14px;
@@ -356,16 +356,17 @@
                                 <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
                                     name="title" placeholder="Enter your title here" required />
                             </div>
-                            <div class="textarea-wrapper flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
+                            <div
+                                class="textarea-wrapper flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
                                 <label for="postDescription">Description</label>
-                                <textarea class="input-tag-description d-block h-100 w-100 form-control flex-grow-1" id="postDescription" name="description"
-                                    placeholder="Enter your post description"></textarea>
+                                <textarea class="input-tag-description d-block h-100 w-100 form-control flex-grow-1" id="postDescription"
+                                    name="description" placeholder="Enter your post description"></textarea>
                             </div>
                             <div class="date-time-inputs">
                                 <label for="postDate">Date</label>
-                                <input type="date" min="{{ date('Y-m-d') }}" class="form-control mb-2" id="postDate" name="schedule_date"
-                                    required />
-                                    <label for="postTime">Time</label>
+                                <input type="date" min="{{ date('Y-m-d') }}" class="form-control mb-2" id="postDate"
+                                    name="schedule_date" required />
+                                <label for="postTime">Time</label>
                                 <input type="time" class="form-control" id="postTime" name="schedule_time" required />
                             </div>
                             <div class="">
@@ -374,27 +375,85 @@
                             </div>
                             <div class="">
                                 <label>Platforms</label>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_facebook" value="1"
-                                        id="postFacebook" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="postFacebook">
-                                        <i class="fab fa-facebook-f"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_instagram" value="1"
-                                        id="postInstagram" @if (Auth::guard('web')->user()->linkedin_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="postInstagram">
-                                        <i class="fab fa-instagram"></i>
-                                    </label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="checkbox" name="on_linkedin" value="1"
-                                        id="postLinkedin" @if (Auth::guard('web')->user()->meta_access_token == null) disabled @endif>
-                                    <label class="form-check-label" for="postLinkedin">
-                                        <i class="fab fa-linkedin-in"></i>
-                                    </label>
-                                </div>
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_facebook"
+                                            onchange="getFacebookPages(this)" value="1" id="postFacebook" />
+                                        <label class="form-check-label" for="postFacebook"><i
+                                                class="fab fa-facebook-f"></i></label>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_instagram"
+                                            onchange="getInstagramAccounts(this)" value="1" id="postInstagram" />
+                                        <label class="form-check-label" for="postInstagram"><i
+                                                class="fab fa-instagram"></i></label>
+                                    </div>
+                                @endif
+                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="on_linkedin"
+                                            onchange="getLinkedInOrganizations(this)" value="1" id="postLinkedin" />
+                                        <label class="form-check-label" for="postLinkedin"><i
+                                                class="fab fa-linkedin-in"></i></label>
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="row">
+                                {{-- Facebook Pages --}}
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="col-md-4">
+                                        <div class="m-0" style="display: none;" id="facebookSelectSection">
+                                            <div class="d-flex flex-column gap-1">
+                                                <p class="mb-0">Facebook Pages:</p>
+
+                                                <div class="d-flex flex-column gap-1 w-100">
+                                                    <select name="facebook_page" id="facebookPagesSelect"
+                                                        class="form-select w-100">
+                                                        <option value="">Select</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- Instagram Account --}}
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="col-md-4">
+                                        <div class="m-0" style="display: none;" id="instagramSelectSection">
+                                            <div class="d-flex flex-column gap-1">
+                                                <p class="mb-0">Instagram Account:</p>
+
+                                                <div class="d-flex flex-column gap-1 w-100">
+                                                    <select name="instagram_account" id="instagramAccountSelect"
+                                                        class="form-select w-100">
+                                                        <option value="">Select</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- LinkedIn Organizations --}}
+                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                    <div class="col-md-4">
+                                        <div class="m-0" style="display: none;" id="linkedinSelectSection">
+                                            <div class="d-flex flex-column gap-1">
+                                                <p class="mb-0">LinkedIn Organizations:</p>
+
+                                                <div class="d-flex flex-column gap-1 w-100">
+                                                    <select name="linkedin_organization" id="linkedinOrganizationsSelect"
+                                                        class="form-select w-100">
+                                                        <option value="">Select</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -435,18 +494,26 @@
                                     <strong>Platforms:</strong>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <input type="checkbox" style="pointer-events: none;display: none" id="facebook-post-detail">
+                                    <input type="checkbox" style="pointer-events: none;display: none"
+                                        id="facebook-post-detail">
                                     <i class="fab fa-facebook"></i>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <input type="checkbox" style="pointer-events: none;display: none" id="instagram-post-detail">
+                                    <input type="checkbox" style="pointer-events: none;display: none"
+                                        id="instagram-post-detail">
                                     <i class="fab fa-instagram"></i>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <input type="checkbox" style="pointer-events: none;display: none" id="linkedin-post-detail">
+                                    <input type="checkbox" style="pointer-events: none;display: none"
+                                        id="linkedin-post-detail">
                                     <i class="fab fa-linkedin"></i>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <div>
+                            <button type="button" class="btn btn-custom" onclick="deletePost()">Delete</button>
                         </div>
                     </div>
                 </div>
@@ -465,7 +532,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
 
     <script>
-            document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -506,11 +573,16 @@
                 },
                 eventContent: function(arg) {
                     let icons = '';
-                    if (arg.event.extendedProps.on_facebook) icons += '<i class="fab fa-facebook-f"></i>';
-                    if (arg.event.extendedProps.on_instagram) icons += '<i class="fab fa-instagram"></i>';
-                    if (arg.event.extendedProps.on_linkedin) icons += '<i class="fab fa-linkedin-in"></i>';
+                    if (arg.event.extendedProps.on_facebook) icons +=
+                        '<i class="fab fa-facebook-f"></i>';
+                    if (arg.event.extendedProps.on_instagram) icons +=
+                        '<i class="fab fa-instagram"></i>';
+                    if (arg.event.extendedProps.on_linkedin) icons +=
+                        '<i class="fab fa-linkedin-in"></i>';
 
-                    return { html: icons + ' -' + arg.event.title };
+                    return {
+                        html: icons + ' -' + arg.event.title
+                    };
                 }
             });
 
@@ -522,15 +594,18 @@
                 var monthSelect = document.createElement('select');
                 monthSelect.id = 'monthSelect';
                 monthSelect.className = 'form-select d-inline-block w-auto';
-                monthSelect.innerHTML = `
-                    ${Array.from({ length: 12 }, (_, i) => `<option value="${i + 1}">${new Date(0, i).toLocaleString('default', { month: 'long' })}</option>`).join('')}
-                `;
+                monthSelect.innerHTML = `${Array.from({ length: 12 }, (_, i) => ` < option value = "${i + 1}" > $ {
+                    new Date(0, i).toLocaleString('default', {
+                        month: 'long'
+                    })
+                } < /option>`).join('')}`;
                 var yearSelect = document.createElement('select');
                 yearSelect.id = 'yearSelect';
                 yearSelect.className = 'form-select d-inline-block w-auto';
-                yearSelect.innerHTML = `
-                    ${Array.from({ length: 11 }, (_, i) => `<option value="${new Date().getFullYear() - 5 + i}">${new Date().getFullYear() - 5 + i}</option>`).join('')}
-                `;
+                yearSelect.innerHTML = `${Array.from({ length: 11 }, (_, i) => ` < option value =
+                    "${new Date().getFullYear() - 5 + i}" > $ {
+                        new Date().getFullYear() - 5 + i
+                    } < /option>`).join('')}`;
                 headerToolbar.appendChild(monthSelect);
                 headerToolbar.appendChild(yearSelect);
 
@@ -553,8 +628,8 @@
             addMonthYearSelects();
 
             function fetchEvents(start, end) {
-                const apiUrl = `{{ route('user.post.scheduled.all') }}?start=${start.toISOString()}&end=${end.toISOString()}`;
-
+                const apiUrl =
+                    `{{ route('user.post.scheduled.all') }}?start=${start.toISOString()}&end=${end.toISOString()}`;
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(data => {
@@ -580,40 +655,92 @@
 
             function fetchEventDetails(eventId) {
                 const apiUrl = `{{ route('user.post.index') }}/details/${eventId}`;
-
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(response => {
-                        let mediaHtml = '';
-                        const asset = `{{ asset('') }}`;
-                        const mediaType = response.data.media_type;
-                        const mediaContent = response.data.media;
+                        if (response.status == 200) {
+                            let html = '';
+                            let asset = `{{ asset('') }}`;
+                            let mediaType = response.data.media_type;
+                            let mediaContent = response.data.media;
 
-                        if (mediaType === 'image') {
-                            mediaHtml += `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
-                        } else if (mediaType === 'video') {
-                            mediaHtml += `<video controls class="w-100 rounded mb-1">
-                                            <source src="${asset}${mediaContent}" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                        </video>`;
+                            html += `<div class="media-preview w-50 p-3">`;
+
+                            if (mediaType == 'image') {
+                                html +=
+                                    `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
+                            } else if (mediaType == 'video') {
+                                html += `<video controls class="w-100 rounded mb-1">
+                                    <source src="${asset}${mediaContent}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>`;
+                            } else {
+                                html +=
+                                `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                            }
+
+                            html += `
+                                </div>
+                                <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
+                                    <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
+                                <p class="modal-post-date mb-1"><strong>Created on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.created_at)}</span></p>
+                                    <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
+                                        style="max-height: 200px; overflow-y: auto;">
+                                        <strong>Description:</strong> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
+                                    </div>
+                                    <input type="hidden" id="postDetailId" value="${response.data.id}"/>
+                                    <div class="py-2">
+                                        <div class="mb-2">
+                                            <strong>Platforms & Pages:</strong>
+                                        </div>
+                            `;
+                            html += `
+                                    <div class="d-flex flex-column gap-2">
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <input type="checkbox" style="pointer-events: none; display: none"
+                                                id="facebook-post-detail" ${(response.data.on_facebook) ? 'checked' : ''}>
+                            `;
+                            if (response.data.on_facebook) html +=
+                                `<i class="fab fa-facebook m-0"></i><span class="m-0 ms-2">${response.data.facebook_page_name}</span>`;
+                            html += `
+                                        </div>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <input type="checkbox" style="pointer-events: none; display: none"
+                                                id="instagram-post-detail" ${(response.data.on_instagram) ? 'checked' : ''}>
+                            `;
+                            if (response.data.on_instagram) html +=
+                                `<i class="fab fa-instagram"></i><span class="m-0 ms-2">${response.data.instagram_account_name}</span>`;
+                            html += `
+                                        </div>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <input type="checkbox" style="pointer-events: none; display: none"
+                                                id="linkedin-post-detail" ${(response.data.on_linkedin) ? 'checked' : ''}>
+                            `;
+                            if (response.data.on_linkedin) html +=
+                                `<i class="fab fa-linkedin"></i><span class="m-0 ms-2">${response.data.linkedin_company_name}</span>`;
+                            html += `
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+
+                            html += ` 
+                                <input type="hidden" id="facebook_page_access_token" value="${response.data.facebook_page_access_token}"/>
+                                <input type="hidden" id="facebook_page_id" value="${response.data.facebook_page_id}"/>
+                                <input type="hidden" id="facebook_page_name" value="${response.data.facebook_page_name}"/>
+                                <input type="hidden" id="instagram_account_id" value="${response.data.instagram_account_id}"/>
+                                <input type="hidden" id="instagram_account_name" value="${response.data.instagram_account_name}"/>
+                                <input type="hidden" id="linkedin_company_id" value="${response.data.linkedin_company_id}"/>
+                                <input type="hidden" id="linkedin_company_name" value="${response.data.linkedin_company_name}"/>
+                            `
+
+                            $('#postDetail .modal-body').html(html);
+                            $('#postDetail').modal('show');
                         } else {
-                            mediaHtml += `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                            toastr.error(response.error);
                         }
 
-                        $("#postDetailId").val(response.data.id);
-                        $("#facebook-post-detail").attr("checked", response.data.on_facebook ? true : false);
-                        $("#instagram-post-detail").attr("checked", response.data.on_instagram ? true : false);
-                        $("#linkedin-post-detail").attr("checked", response.data.on_linkedin ? true : false);
-
-                        
-                        $("#facebook-post-detail + i").css("display",response.data.on_facebook ? "block" : "none" );
-                        $("#instagram-post-detail + i").css("display",response.data.on_instagram ? "block" : "none" );
-                        $("#linkedin-post-detail + i").css("display",response.data.on_linkedin ? "block" : "none" );
-
-                        $('#postDetail .media-preview').html(mediaHtml);
-                        $('#modalPostTitle').text(response.data.title);
-                        $('#modalPostDate').text(response.data.created_at);
-                        $('#modalPostDescription').html(response.data.description.replace(/\n/g, '<br>'));
                         $('#postDetail').modal('show');
                     })
                     .catch(error => console.error('Error fetching event details:', error));
@@ -631,6 +758,7 @@
                         button.innerHTML = '<i class="fas fa-plus"></i>';
                         button.className = 'schedule-button';
                         button.addEventListener('click', function() {
+                            $("#schedulePostForm").trigger("reset");
                             $("#schedulePostModal").modal("show");
                             $("#postDate").val(cellDate.toISOString().split('T')[0]);
                         });
@@ -662,7 +790,14 @@
                     success: function(response) {
                         if (response.status == 200) {
                             $("#schedulePostModal").modal('hide');
-                            toastr.success("Post scheduled successfully");
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Post scheduled successfully',
+                                showConfirmButton: false,
+                                timer: 700
+                            }).then(() => {
+                                location.reload();
+                            })
                         } else {
                             toastr.error(response.error);
                         }
@@ -672,5 +807,142 @@
                 });
             });
         });
+
+
+        // Facbook Pages
+        function getFacebookPages(element) {
+            if (element.checked) {
+                $("#facebookSelectSection").fadeIn();
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('user.facebook.pages') }}",
+                    beforeSend: function() {
+                        $("#facebookPagesSelect").html(`<option value="">Loading...</option>`);
+                    },
+                    success: function(response) {
+                        html = `<option value="">Select</option>`;
+
+                        if (response.length > 0) {
+                            response.forEach((page) => {
+                                html +=
+                                    `<option value="${page.id} - ${page.access_token} - ${page.name}">${page.name}</option>`
+                            })
+                        } else {
+                            html = `<option value="">No Page Found</option>`;
+                        }
+                        $("#facebookPagesSelect").html(html);
+                    }
+                });
+            } else {
+                $("#facebookSelectSection").fadeOut();
+            }
+        }
+
+        // Instagram Accounts
+        function getInstagramAccounts(element) {
+            if (element.checked) {
+                $("#instagramSelectSection").fadeIn();
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('user.instagram.accounts') }}",
+                    beforeSend: function() {
+                        $("#instagramAccountSelect").html(`<option value="">Loading...</option>`);
+                    },
+                    success: function(response) {
+                        html = `<option value="">Select</option>`;
+
+                        if (response.length > 0) {
+                            response.forEach((account) => {
+                                html +=
+                                    `<option value="${account.ig_business_account} - ${account.name}">${account.name}</option>`
+                            })
+                        } else {
+                            html = `<option value="">No Account Found</option>`;
+                        }
+                        $("#instagramAccountSelect").html(html);
+                    }
+                });
+            } else {
+                $("#instagramSelectSection").fadeOut();
+            }
+        }
+
+        // LinkedIn Organizations
+        function getLinkedInOrganizations(element) {
+            if (element.checked) {
+                $("#linkedinSelectSection").fadeIn();
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('user.linkedin.organizations') }}",
+                    beforeSend: function() {
+                        $("#linkedinOrganizationsSelect").html(`<option value="">Loading...</option>`);
+                    },
+                    success: function(response) {
+                        html = `<option value="">Select</option>`;
+
+                        if (response.length > 0) {
+                            response.forEach((account) => {
+                                html +=
+                                    `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
+                            })
+                        } else {
+                            html = `<option value="">No Account Found</option>`;
+                        }
+                        $("#linkedinOrganizationsSelect").html(html);
+                    }
+                });
+            } else {
+                $("#linkedinSelectSection").fadeOut();
+            }
+        }
+
+        // Delete Post
+        function deletePost() {
+            $("#postDetail").modal("hide");
+            const postId = $("#postDetailId").val();
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-success",
+                    cancelButton: "btn btn-danger"
+                },
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: `{{ route('user.post.index') }}/${postId}/delete`,
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            post_id: postId
+                        },
+                        success: function(response) {
+                            if (response.status == 200) {
+                                swalWithBootstrapButtons.fire({
+                                    title: "Deleted!",
+                                    text: "Post has been deleted.",
+                                    icon: "success",
+                                    showConfirmButton: false,
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                toastr.error(response.error);
+                            }
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    $("#postDetail").modal("show");
+                }
+            });
+        }
     </script>
 @endsection

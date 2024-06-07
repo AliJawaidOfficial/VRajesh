@@ -69,6 +69,12 @@
             'name' => 'Linkedin Self',
             'active_url' => 'user.individual.post.*',
             'icon' => asset('assets/images/icons/arrow-right.png'),
+            'permissions' => [
+                'linkedin_text_post',
+                'linkedin_image_post',
+                'linkedin_video_post',
+                'immediate_post',
+            ],
             'submenu' => [
                 [
                     'name' => 'Create',

@@ -69,17 +69,18 @@
             'name' => 'Linkedin Self',
             'active_url' => 'user.individual.post.*',
             'icon' => asset('assets/images/icons/arrow-right.png'),
-            'permissions' => [
-                'linkedin_text_post',
-                'linkedin_image_post',
-                'linkedin_video_post',
-                'immediate_post',
-            ],
+            'permissions' => ['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post', 'immediate_post'],
             'submenu' => [
                 [
                     'name' => 'Create',
                     'url' => route('user.individual.post.create'),
                     'active_url' => 'user.individual.post.create',
+                    'permissions' => [
+                        'linkedin_text_post',
+                        'linkedin_image_post',
+                        'linkedin_video_post',
+                        'immediate_post',
+                    ],
                 ],
                 [
                     'name' => 'Published',
@@ -89,28 +90,28 @@
                 ],
             ],
         ],
-        [
-            'name' => 'Pipelines',
-            'active_url' => 'user.linkedin.pipeline.*',
-            'icon' => asset('assets/images/icons/arrow-right.png'),
-            'submenu' => [
-                [
-                    'name' => 'B1',
-                    'url' => route('user.linkedin.pipeline.index'),
-                    'active_url' => 'user.linkedin.pipeline.index',
-                ],
-                [
-                    'name' => 'B2',
-                    'url' => route('user.linkedin.pipeline.index'),
-                    'active_url' => '',
-                ],
-                [
-                    'name' => 'B3',
-                    'url' => route('user.linkedin.pipeline.index'),
-                    'active_url' => '',
-                ],
-            ],
-        ],
+        // [
+        //     'name' => 'Pipelines',
+        //     'active_url' => 'user.linkedin.pipeline.*',
+        //     'icon' => asset('assets/images/icons/arrow-right.png'),
+        //     'submenu' => [
+        //         [
+        //             'name' => 'B1',
+        //             'url' => route('user.linkedin.pipeline.index'),
+        //             'active_url' => 'user.linkedin.pipeline.index',
+        //         ],
+        //         [
+        //             'name' => 'B2',
+        //             'url' => route('user.linkedin.pipeline.index'),
+        //             'active_url' => '',
+        //         ],
+        //         [
+        //             'name' => 'B3',
+        //             'url' => route('user.linkedin.pipeline.index'),
+        //             'active_url' => '',
+        //         ],
+        //     ],
+        // ],
     ];
 @endphp
 
@@ -186,7 +187,8 @@
                                     <div class="accordion-body">
                                         <ul class="accordion inner-menu" id="secondLevel">
                                             @foreach ($item['submenu'] as $key => $item)
-                                                <li class="menu-item {{ Str::is($item['active_url'], Route::currentRouteName()) ? 'active' : '' }}">
+                                                <li
+                                                    class="menu-item {{ Str::is($item['active_url'], Route::currentRouteName()) ? 'active' : '' }}">
                                                     <a href="{{ $item['url'] }}">
                                                         <span class="menu-icon">
                                                             <img src="{{ asset('assets/images/icons/arrow-right.png') }}"

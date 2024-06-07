@@ -68,7 +68,7 @@ class ConnectController extends Controller
                 'pages_manage_posts',
                 'instagram_basic',
                 'instagram_content_publish',
-                'instagram_manage_media',
+                // 'instagram_manage_media',
             ])
             ->redirect();
     }

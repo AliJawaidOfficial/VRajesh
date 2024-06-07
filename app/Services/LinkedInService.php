@@ -9,9 +9,16 @@ use Illuminate\Support\Facades\Auth;
 class LinkedInService
 {
     protected $baseUrl;
+
     protected $clientId;
     protected $clientSecret;
+
+    protected $clientId2;
+    protected $clientSecret2;
+
     protected $accessToken;
+    protected $community_accessToken;
+
     protected $personUrn;
     protected $organizationUrn;
 
@@ -20,6 +27,8 @@ class LinkedInService
         $this->baseUrl = 'https://api.linkedin.com/v2/';
         $this->clientId = env('LINKEDIN_CLIENT_ID');
         $this->clientSecret = env('LINKEDIN_CLIENT_SECRET');
+        $this->clientId2 = env('LINKEDIN_CLIENT_ID_2');
+        $this->clientSecret2 = env('LINKEDIN_CLIENT_SECRET_2');
     }
 
     /**
@@ -37,6 +46,20 @@ class LinkedInService
         $url = 'https://www.linkedin.com/oauth/v2/authorization?' . http_build_query($param);
         return $url;
     }
+
+    public function generateAuthUrl2()
+    {
+        $param = [
+            'response_type' => 'code',
+            'client_id' => $this->clientId2,
+            'scope' => 'w_organization_social',
+            'redirect_uri' => route('user.connect.linkedin.callback.2'),
+            'state' => uniqid(),
+        ];
+        $url = 'https://www.linkedin.com/oauth/v2/authorization?' . http_build_query($param);
+        return $url;
+    }
+
 
     public function generateAccessToken($code)
     {
@@ -60,7 +83,37 @@ class LinkedInService
             curl_close($ch);
             $data = json_decode($response, true);
 
-            Auth::guard('web')->user()->linkedin_access_token = $data['access_token'];
+            return $data['access_token'];
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function generateAccessToken2($code)
+    {
+        try {
+            $url = 'https://www.linkedin.com/oauth/v2/accessToken';
+            $params = [
+                'grant_type' => 'authorization_code',
+                'client_id' => $this->clientId2,
+                'client_secret' => $this->clientSecret2,
+                'redirect_uri' => route('user.connect.linkedin.callback.2'),
+                'code' => $code,
+            ];
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $response = curl_exec($ch);
+            if ($response === false) throw new Exception(curl_error($ch));
+            curl_close($ch);
+            $data = json_decode($response, true);
+
             return $data['access_token'];
         } catch (Exception $e) {
             return [
@@ -81,22 +134,27 @@ class LinkedInService
             $this->accessToken = $user->linkedin_access_token;
         }
     }
-    
+
     public function setOrganizationUrn($organization_id)
     {
         $this->organizationUrn = $organization_id;
     }
- 
+
+    public function setCommunityAccessToken()
+    {
+        $this->community_accessToken = Auth::guard('web')->user()->linkedin_community_access_token;
+    }
+
     /**
      * User
      */
-    public function getProfile()
+    public function getProfile($access_token)
     {
         try {
             $url = $this->baseUrl . 'userinfo';
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . Auth::guard('web')->user()->linkedin_access_token]);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $access_token]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
             if ($response === false) throw new Exception(curl_error($ch));
@@ -209,15 +267,16 @@ class LinkedInService
             $this->init($user_id);
 
             $this->setOrganizationUrn($organization_id);
+            $this->setCommunityAccessToken();
 
             $params = [
                 'author' => "urn:li:organization:" . $this->organizationUrn,
-                "commentary" => "Sample text Post",
+                "commentary" => $text,
                 "visibility" => "PUBLIC",
                 "distribution" => [
                     "feedDistribution" => "MAIN_FEED",
                     "targetEntities" => [],
-                    "thirdPartyDistributionChannels" => []
+                    "thirdPartyDistributionChannels" => [],
                 ],
                 "lifecycleState" => "PUBLISHED",
                 "isReshareDisabledByAuthor" => false
@@ -226,16 +285,16 @@ class LinkedInService
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
+                'Authorization: Bearer ' . $this->community_accessToken,
                 'X-Restli-Protocol-Version: 2.0.0',
                 'LinkedIn-Version: 202403',
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params)); // Encode params as JSON
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
             $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
@@ -256,10 +315,12 @@ class LinkedInService
             $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
 
             $this->init($user_id);
+            $this->setOrganizationUrn($organization_id);
+            $this->setCommunityAccessToken();
 
             $params = [
                 'registerUploadRequest' => [
-                    'owner' => "urn:li:person:" . $this->personUrn,
+                    'owner' => "urn:li:organization:" . $this->organizationUrn,
                     'recipes' => ['urn:li:digitalmediaRecipe:feedshare-image'],
                     'serviceRelationships' => [
                         [
@@ -275,7 +336,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
+                'Authorization: Bearer ' . $this->community_accessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -308,7 +369,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $image);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
+                'Authorization: Bearer ' . $this->community_accessToken,
                 'Content-Type: application/octet-stream',
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -334,7 +395,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
+                'Authorization: Bearer ' . $this->community_accessToken,
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
@@ -356,7 +417,7 @@ class LinkedInService
         try {
             $url = 'https://api.linkedin.com/v2/ugcPosts';
             $params = [
-                'author' => "urn:li:person:" . $this->personUrn,
+                'author' => "urn:li:organization:" . $this->organizationUrn,
                 'lifecycleState' => 'PUBLISHED',
                 'specificContent' => [
                     'com.linkedin.ugc.ShareContent' => [
@@ -384,7 +445,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
+                'Authorization: Bearer ' . $this->community_accessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -418,10 +479,12 @@ class LinkedInService
             $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
 
             $this->init($user_id);
+            $this->setOrganizationUrn($organization_id);
+            $this->setCommunityAccessToken();
 
             $params = [
                 'registerUploadRequest' => [
-                    'owner' => "urn:li:person:" . $this->personUrn,
+                    'owner' => "urn:li:person:" . $this->organizationUrn,
                     'recipes' => ['urn:li:digitalmediaRecipe:feedshare-video'],
                     'serviceRelationships' => [
                         [
@@ -437,7 +500,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
+                'Authorization: Bearer ' . $this->community_accessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -449,6 +512,8 @@ class LinkedInService
 
             $data = json_decode($response, true);
 
+            if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
+            
             $upload_url = $data['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
             $asset_id = $data['value']['asset'];
 
@@ -472,7 +537,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $video);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
+                'Authorization: Bearer ' . $this->community_accessToken,
                 'Content-Type: application/octet-stream',
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -498,7 +563,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
+                'Authorization: Bearer ' . $this->community_accessToken,
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
@@ -525,7 +590,7 @@ class LinkedInService
         try {
             $url = 'https://api.linkedin.com/v2/ugcPosts';
             $params = [
-                'author' => "urn:li:person:" . $this->personUrn,
+                'author' => "urn:li:organization:" . $this->organizationUrn,
                 'lifecycleState' => 'PUBLISHED',
                 'specificContent' => [
                     'com.linkedin.ugc.ShareContent' => [
@@ -553,7 +618,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
+                'Authorization: Bearer ' . $this->community_accessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -567,6 +632,7 @@ class LinkedInService
 
             if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
 
+            return $data;
             return ['status' => 200];
         } catch (Exception $e) {
             return [

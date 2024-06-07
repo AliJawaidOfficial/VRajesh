@@ -422,7 +422,7 @@
                                 showConfirmButton: false,
                                 timer: 700
                             }).then(() => {
-                                location.reload();
+                                // location.reload();
                             });
                         } else {
                             toastr.error(response.error);

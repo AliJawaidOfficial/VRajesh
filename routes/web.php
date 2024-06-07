@@ -82,6 +82,7 @@ Route::name('user.')
                     // Linkedin
                     Route::get('/linkedin', 'linkedin')->name('.linkedin');
                     Route::get('/linkedin/callback', 'linkedinCallback')->name('.linkedin.callback');
+                    Route::get('/linkedin/callback/2', 'linkedinCallback2')->name('.linkedin.callback.2');
                     Route::get('/linkedin/disconnect', 'linkedinDisconnect')->name('.linkedin.disconnect');
                 });
 

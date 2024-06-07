@@ -14,6 +14,7 @@ use App\Services\FacebookService;
 use App\Services\InstagramService;
 use App\Services\LinkedInService;
 use App\Models\Post;
+use App\Models\User;
 
 class DraftPostController extends Controller
 {

@@ -24,10 +24,21 @@
                 @can($platform['permission'])
                     <div class="col">
                         <div class="card rounded-6">
-                            <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-center">
+                            <div
+                                class="card-header bg-transparent border-0 d-flex align-items-center justify-content-center position-relative">
                                 <img src="{{ asset($platform['image']) }}" alt="">
+                                @if ($platform['is_connected'] == 1)
+                                    <img src="{{ asset($platform['avatar']) }}"
+                                        class="rounded-circle position-absolute end-0 bottom-0" alt="">
+                                @endif
                             </div>
                             <div class="card-body pt-0">
+
+                                @if ($platform['is_connected'] == 1)
+                                    <p>{{ $platform['name'] }}</p>
+                                    <p>{{ $platform['email'] }}</p>
+                                @endif
+
                                 <p class="mb-3 text-center">{{ $platform['text'] }}</p>
                                 @if ($platform['is_connected'] == 1)
                                     <a href="{{ route($platform['disconnect_route']) }}"

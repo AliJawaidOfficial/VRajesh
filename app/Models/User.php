@@ -30,6 +30,7 @@ class User extends Authenticatable
         'meta_email',
         
         'linkedin_access_token',
+        'linkedin_community_access_token',
         'linkedin_urn',
         'linkedin_avatar',
         'linkedin_name',

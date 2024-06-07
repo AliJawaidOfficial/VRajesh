@@ -31,21 +31,26 @@ class ConnectController extends Controller
             [
                 'image' => 'assets/images/icons/icons-facebook.png',
                 'text' => 'Connect With Facebook',
-                'is_connected' => (Auth::guard('web')->user()->meta_access_token != null)? 1: 0,
+                'is_connected' => (Auth::guard('web')->user()->meta_access_token != null) ? 1 : 0,
                 'connect_route' => 'user.connect.facebook',
                 'disconnect_route' => 'user.connect.facebook.disconnect',
-                'permission' => 'connect_facebook'
+                'permission' => 'connect_facebook',
+                'user_avatar' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->meta_avatar : null,
+                'user_name' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->meta_name : null,
+                'user_email' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->meta_email : null,
             ],
             [
                 'image' => 'assets/images/icons/icons-linkedin.png',
                 'text' => 'Connect With LinkedIn',
-                'is_connected' => (Auth::guard('web')->user()->linkedin_access_token != null)? 1: 0,
+                'is_connected' => (Auth::guard('web')->user()->linkedin_access_token != null) ? 1 : 0,
                 'connect_route' => 'user.connect.linkedin',
                 'disconnect_route' => 'user.connect.linkedin.disconnect',
-                'permission' => 'connect_linkedin'
+                'permission' => 'connect_linkedin',
+                'user_avatar' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->linkedin_avatar : null,
+                'user_name' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->linkedin_name : null,
+                'user_email' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->linkedin_email : null,
             ]
         ];
-        // return $platforms;
         return view('user.connect.index', compact('platforms'));
     }
 
@@ -102,8 +107,8 @@ class ConnectController extends Controller
     {
         $user = User::where('id', Auth::guard('web')->user()->id)->first();
         $user->meta_access_token = null;
-        $user->meta_name = null;
         $user->meta_avatar = null;
+        $user->meta_name = null;
         $user->save();
 
         Session::flash('success', ['text' => 'Your Facebook account disconnected.']);
@@ -128,7 +133,7 @@ class ConnectController extends Controller
             $generateAccessToken = $this->linkedinService->generateAccessToken($code);
             if ($generateAccessToken === false) throw new Exception('Failed to generate access token');
 
-            $getProfile = $this->linkedinService->getProfile();
+            $getProfile = $this->linkedinService->getProfile($generateAccessToken);
             if ($getProfile === false) throw new Exception('Failed to get profile');
 
             $user = User::where('id', Auth::guard('web')->user()->id)->where('linkedin_email', $getProfile['email'])->first();
@@ -144,6 +149,28 @@ class ConnectController extends Controller
             $user->linkedin_avatar = $getProfile['picture'];
             $user->save();
 
+            return redirect($this->linkedinService->generateAuthUrl2());
+
+            Session::flash('success', ['text' => 'Your Linkedin account connected successfully.']);
+            return redirect()->route('user.connect');
+        } catch (Exception $e) {
+            Session::flash('error', ['text' => 'Something went wrong. Please try again.']);
+            return redirect()->route('user.connect');
+        }
+    }
+
+    public function linkedinCallback2(Request $request)
+    {
+        try {
+            $code = $request->code;
+
+            $generateAccessToken = $this->linkedinService->generateAccessToken2($code);
+            if ($generateAccessToken === false) throw new Exception('Failed to generate access token');
+
+            $user = User::where('id', Auth::guard('web')->user()->id)->first();
+            $user->linkedin_community_access_token = $generateAccessToken;
+            $user->save();
+
             Session::flash('success', ['text' => 'Your Linkedin account connected successfully.']);
             return redirect()->route('user.connect');
         } catch (Exception $e) {
@@ -156,7 +183,10 @@ class ConnectController extends Controller
     {
         $user = User::where('id', Auth::guard('web')->user()->id)->first();
         $user->linkedin_access_token = null;
+        $user->linkedin_community_access_token = null;
         $user->linkedin_urn = null;
+        $user->linkedin_avatar = null;
+        $user->linkedin_name = null;
         $user->save();
 
         Session::flash('success', ['text' => 'Your Linkedin account disconnected successfully.']);

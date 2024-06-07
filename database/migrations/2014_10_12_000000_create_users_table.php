@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('meta_email')->nullable();
 
             $table->text('linkedin_access_token')->nullable();
+            $table->text('linkedin_community_access_token')->nullable();
+            
             $table->text('linkedin_urn')->nullable();
             $table->text('linkedin_avatar')->nullable();
             $table->string('linkedin_name')->nullable();

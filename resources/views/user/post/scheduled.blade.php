@@ -385,7 +385,7 @@
                             @endif
                             <div class="d-flex align-items-center gap-3 py-2">
                                 <div><strong>Platforms</strong></div>
-                                
+
                                 @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
                                     @if (Auth::guard('web')->user()->meta_access_token != null)
                                         <label class="d-inline-block platform-checkbox">
@@ -476,8 +476,8 @@
                                                     <p class="mb-0">LinkedIn Organizations:</p>
 
                                                     <div class="d-flex flex-column gap-1 w-100">
-                                                        <select name="linkedin_organization" id="linkedinOrganizationsSelect"
-                                                            class="form-select w-100">
+                                                        <select name="linkedin_organization"
+                                                            id="linkedinOrganizationsSelect" class="form-select w-100">
                                                             <option value="">Select</option>
                                                         </select>
                                                     </div>
@@ -563,7 +563,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
 
-    {{-- <script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
 
@@ -620,17 +620,17 @@
 
             calendar.render();
 
-            // Add month and year select elements to the toolbar
             function addMonthYearSelects() {
                 var headerToolbar = document.querySelector('.fc-toolbar-chunk:last-child');
                 var monthSelect = document.createElement('select');
                 monthSelect.id = 'monthSelect';
                 monthSelect.className = 'form-select d-inline-block w-auto';
-                monthSelect.innerHTML = `${Array.from({ length: 12 }, (_, i) => ` < option value = "${i + 1}" > $ {
+                monthSelect.innerHTML = `${Array.from({ length: 12 }, (_, i) => ` < option value = "${i}" > $ {
                     new Date(0, i).toLocaleString('default', {
                         month: 'long'
                     })
                 } < /option>`).join('')}`;
+
                 var yearSelect = document.createElement('select');
                 yearSelect.id = 'yearSelect';
                 yearSelect.className = 'form-select d-inline-block w-auto';
@@ -638,21 +638,21 @@
                     "${new Date().getFullYear() - 5 + i}" > $ {
                         new Date().getFullYear() - 5 + i
                     } < /option>`).join('')}`;
+
                 headerToolbar.appendChild(monthSelect);
                 headerToolbar.appendChild(yearSelect);
 
                 // Set default values to current month and year
                 var currentDate = new Date();
-                monthSelect.value = currentDate.getMonth() + 1; // getMonth() returns 0-11
+                monthSelect.value = currentDate.getMonth(); // getMonth() returns 0-11
                 yearSelect.value = currentDate.getFullYear();
             }
 
-            // Handle month/year selection
             document.addEventListener('change', function(event) {
                 if (event.target.id === 'monthSelect' || event.target.id === 'yearSelect') {
                     const month = document.getElementById('monthSelect').value;
                     const year = document.getElementById('yearSelect').value;
-                    const date = new Date(year, month - 1, 1); // Month is zero-based in JavaScript Date
+                    const date = new Date(year, month, 1); // Month is zero-based in JavaScript Date
                     calendar.gotoDate(date);
                 }
             });
@@ -703,69 +703,63 @@
                                     `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
                             } else if (mediaType == 'video') {
                                 html += `<video controls class="w-100 rounded mb-1">
-                                    <source src="${asset}${mediaContent}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>`;
+                                            <source src="${asset}${mediaContent}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                         </video>`;
                             } else {
                                 html +=
                                     `<p class="text-center text-muted my-auto">No image/video published</p>`;
                             }
 
-                            html += `
-                                </div>
-                                <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
-                                    <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
-                                <p class="modal-post-date mb-1"><strong>Created on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.created_at)}</span></p>
-                                    <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
-                                        style="max-height: 200px; overflow-y: auto;">
-                                        <strong>Description:</strong> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
-                                    </div>
-                                    <input type="hidden" id="postDetailId" value="${response.data.id}"/>
-                                    <div class="py-2">
-                                        <div class="mb-2">
-                                            <strong>Platforms & Pages:</strong>
+                            html += `</div>
+                                     <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
+                                        <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
+                                        <p class="modal-post-date mb-1"><strong>Created on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.created_at)}</span></p>
+                                        <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
+                                            style="max-height: 200px; overflow-y: auto;">
+                                            <strong>Description:</strong> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
                                         </div>
-                            `;
-                            html += `
-                                    <div class="d-flex flex-column gap-2">
+                                        <input type="hidden" id="postDetailId" value="${response.data.id}"/>
+                                        <div class="py-2">
+                                            <div class="mb-2">
+                                                <strong>Platforms & Pages:</strong>
+                                            </div>
+                                    `;
+
+                            html += `<div class="d-flex flex-column gap-2">
                                         <div class="d-flex gap-2 align-items-center">
                                             <input type="checkbox" style="pointer-events: none; display: none"
                                                 id="facebook-post-detail" ${(response.data.on_facebook) ? 'checked' : ''}>
-                            `;
+                                        `;
                             if (response.data.on_facebook) html +=
                                 `<i class="fab fa-facebook m-0"></i><span class="m-0 ms-2">${response.data.facebook_page_name}</span>`;
-                            html += `
-                                        </div>
+                            html += `</div>
                                         <div class="d-flex gap-2 align-items-center">
                                             <input type="checkbox" style="pointer-events: none; display: none"
                                                 id="instagram-post-detail" ${(response.data.on_instagram) ? 'checked' : ''}>
-                            `;
+                                        `;
                             if (response.data.on_instagram) html +=
                                 `<i class="fab fa-instagram"></i><span class="m-0 ms-2">${response.data.instagram_account_name}</span>`;
-                            html += `
-                                        </div>
+                            html += `</div>
                                         <div class="d-flex gap-2 align-items-center">
                                             <input type="checkbox" style="pointer-events: none; display: none"
                                                 id="linkedin-post-detail" ${(response.data.on_linkedin) ? 'checked' : ''}>
-                            `;
+                                        `;
                             if (response.data.on_linkedin) html +=
                                 `<i class="fab fa-linkedin"></i><span class="m-0 ms-2">${response.data.linkedin_company_name}</span>`;
-                            html += `
-                                            </div>
-                                        </div>
+                            html += `</div>
                                     </div>
                                 </div>
-                            `;
+                            </div>`;
 
-                            html += ` 
-                                <input type="hidden" id="facebook_page_access_token" value="${response.data.facebook_page_access_token}"/>
-                                <input type="hidden" id="facebook_page_id" value="${response.data.facebook_page_id}"/>
-                                <input type="hidden" id="facebook_page_name" value="${response.data.facebook_page_name}"/>
-                                <input type="hidden" id="instagram_account_id" value="${response.data.instagram_account_id}"/>
-                                <input type="hidden" id="instagram_account_name" value="${response.data.instagram_account_name}"/>
-                                <input type="hidden" id="linkedin_company_id" value="${response.data.linkedin_company_id}"/>
-                                <input type="hidden" id="linkedin_company_name" value="${response.data.linkedin_company_name}"/>
-                            `
+                            html +=
+                                `<input type="hidden" id="facebook_page_access_token" value="${response.data.facebook_page_access_token}"/>
+                                    <input type="hidden" id="facebook_page_id" value="${response.data.facebook_page_id}"/>
+                                    <input type="hidden" id="facebook_page_name" value="${response.data.facebook_page_name}"/>
+                                    <input type="hidden" id="instagram_account_id" value="${response.data.instagram_account_id}"/>
+                                    <input type="hidden" id="instagram_account_name" value="${response.data.instagram_account_name}"/>
+                                    <input type="hidden" id="linkedin_company_id" value="${response.data.linkedin_company_id}"/>
+                                    <input type="hidden" id="linkedin_company_name" value="${response.data.linkedin_company_name}"/>`
 
                             $('#postDetail .modal-body').html(html);
                             $('#postDetail').modal('show');
@@ -800,14 +794,12 @@
                 });
             }
 
-            // Close modal using JavaScript
             document.querySelectorAll('.close, .btn-secondary').forEach(btn => {
                 btn.addEventListener('click', function() {
                     $("#schedulePostModal").modal("hide");
                 });
             });
 
-            // Schedule Form
             $("#schedulePostForm").submit(function(e) {
                 e.preventDefault();
                 $.ajax({
@@ -840,7 +832,6 @@
             });
         });
 
-        // Facbook Pages
         function getFacebookPages(element) {
             if (element.checked) {
                 $("#facebookSelectSection").fadeIn();
@@ -856,7 +847,7 @@
                         if (response.length > 0) {
                             response.forEach((page) => {
                                 html +=
-                                    `<option value="${page.id} - ${page.access_token} - ${page.name}">${page.name}</option>`
+                                    `<option value="${page.id} - ${page.access_token} - ${page.name}">${page.name}</option>`;
                             })
                         } else {
                             html = `<option value="">No Page Found</option>`;
@@ -869,7 +860,6 @@
             }
         }
 
-        // Instagram Accounts
         function getInstagramAccounts(element) {
             if (element.checked) {
                 $("#instagramSelectSection").fadeIn();
@@ -885,7 +875,7 @@
                         if (response.length > 0) {
                             response.forEach((account) => {
                                 html +=
-                                    `<option value="${account.ig_business_account} - ${account.name}">${account.name}</option>`
+                                    `<option value="${account.ig_business_account} - ${account.name}">${account.name}</option>`;
                             })
                         } else {
                             html = `<option value="">No Account Found</option>`;
@@ -898,7 +888,6 @@
             }
         }
 
-        // LinkedIn Organizations
         function getLinkedInOrganizations(element) {
             if (element.checked) {
                 $("#linkedinSelectSection").fadeIn();
@@ -914,7 +903,7 @@
                         if (response.length > 0) {
                             response.forEach((account) => {
                                 html +=
-                                    `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
+                                    `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`;
                             })
                         } else {
                             html = `<option value="">No Account Found</option>`;
@@ -927,7 +916,6 @@
             }
         }
 
-        // Delete Post
         function deletePost() {
             $("#postDetail").modal("hide");
             const postId = $("#postDetailId").val();
@@ -975,393 +963,6 @@
                 }
             });
         }
-    </script> --}}
-
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var calendarEl = document.getElementById('calendar');
-    
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: ''
-                },
-                customButtons: {
-                    monthSelect: {
-                        text: 'Month',
-                        click: function() {
-                            // Empty, just a placeholder
-                        }
-                    },
-                    yearSelect: {
-                        text: 'Year',
-                        click: function() {
-                            // Empty, just a placeholder
-                        }
-                    }
-                },
-                datesSet: function(info) {
-                    fetchEvents(info.start, info.end);
-                    addScheduleButtons();
-                },
-                eventDidMount: function(info) {
-                    var eventDate = new Date(info.event.start);
-                    var now = new Date();
-                    if (eventDate < now) {
-                        info.el.classList.add('fc-event-past');
-                    }
-    
-                    info.el.addEventListener('click', function() {
-                        fetchEventDetails(info.event.id);
-                    });
-                },
-                eventContent: function(arg) {
-                    let icons = '';
-                    if (arg.event.extendedProps.on_facebook) icons +=
-                        '<i class="fab fa-facebook-f"></i>';
-                    if (arg.event.extendedProps.on_instagram) icons +=
-                        '<i class="fab fa-instagram"></i>';
-                    if (arg.event.extendedProps.on_linkedin) icons +=
-                        '<i class="fab fa-linkedin-in"></i>';
-    
-                    return {
-                        html: icons + ' -' + arg.event.title
-                    };
-                }
-            });
-    
-            calendar.render();
-    
-            function addMonthYearSelects() {
-                var headerToolbar = document.querySelector('.fc-toolbar-chunk:last-child');
-                var monthSelect = document.createElement('select');
-                monthSelect.id = 'monthSelect';
-                monthSelect.className = 'form-select d-inline-block w-auto';
-                monthSelect.innerHTML = `${Array.from({ length: 12 }, (_, i) => `<option value="${i}">${new Date(0, i).toLocaleString('default', { month: 'long' })}</option>`).join('')}`;
-    
-                var yearSelect = document.createElement('select');
-                yearSelect.id = 'yearSelect';
-                yearSelect.className = 'form-select d-inline-block w-auto';
-                yearSelect.innerHTML = `${Array.from({ length: 11 }, (_, i) => `<option value="${new Date().getFullYear() - 5 + i}">${new Date().getFullYear() - 5 + i}</option>`).join('')}`;
-    
-                headerToolbar.appendChild(monthSelect);
-                headerToolbar.appendChild(yearSelect);
-    
-                // Set default values to current month and year
-                var currentDate = new Date();
-                monthSelect.value = currentDate.getMonth(); // getMonth() returns 0-11
-                yearSelect.value = currentDate.getFullYear();
-            }
-    
-            document.addEventListener('change', function(event) {
-                if (event.target.id === 'monthSelect' || event.target.id === 'yearSelect') {
-                    const month = document.getElementById('monthSelect').value;
-                    const year = document.getElementById('yearSelect').value;
-                    const date = new Date(year, month, 1); // Month is zero-based in JavaScript Date
-                    calendar.gotoDate(date);
-                }
-            });
-    
-            addMonthYearSelects();
-    
-            function fetchEvents(start, end) {
-                const apiUrl =
-                    `{{ route('user.post.scheduled.all') }}?start=${start.toISOString()}&end=${end.toISOString()}`;
-                fetch(apiUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        const events = data.map((post) => {
-                            const eventDate = new Date(post.scheduled_at);
-                            return {
-                                id: post.id,
-                                title: post.title,
-                                start: eventDate.toISOString().split('T')[0],
-                                description: post.description,
-                                on_facebook: post.on_facebook,
-                                on_instagram: post.on_instagram,
-                                on_linkedin: post.on_linkedin
-                            };
-                        });
-                        calendar.removeAllEvents();
-                        calendar.addEventSource(events);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching events:', error);
-                    });
-            }
-    
-            function fetchEventDetails(eventId) {
-                const apiUrl = `{{ route('user.post.index') }}/details/${eventId}`;
-                fetch(apiUrl)
-                    .then(response => response.json())
-                    .then(response => {
-                        if (response.status == 200) {
-                            let html = '';
-                            let asset = `{{ asset('') }}`;
-                            let mediaType = response.data.media_type;
-                            let mediaContent = response.data.media;
-    
-                            html += `<div class="media-preview w-50 p-3">`;
-    
-                            if (mediaType == 'image') {
-                                html += `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
-                            } else if (mediaType == 'video') {
-                                html += `<video controls class="w-100 rounded mb-1">
-                                            <source src="${asset}${mediaContent}" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                         </video>`;
-                            } else {
-                                html += `<p class="text-center text-muted my-auto">No image/video published</p>`;
-                            }
-    
-                            html += `</div>
-                                     <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
-                                        <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
-                                        <p class="modal-post-date mb-1"><strong>Created on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.created_at)}</span></p>
-                                        <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
-                                            style="max-height: 200px; overflow-y: auto;">
-                                            <strong>Description:</strong> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
-                                        </div>
-                                        <input type="hidden" id="postDetailId" value="${response.data.id}"/>
-                                        <div class="py-2">
-                                            <div class="mb-2">
-                                                <strong>Platforms & Pages:</strong>
-                                            </div>
-                                    `;
-    
-                            html += `<div class="d-flex flex-column gap-2">
-                                        <div class="d-flex gap-2 align-items-center">
-                                            <input type="checkbox" style="pointer-events: none; display: none"
-                                                id="facebook-post-detail" ${(response.data.on_facebook) ? 'checked' : ''}>
-                                        `;
-                            if (response.data.on_facebook) html += `<i class="fab fa-facebook m-0"></i><span class="m-0 ms-2">${response.data.facebook_page_name}</span>`;
-                            html += `</div>
-                                        <div class="d-flex gap-2 align-items-center">
-                                            <input type="checkbox" style="pointer-events: none; display: none"
-                                                id="instagram-post-detail" ${(response.data.on_instagram) ? 'checked' : ''}>
-                                        `;
-                            if (response.data.on_instagram) html += `<i class="fab fa-instagram"></i><span class="m-0 ms-2">${response.data.instagram_account_name}</span>`;
-                            html += `</div>
-                                        <div class="d-flex gap-2 align-items-center">
-                                            <input type="checkbox" style="pointer-events: none; display: none"
-                                                id="linkedin-post-detail" ${(response.data.on_linkedin) ? 'checked' : ''}>
-                                        `;
-                            if (response.data.on_linkedin) html += `<i class="fab fa-linkedin"></i><span class="m-0 ms-2">${response.data.linkedin_company_name}</span>`;
-                            html += `</div>
-                                    </div>
-                                </div>
-                            </div>`;
-    
-                            html += `<input type="hidden" id="facebook_page_access_token" value="${response.data.facebook_page_access_token}"/>
-                                    <input type="hidden" id="facebook_page_id" value="${response.data.facebook_page_id}"/>
-                                    <input type="hidden" id="facebook_page_name" value="${response.data.facebook_page_name}"/>
-                                    <input type="hidden" id="instagram_account_id" value="${response.data.instagram_account_id}"/>
-                                    <input type="hidden" id="instagram_account_name" value="${response.data.instagram_account_name}"/>
-                                    <input type="hidden" id="linkedin_company_id" value="${response.data.linkedin_company_id}"/>
-                                    <input type="hidden" id="linkedin_company_name" value="${response.data.linkedin_company_name}"/>`
-    
-                            $('#postDetail .modal-body').html(html);
-                            $('#postDetail').modal('show');
-                        } else {
-                            toastr.error(response.error);
-                        }
-    
-                        $('#postDetail').modal('show');
-                    })
-                    .catch(error => console.error('Error fetching event details:', error));
-            }
-    
-            function addScheduleButtons() {
-                var calendarCells = document.querySelectorAll('.fc-daygrid-day');
-                var now = new Date();
-    
-                calendarCells.forEach(function(cell) {
-                    var cellDate = new Date(cell.getAttribute('data-date'));
-    
-                    if (cellDate >= now) {
-                        var button = document.createElement('button');
-                        button.innerHTML = '<i class="fas fa-plus"></i>';
-                        button.className = 'schedule-button';
-                        button.addEventListener('click', function() {
-                            $("#schedulePostForm").trigger("reset");
-                            $("#schedulePostModal").modal("show");
-                            $("#postDate").val(cellDate.toISOString().split('T')[0]);
-                        });
-    
-                        cell.appendChild(button);
-                    }
-                });
-            }
-    
-            document.querySelectorAll('.close, .btn-secondary').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    $("#schedulePostModal").modal("hide");
-                });
-            });
-    
-            $("#schedulePostForm").submit(function(e) {
-                e.preventDefault();
-                $.ajax({
-                    type: "POST",
-                    url: `{{ route('user.post.store') }}`,
-                    data: new FormData(this),
-                    processData: false,
-                    contentType: false,
-                    beforeSend: function() {
-                        $("#scheduleSaveBtn").attr('disabled', 'true');
-                    },
-                    success: function(response) {
-                        if (response.status == 200) {
-                            $("#schedulePostModal").modal('hide');
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Post scheduled successfully',
-                                showConfirmButton: false,
-                                timer: 700
-                            }).then(() => {
-                                location.reload();
-                            })
-                        } else {
-                            toastr.error(response.error);
-                        }
-    
-                        $("#scheduleSaveBtn").removeAttr('disabled');
-                    }
-                });
-            });
-    
-            function getFacebookPages(element) {
-                if (element.checked) {
-                    $("#facebookSelectSection").fadeIn();
-                    $.ajax({
-                        type: "GET",
-                        url: "{{ route('user.facebook.pages') }}",
-                        beforeSend: function() {
-                            $("#facebookPagesSelect").html(`<option value="">Loading...</option>`);
-                        },
-                        success: function(response) {
-                            html = `<option value="">Select</option>`;
-    
-                            if (response.length > 0) {
-                                response.forEach((page) => {
-                                    html += `<option value="${page.id} - ${page.access_token} - ${page.name}">${page.name}</option>`;
-                                })
-                            } else {
-                                html = `<option value="">No Page Found</option>`;
-                            }
-                            $("#facebookPagesSelect").html(html);
-                        }
-                    });
-                } else {
-                    $("#facebookSelectSection").fadeOut();
-                }
-            }
-    
-            function getInstagramAccounts(element) {
-                if (element.checked) {
-                    $("#instagramSelectSection").fadeIn();
-                    $.ajax({
-                        type: "GET",
-                        url: "{{ route('user.instagram.accounts') }}",
-                        beforeSend: function() {
-                            $("#instagramAccountSelect").html(`<option value="">Loading...</option>`);
-                        },
-                        success: function(response) {
-                            html = `<option value="">Select</option>`;
-    
-                            if (response.length > 0) {
-                                response.forEach((account) => {
-                                    html += `<option value="${account.ig_business_account} - ${account.name}">${account.name}</option>`;
-                                })
-                            } else {
-                                html = `<option value="">No Account Found</option>`;
-                            }
-                            $("#instagramAccountSelect").html(html);
-                        }
-                    });
-                } else {
-                    $("#instagramSelectSection").fadeOut();
-                }
-            }
-    
-            function getLinkedInOrganizations(element) {
-                if (element.checked) {
-                    $("#linkedinSelectSection").fadeIn();
-                    $.ajax({
-                        type: "GET",
-                        url: "{{ route('user.linkedin.organizations') }}",
-                        beforeSend: function() {
-                            $("#linkedinOrganizationsSelect").html(`<option value="">Loading...</option>`);
-                        },
-                        success: function(response) {
-                            html = `<option value="">Select</option>`;
-    
-                            if (response.length > 0) {
-                                response.forEach((account) => {
-                                    html += `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`;
-                                })
-                            } else {
-                                html = `<option value="">No Account Found</option>`;
-                            }
-                            $("#linkedinOrganizationsSelect").html(html);
-                        }
-                    });
-                } else {
-                    $("#linkedinSelectSection").fadeOut();
-                }
-            }
-    
-            function deletePost() {
-                $("#postDetail").modal("hide");
-                const postId = $("#postDetailId").val();
-                const swalWithBootstrapButtons = Swal.mixin({
-                    customClass: {
-                        confirmButton: "btn btn-success",
-                        cancelButton: "btn btn-danger"
-                    },
-                    buttonsStyling: false
-                });
-                swalWithBootstrapButtons.fire({
-                    title: "Are you sure?",
-                    text: "You won't be able to revert this!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Yes, delete it!",
-                    cancelButtonText: "No, cancel!",
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            type: "POST",
-                            url: `{{ route('user.post.index') }}/${postId}/delete`,
-                            data: {
-                                _token: "{{ csrf_token() }}",
-                                post_id: postId
-                            },
-                            success: function(response) {
-                                if (response.status == 200) {
-                                    swalWithBootstrapButtons.fire({
-                                        title: "Deleted!",
-                                        text: "Post has been deleted.",
-                                        icon: "success",
-                                        showConfirmButton: false,
-                                    }).then(() => {
-                                        location.reload();
-                                    });
-                                } else {
-                                    toastr.error(response.error);
-                                }
-                            }
-                        });
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        $("#postDetail").modal("show");
-                    }
-                });
-            }
-        });
     </script>
-    
+
 @endsection

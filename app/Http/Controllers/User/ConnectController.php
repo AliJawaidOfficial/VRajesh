@@ -46,9 +46,9 @@ class ConnectController extends Controller
                 'connect_route' => 'user.connect.linkedin',
                 'disconnect_route' => 'user.connect.linkedin.disconnect',
                 'permission' => 'connect_linkedin',
-                'user_avatar' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->linkedin_avatar : null,
-                'user_name' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->linkedin_name : null,
-                'user_email' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->linkedin_email : null,
+                'user_avatar' => (Auth::guard('web')->user()->linkedin_access_token != null) ? Auth::guard('web')->user()->linkedin_avatar : null,
+                'user_name' => (Auth::guard('web')->user()->linkedin_access_token != null) ? Auth::guard('web')->user()->linkedin_name : null,
+                'user_email' => (Auth::guard('web')->user()->linkedin_access_token != null) ? Auth::guard('web')->user()->linkedin_email : null,
             ]
         ];
         return view('user.connect.index', compact('platforms'));

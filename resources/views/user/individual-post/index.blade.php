@@ -322,7 +322,7 @@
                 if (result.isConfirmed) {
                     $.ajax({
                         type: "POST",
-                        url: `{{ route('user.post.index') }}/${postId}/delete`,
+                        url: `{{ route('user.individual.post.index') }}/${postId}/delete`,
                         data: {
                             _token: "{{ csrf_token() }}",
                             post_id: postId

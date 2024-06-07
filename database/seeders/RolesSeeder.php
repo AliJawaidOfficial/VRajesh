@@ -18,7 +18,7 @@ class RolesSeeder extends Seeder
             'is_visible' => 1,
         ])->givePermissionTo([
             'connect_facebook',
-            'facebook_text_post',
+            'meta_facebook_text_post',
             'linkedin_text_post',
         ]);
 
@@ -30,14 +30,18 @@ class RolesSeeder extends Seeder
         ])->givePermissionTo([
             'connect_facebook',
             'connect_linkedin',
-            'facebook_text_post',
-            'facebook_image_post',
-            'facebook_video_post',
-            'instagram_image_post',
-            'instagram_video_post',
+            'meta_facebook_text_post',
+            'meta_facebook_image_post',
+            'meta_facebook_video_post',
+            'meta_instagram_image_post',
+            'meta_instagram_video_post',
             'linkedin_text_post',
             'linkedin_image_post',
             'linkedin_video_post',
+            'immediate_post',
+            'scheduled_post',
+            'draft_post',
+            're_post',
         ]);
     }
 }

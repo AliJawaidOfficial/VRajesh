@@ -28,15 +28,15 @@
                                 class="card-header bg-transparent border-0 d-flex align-items-center justify-content-center position-relative">
                                 <img src="{{ asset($platform['image']) }}" alt="">
                                 @if ($platform['is_connected'] == 1)
-                                    <img src="{{ asset($platform['avatar']) }}"
+                                    <img src="{{ asset($platform['user_avatar']) }}"
                                         class="rounded-circle position-absolute end-0 bottom-0" alt="">
                                 @endif
                             </div>
                             <div class="card-body pt-0">
 
                                 @if ($platform['is_connected'] == 1)
-                                    <p>{{ $platform['name'] }}</p>
-                                    <p>{{ $platform['email'] }}</p>
+                                    <p>{{ $platform['user_name'] }}</p>
+                                    <p>{{ $platform['user_email'] }}</p>
                                 @endif
 
                                 <p class="mb-3 text-center">{{ $platform['text'] }}</p>

@@ -285,44 +285,46 @@
             updateDescription(description);
         });
 
-        document.getElementById('mediaInput').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const url = e.target.result;
-                    const isImage = file.type.startsWith('image/');
+        if (document.getElementById('mediaInput')) {
+            document.getElementById('mediaInput').addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const url = e.target.result;
+                        const isImage = file.type.startsWith('image/');
 
-                    if (isImage) {
-                        document.querySelectorAll('.post-media img').forEach(img => {
-                            img.src = url;
-                            img.classList.add('active');
-                            img.style.display = 'block';
-                        });
-                        document.querySelectorAll('.post-media video').forEach(video => {
-                            video.classList.remove('active');
-                            video.style.display = 'none';
-                        });
-                    } else {
-                        document.querySelectorAll('.post-media video').forEach(video => {
-                            video.src = url;
-                            video.classList.add('active');
-                            video.style.display = 'block';
-                        });
-                        document.querySelectorAll('.post-media img').forEach(img => {
-                            img.classList.remove('active');
-                            img.style.display = 'none';
-                        });
-                    }
+                        if (isImage) {
+                            document.querySelectorAll('.post-media img').forEach(img => {
+                                img.src = url;
+                                img.classList.add('active');
+                                img.style.display = 'block';
+                            });
+                            document.querySelectorAll('.post-media video').forEach(video => {
+                                video.classList.remove('active');
+                                video.style.display = 'none';
+                            });
+                        } else {
+                            document.querySelectorAll('.post-media video').forEach(video => {
+                                video.src = url;
+                                video.classList.add('active');
+                                video.style.display = 'block';
+                            });
+                            document.querySelectorAll('.post-media img').forEach(img => {
+                                img.classList.remove('active');
+                                img.style.display = 'none';
+                            });
+                        }
 
-                    // Show remove button
-                    document.querySelectorAll('.remove-media-btn').forEach(btn => {
-                        btn.style.display = 'flex';
-                    });
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+                        // Show remove button
+                        document.querySelectorAll('.remove-media-btn').forEach(btn => {
+                            btn.style.display = 'flex';
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
 
         document.querySelectorAll('.remove-media-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -578,9 +580,7 @@
                             <div class="d-flex align-items-center gap-3">
                                 <p class="mb-0">Check to share on:</p>
 
-                                @if (Auth::guard('web')->user()->can('meta_facebook_text_post') ||
-                                        Auth::guard('web')->user()->can('meta_facebook_image_post') ||
-                                        Auth::guard('web')->user()->can('meta_facebook_video_post'))
+                                @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
                                     @if (Auth::guard('web')->user()->meta_access_token != null)
                                         <label class="d-inline-block platform-checkbox">
                                             <input type="checkbox" name="on_facebook" onchange="getFacebookPages(this)"
@@ -593,8 +593,7 @@
                                     @endif
                                 @endif
 
-                                @if (Auth::guard('web')->user()->can('meta_instagram_image_post') ||
-                                        Auth::guard('web')->user()->can('meta_instagram_video_post'))
+                                @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
                                     @if (Auth::guard('web')->user()->meta_access_token != null)
                                         <label class="d-inline-block platform-checkbox">
                                             <input type="checkbox" name="on_instagram" onchange="getInstagramAccounts(this)"
@@ -607,9 +606,7 @@
                                     @endif
                                 @endif
 
-                                @if (Auth::guard('web')->user()->can('linkedin_text_post') ||
-                                        Auth::guard('web')->user()->can('linkedin_image_post') ||
-                                        Auth::guard('web')->user()->can('linkedin_video_post'))
+                                @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
                                     @if (Auth::guard('web')->user()->linkedin_access_token != null)
                                         <label class="d-inline-block platform-checkbox">
                                             <input type="checkbox" name="on_linkedin"
@@ -623,12 +620,14 @@
                                 @endif
                             </div>
 
-                            @if (Auth::guard('web')->user()->can('meta_facebook_image_post') ||
-                                    Auth::guard('web')->user()->can('meta_facebook_video_post') ||
-                                    Auth::guard('web')->user()->can('meta_instagram_image_post') ||
-                                    Auth::guard('web')->user()->can('meta_instagram_video_post') ||
-                                    Auth::guard('web')->user()->can('linkedin_image_post') ||
-                                    Auth::guard('web')->user()->can('linkedin_video_post'))
+                            @if (Auth::guard('web')->user()->canAny([
+                                        'meta_facebook_image_post',
+                                        'meta_facebook_video_post',
+                                        'meta_instagram_image_post',
+                                        'meta_instagram_video_post',
+                                        'linkedin_image_post',
+                                        'linkedin_video_post',
+                                    ]))
                                 <div class="d-flex align-items-center">
                                     <label for="mediaInput" class="btn btn-transparent text-primary"><i
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>
@@ -641,57 +640,63 @@
 
                         <div class="row">
                             {{-- Facebook Pages --}}
-                            @if (Auth::guard('web')->user()->meta_access_token != null)
-                                <div class="col-md-4">
-                                    <div class="m-0" style="display: none;" id="facebookSelectSection">
-                                        <div class="d-flex flex-column gap-1">
-                                            <p class="mb-0">Facebook Pages:</p>
+                            @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="col-md-4">
+                                        <div class="m-0" style="display: none;" id="facebookSelectSection">
+                                            <div class="d-flex flex-column gap-1">
+                                                <p class="mb-0">Facebook Pages:</p>
 
-                                            <div class="d-flex flex-column gap-1 w-100">
-                                                <select name="facebook_page" id="facebookPagesSelect"
-                                                    class="form-select w-100">
-                                                    <option value="">Select</option>
-                                                </select>
+                                                <div class="d-flex flex-column gap-1 w-100">
+                                                    <select name="facebook_page" id="facebookPagesSelect"
+                                                        class="form-select w-100">
+                                                        <option value="">Select</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
                             @endif
 
                             {{-- Instagram Account --}}
-                            @if (Auth::guard('web')->user()->meta_access_token != null)
-                                <div class="col-md-4">
-                                    <div class="m-0" style="display: none;" id="instagramSelectSection">
-                                        <div class="d-flex flex-column gap-1">
-                                            <p class="mb-0">Instagram Account:</p>
+                            @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
+                                @if (Auth::guard('web')->user()->meta_access_token != null)
+                                    <div class="col-md-4">
+                                        <div class="m-0" style="display: none;" id="instagramSelectSection">
+                                            <div class="d-flex flex-column gap-1">
+                                                <p class="mb-0">Instagram Account:</p>
 
-                                            <div class="d-flex flex-column gap-1 w-100">
-                                                <select name="instagram_account" id="instagramAccountSelect"
-                                                    class="form-select w-100">
-                                                    <option value="">Select</option>
-                                                </select>
+                                                <div class="d-flex flex-column gap-1 w-100">
+                                                    <select name="instagram_account" id="instagramAccountSelect"
+                                                        class="form-select w-100">
+                                                        <option value="">Select</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
                             @endif
 
                             {{-- Instagram Account --}}
-                            @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                <div class="col-md-4">
-                                    <div class="m-0" style="display: none;" id="linkedinSelectSection">
-                                        <div class="d-flex flex-column gap-1">
-                                            <p class="mb-0">LinkedIn Organizations:</p>
+                            @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                    <div class="col-md-4">
+                                        <div class="m-0" style="display: none;" id="linkedinSelectSection">
+                                            <div class="d-flex flex-column gap-1">
+                                                <p class="mb-0">LinkedIn Organizations:</p>
 
-                                            <div class="d-flex flex-column gap-1 w-100">
-                                                <select name="linkedin_organization" id="linkedinOrganizationsSelect"
-                                                    class="form-select w-100">
-                                                    <option value="">Select</option>
-                                                </select>
+                                                <div class="d-flex flex-column gap-1 w-100">
+                                                    <select name="linkedin_organization" id="linkedinOrganizationsSelect"
+                                                        class="form-select w-100">
+                                                        <option value="">Select</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -910,29 +915,31 @@
     </section>
 
     <!-- Schedule Modal -->
-    <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="scheduleModalLabel">Schedule Post</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="scheduleForm" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="scheduleDate" class="form-label">Date</label>
-                            <input type="date" min="{{ date('Y-m-d') }}" class="form-control" id="scheduleDate"
-                                name="schedule_date" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="scheduleTime" class="form-label">Time</label>
-                            <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Schedule</button>
-                    </form>
+    @can('scheduled_post')
+        <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="scheduleModalLabel">Schedule Post</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="scheduleForm" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="scheduleDate" class="form-label">Date</label>
+                                <input type="date" min="{{ date('Y-m-d') }}" class="form-control" id="scheduleDate"
+                                    name="schedule_date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="scheduleTime" class="form-label">Time</label>
+                                <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Schedule</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endcan
 @endsection

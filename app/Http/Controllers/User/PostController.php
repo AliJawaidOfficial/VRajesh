@@ -31,6 +31,9 @@ class PostController extends Controller
         $this->linkedinService = $importLinkedinService;
         $this->facebookService = $importFacebookService;
         $this->instagramService = $importinstagramService;
+
+
+        $this->middleware('permission:edit articles')->only(['edit', 'update']);
     }
 
     /**

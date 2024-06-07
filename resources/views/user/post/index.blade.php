@@ -2,7 +2,7 @@
 @extends('user.layouts.app')
 
 {{-- Title --}}
-@section('title', 'Dashboard')
+@section('title', 'Published Posts')
 
 {{-- Styles --}}
 @section('styles')
@@ -409,97 +409,103 @@
             $('#' + modalId).modal('show');
         }
 
-        // Draft Form
-        $("#draftPostForm").submit(function(e) {
-            e.preventDefault();
-            $.ajax({
-                type: "POST",
-                url: `{{ route('user.post.draft.store.new') }}`,
-                data: new FormData(this),
-                processData: false,
-                contentType: false,
-                beforeSend: function() {
-                    $("#draftSaveBtn").attr('disabled', 'true');
-                },
-                success: function(response) {
-                    if (response.status == 200) {
-                        $("#draftPostModal").modal('hide');
-                        Swal.fire({
-                            icon: 'success',
-                            title: response.message,
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                    } else {
-                        toastr.error(response.error);
+        @can('draft_post')
+            // Draft Form
+            $("#draftPostForm").submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: `{{ route('user.post.draft.store.new') }}`,
+                    data: new FormData(this),
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $("#draftSaveBtn").attr('disabled', 'true');
+                    },
+                    success: function(response) {
+                        if (response.status == 200) {
+                            $("#draftPostModal").modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        } else {
+                            toastr.error(response.error);
+                        }
+
+                        $("#draftSaveBtn").removeAttr('disabled');
                     }
-
-                    $("#draftSaveBtn").removeAttr('disabled');
-                }
+                });
             });
-        });
+        @endcan
 
-        // Schedule Form
-        $("#schedulePostForm").submit(function(e) {
-            e.preventDefault();
-            $.ajax({
-                type: "POST",
-                url: `{{ route('user.post.new.store') }}`,
-                data: new FormData(this),
-                processData: false,
-                contentType: false,
-                beforeSend: function() {
-                    $("#scheduleSaveBtn").attr('disabled', 'true');
-                },
-                success: function(response) {
-                    if (response.status == 200) {
-                        $("#schedulePostModal").modal('hide');
-                        Swal.fire({
-                            icon: 'success',
-                            title: "Post scheduled successfully",
-                            showConfirmButton: false,
-                            timer: 1500
-                        });
-                    } else {
-                        toastr.error(response.error);
+        @can('scheduled_post')
+            // Schedule Form
+            $("#schedulePostForm").submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: `{{ route('user.post.new.store') }}`,
+                    data: new FormData(this),
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $("#scheduleSaveBtn").attr('disabled', 'true');
+                    },
+                    success: function(response) {
+                        if (response.status == 200) {
+                            $("#schedulePostModal").modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: "Post scheduled successfully",
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        } else {
+                            toastr.error(response.error);
+                        }
+
+                        $("#scheduleSaveBtn").removeAttr('disabled');
                     }
-
-                    $("#scheduleSaveBtn").removeAttr('disabled');
-                }
+                });
             });
-        });
+        @endcan
 
-        // Repost Form
-        $("#repostPostForm").submit(function(e) {
-            e.preventDefault();
-            $.ajax({
-                type: "POST",
-                url: `{{ route('user.post.new.store') }}`,
-                data: new FormData(this),
-                processData: false,
-                contentType: false,
-                beforeSend: function() {
-                    $("#repostSaveBtn").attr('disabled', 'true');
-                },
-                success: function(response) {
-                    if (response.status == 200) {
-                        $("#repostModal").modal('hide');
-                        Swal.fire({
-                            icon: 'success',
-                            title: "Post reposted successfully",
-                            showConfirmButton: false,
-                            timer: 1500
-                        }).then(() => {
-                            location.reload();
-                        })
-                    } else {
-                        toastr.error(response.error);
+        @can('re_post')
+            // Repost Form
+            $("#repostPostForm").submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: `{{ route('user.post.new.store') }}`,
+                    data: new FormData(this),
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $("#repostSaveBtn").attr('disabled', 'true');
+                    },
+                    success: function(response) {
+                        if (response.status == 200) {
+                            $("#repostModal").modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: "Post reposted successfully",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                location.reload();
+                            })
+                        } else {
+                            toastr.error(response.error);
+                        }
+
+                        $("#repostSaveBtn").removeAttr('disabled');
                     }
-
-                    $("#repostSaveBtn").removeAttr('disabled');
-                }
+                });
             });
-        });
+        @endcan
 
         // Facebook Pages
         function getFacebookPages(element) {
@@ -707,14 +713,20 @@
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
                             <button type="button" class="btn btn-custom" onclick="deletePost()">Delete</button>
-                            <button type="button" class="btn btn-custom"
-                                onclick="transferPostData('draftPostModal')">Draft</button>
+                            @can('draft_post')
+                                <button type="button" class="btn btn-custom"
+                                    onclick="transferPostData('draftPostModal')">Draft</button>
+                            @endcan
                         </div>
                         <div>
-                            <button type="button" class="btn btn-custom"
-                                onclick="transferPostData('schedulePostModal')">Schedule</button>
-                            <button type="button" class="btn btn-custom"
-                                onclick="transferPostData('repostModal')">Repost</button>
+                            @can('scheduled_post')
+                                <button type="button" class="btn btn-custom"
+                                    onclick="transferPostData('schedulePostModal')">Schedule</button>
+                            @endcan
+                            @can('re_post')
+                                <button type="button" class="btn btn-custom"
+                                    onclick="transferPostData('repostModal')">Repost</button>
+                            @endcan
                         </div>
                     </div>
                 </div>
@@ -722,314 +734,382 @@
         </div>
 
         {{-- Draft Post Modal --}}
-        <div class="modal fade" id="draftPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title" id="editPostModalLabel">Draft Post</h5>
-                        <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+        @can('draft_post')
+            <div class="modal fade" id="draftPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title" id="editPostModalLabel">Draft Post</h5>
+                            <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <form id="draftPostForm" enctype="multipart/form-data" method="POST">
+                            @method('POST')
+                            @csrf
+                            <input type="hidden" name="post_id" id="postID">
+                            <div class="modal-body d-flex align-items-stretch flex-column gap-3">
+                                <div>
+                                    <label for="postTitle" class="form-label">Title</label>
+                                    <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
+                                        name="title" placeholder="Enter your title here" required />
+                                </div>
+                                <div
+                                    class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
+                                    <label for="postDescription" class="form-label">Description</label>
+                                    <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
+                                        placeholder="Enter your post description"></textarea>
+                                </div>
+                                @if (Auth::guard('web')->user()->canAny([
+                                            'meta_facebook_image_post',
+                                            'meta_facebook_video_post',
+                                            'meta_instagram_image_post',
+                                            'meta_instagram_video_post',
+                                            'linkedin_image_post',
+                                            'linkedin_video_post',
+                                        ]))
+                                    <div>
+                                        <label for="media" class="form-label">Media</label>
+                                        <input type="file" class="form-control" id="media" name="media"
+                                            accept="image/*">
+                                    </div>
+                                @endif
+                                <div class="d-flex align-items-center gap-3 py-2">
+                                    <div><strong>Platforms</strong></div>
+                                    @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_facebook"
+                                                    value="1" id="PlatformFacebook">
+                                                <label class="form-check-label" for="PlatformFacebook">
+                                                    <i class="fab fa-facebook-f"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_instagram"
+                                                    value="1" id="PlatformInstagram">
+                                                <label class="form-check-label" for="PlatformInstagram">
+                                                    <i class="fab fa-instagram"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                        @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_linkedin"
+                                                    value="1" id="PlatformLinkedIn">
+                                                <label class="form-check-label" for="PlatformLinkedIn">
+                                                    <i class="fab fa-linkedin-in"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                                <div class="d-flex align-items-center gap-3 w-100">
+                                    @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                                <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
+                                                <select name="facebook_page" class="d-block w-100 form-select text-black"
+                                                    id="facebookPage">
+                                                    <option value="">Select Page</option>
+                                                </select>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                                <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
+                                                <select name="instagram_account" class="d-block w-100 form-select text-black"
+                                                    id="instagramPage">
+                                                    <option value="">Select Page</option>
+                                                </select>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                        @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                            <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                                <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
+                                                <select name="linkedin_organization"
+                                                    class="d-block w-100 form-select text-black" id="linkedInPage">
+                                                    <option value="">Select Page</option>
+                                                </select>
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div>
+                                    <button type="submit" class="btn btn-custom" id="draftSaveBtn">Save</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <form id="draftPostForm" enctype="multipart/form-data" method="POST">
-                        @method('POST')
-                        @csrf
-                        <input type="hidden" name="post_id" id="postID">
-                        <div class="modal-body d-flex align-items-stretch flex-column gap-3">
-                            <div>
-                                <label for="postTitle" class="form-label">Title</label>
-                                <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
-                                    name="title" placeholder="Enter your title here" required />
-                            </div>
-                            <div
-                                class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
-                                <label for="postDescription" class="form-label">Description</label>
-                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
-                                    placeholder="Enter your post description"></textarea>
-                            </div>
-                            <div>
-                                <label for="media" class="form-label">Media</label>
-                                <input type="file" class="form-control" id="media" name="media"
-                                    accept="image/*">
-                            </div>
-                            <div class="d-flex align-items-center gap-3 py-2">
-                                <div><strong>Platforms</strong></div>
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_facebook"
-                                            value="1" id="PlatformFacebook">
-                                        <label class="form-check-label" for="PlatformFacebook">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_instagram"
-                                            value="1" id="PlatformInstagram">
-                                        <label class="form-check-label" for="PlatformInstagram">
-                                            <i class="fab fa-instagram"></i>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_linkedin"
-                                            value="1" id="PlatformLinkedIn">
-                                        <label class="form-check-label" for="PlatformLinkedIn">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </label>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <div class="d-flex align-items-center gap-3 w-100">
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                        <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
-                                        <select name="facebook_page" class="d-block w-100 form-select text-black"
-                                            id="facebookPage">
-                                            <option value="">Select Page</option>
-                                        </select>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                        <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
-                                        <select name="instagram_account" class="d-block w-100 form-select text-black"
-                                            id="instagramPage">
-                                            <option value="">Select Page</option>
-                                        </select>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                        <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
-                                        <select name="linkedin_organization" class="d-block w-100 form-select text-black"
-                                            id="linkedInPage">
-                                            <option value="">Select Page</option>
-                                        </select>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <div>
-                                <button type="submit" class="btn btn-custom" id="draftSaveBtn">Save</button>
-                            </div>
-                        </div>
-                    </form>
                 </div>
             </div>
-        </div>
+        @endcan
 
         {{-- Schedule Post Modal --}}
-        <div class="modal fade" id="schedulePostModal" tabindex="-1" aria-labelledby="schedulePostModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title" id="schedulePostModalLabel">Schedule Post</h5>
-                        <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+        @can('scheduled_post')
+            <div class="modal fade" id="schedulePostModal" tabindex="-1" aria-labelledby="schedulePostModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title" id="schedulePostModalLabel">Schedule Post</h5>
+                            <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <form id="schedulePostForm" enctype="multipart/form-data" method="POST">
+                            @method('POST')
+                            @csrf
+                            <input type="hidden" name="post_id" id="postID">
+                            <div class="modal-body d-flex align-items-stretch flex-column gap-3">
+                                <div>
+                                    <label for="postTitle" class="form-label">Title</label>
+                                    <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
+                                        name="title" placeholder="Enter your title here" required />
+                                </div>
+                                <div
+                                    class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
+                                    <label for="postDescription" class="form-label">Description</label>
+                                    <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
+                                        placeholder="Enter your post description"></textarea>
+                                </div>
+                                <div class="date-time-inputs">
+                                    <label for="schedulePostDate" class="form-label">Schedule Date & Time</label>
+                                    <input type="date" min="{{ date('Y-m-d') }}" class="form-control mb-3"
+                                        id="schedulePostDate" name="schedule_date" required>
+                                    <label for="schedulePostTime" class="form-label">Time</label>
+                                    <input type="time" class="form-control" id="schedulePostTime" name="schedule_time"
+                                        required>
+                                </div>
+                                @if (Auth::guard('web')->user()->canAny([
+                                            'meta_facebook_image_post',
+                                            'meta_facebook_video_post',
+                                            'meta_instagram_image_post',
+                                            'meta_instagram_video_post',
+                                            'linkedin_image_post',
+                                            'linkedin_video_post',
+                                        ]))
+                                    <div>
+                                        <label for="media" class="form-label">Media</label>
+                                        <input type="file" class="form-control" id="media" name="media"
+                                            accept="image/*">
+                                    </div>
+                                @endif
+                                <div class="d-flex align-items-center gap-3 py-2">
+                                    <div><strong>Platforms</strong></div>
+                                    @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_facebook"
+                                                    value="1" id="PlatformFacebook">
+                                                <label class="form-check-label" for="PlatformFacebook">
+                                                    <i class="fab fa-facebook-f"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_instagram"
+                                                    value="1" id="PlatformInstagram">
+                                                <label class="form-check-label" for="PlatformInstagram">
+                                                    <i class="fab fa-instagram"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                        @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_linkedin"
+                                                    value="1" id="PlatformLinkedIn">
+                                                <label class="form-check-label" for="PlatformLinkedIn">
+                                                    <i class="fab fa-linkedin-in"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                                <div class="d-flex align-items-center gap-3 w-100">
+                                    @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                                <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
+                                                <select name="facebook_page" class="d-block w-100 form-select text-black"
+                                                    id="facebookPage">
+                                                    <option value="">Select Page</option>
+                                                </select>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                                <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
+                                                <select name="instagram_account" class="d-block w-100 form-select text-black"
+                                                    id="instagramPage">
+                                                    <option value="">Select Page</option>
+                                                </select>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                        @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                            <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                                <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
+                                                <select name="linkedin_organization"
+                                                    class="d-block w-100 form-select text-black" id="linkedInPage">
+                                                    <option value="">Select Page</option>
+                                                </select>
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div>
+                                    <button type="submit" class="btn btn-custom" id="scheduleSaveBtn">Schedule</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <form id="schedulePostForm" enctype="multipart/form-data" method="POST">
-                        @method('POST')
-                        @csrf
-                        <input type="hidden" name="post_id" id="postID">
-                        <div class="modal-body d-flex align-items-stretch flex-column gap-3">
-                            <div>
-                                <label for="postTitle" class="form-label">Title</label>
-                                <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
-                                    name="title" placeholder="Enter your title here" required />
-                            </div>
-                            <div
-                                class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
-                                <label for="postDescription" class="form-label">Description</label>
-                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
-                                    placeholder="Enter your post description"></textarea>
-                            </div>
-                            <div class="date-time-inputs">
-                                <label for="schedulePostDate" class="form-label">Schedule Date & Time</label>
-                                <input type="date" min="{{ date('Y-m-d') }}" class="form-control mb-3"
-                                    id="schedulePostDate" name="schedule_date" required>
-                                <label for="schedulePostTime" class="form-label">Time</label>
-                                <input type="time" class="form-control" id="schedulePostTime" name="schedule_time"
-                                    required>
-                            </div>
-                            <div>
-                                <label for="media" class="form-label">Media</label>
-                                <input type="file" class="form-control" id="media" name="media"
-                                    accept="image/*">
-                            </div>
-                            <div class="d-flex align-items-center gap-3 py-2">
-                                <div><strong>Platforms</strong></div>
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_facebook"
-                                            value="1" id="PlatformFacebook">
-                                        <label class="form-check-label" for="PlatformFacebook">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_instagram"
-                                            value="1" id="PlatformInstagram">
-                                        <label class="form-check-label" for="PlatformInstagram">
-                                            <i class="fab fa-instagram"></i>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_linkedin"
-                                            value="1" id="PlatformLinkedIn">
-                                        <label class="form-check-label" for="PlatformLinkedIn">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </label>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="d-flex align-items-center gap-3 w-100">
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                        <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
-                                        <select name="facebook_page" class="d-block w-100 form-select text-black"
-                                            id="facebookPage">
-                                            <option value="">Select Page</option>
-                                        </select>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                        <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
-                                        <select name="instagram_account" class="d-block w-100 form-select text-black"
-                                            id="instagramPage">
-                                            <option value="">Select Page</option>
-                                        </select>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                        <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
-                                        <select name="linkedin_organization" class="d-block w-100 form-select text-black"
-                                            id="linkedInPage">
-                                            <option value="">Select Page</option>
-                                        </select>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <div>
-                                <button type="submit" class="btn btn-custom" id="scheduleSaveBtn">Schedule</button>
-                            </div>
-                        </div>
-                    </form>
                 </div>
             </div>
-        </div>
+        @endcan
 
         {{-- Repost Modal --}}
-        <div class="modal fade" id="repostModal" tabindex="-1" aria-labelledby="repostModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-dark text-white">
-                        <h5 class="modal-title" id="repostModalLabel">Repost</h5>
-                        <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+        @can('re_post')
+            <div class="modal fade" id="repostModal" tabindex="-1" aria-labelledby="repostModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title" id="repostModalLabel">Repost</h5>
+                            <button type="button" class="btn-close" style="filter: invert(1)" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <form id="repostPostForm" enctype="multipart/form-data" method="POST">
+                            @method('POST')
+                            @csrf
+                            <input type="hidden" name="post_id" id="postID">
+                            <div class="modal-body d-flex align-items-stretch flex-column gap-3">
+                                <div>
+                                    <label for="postTitle" class="form-label">Title</label>
+                                    <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
+                                        name="title" placeholder="Enter your title here" required />
+                                </div>
+                                <div
+                                    class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
+                                    <label for="postDescription" class="form-label">Description</label>
+                                    <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
+                                        placeholder="Enter your post description"></textarea>
+                                </div>
+                                @if (Auth::guard('web')->user()->canAny([
+                                            'meta_facebook_image_post',
+                                            'meta_facebook_video_post',
+                                            'meta_instagram_image_post',
+                                            'meta_instagram_video_post',
+                                            'linkedin_image_post',
+                                            'linkedin_video_post',
+                                        ]))
+                                    <div>
+                                        <label for="media" class="form-label">Media</label>
+                                        <input type="file" class="form-control" id="media" name="media"
+                                            accept="image/*">
+                                    </div>
+                                @endif
+                                <div class="d-flex align-items-center gap-3 py-2">
+                                    <div><strong>Platforms</strong></div>
+                                    @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_facebook"
+                                                    value="1" id="PlatformFacebook">
+                                                <label class="form-check-label" for="PlatformFacebook">
+                                                    <i class="fab fa-facebook-f"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_instagram"
+                                                    value="1" id="PlatformInstagram">
+                                                <label class="form-check-label" for="PlatformInstagram">
+                                                    <i class="fab fa-instagram"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                        @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_linkedin"
+                                                    value="1" id="PlatformLinkedIn">
+                                                <label class="form-check-label" for="PlatformLinkedIn">
+                                                    <i class="fab fa-linkedin-in"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                                <div class="d-flex align-items-center gap-3 w-100">
+                                    @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                                <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
+                                                <select name="facebook_page" class="d-block w-100 form-select text-black"
+                                                    id="facebookPage">
+                                                    <option value="">Select Page</option>
+                                                </select>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
+                                        @if (Auth::guard('web')->user()->meta_access_token != null)
+                                            <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                                <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
+                                                <select name="instagram_account" class="d-block w-100 form-select text-black"
+                                                    id="instagramPage">
+                                                    <option value="">Select Page</option>
+                                                </select>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                        @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                            <div class="w-100 d-flex align-items-center gap-1 flex-column">
+                                                <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
+                                                <select name="linkedin_organization"
+                                                    class="d-block w-100 form-select text-black" id="linkedInPage">
+                                                    <option value="">Select Page</option>
+                                                </select>
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div>
+                                    <button type="submit" class="btn btn-custom" id="repostSaveBtn">Repost</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <form id="repostPostForm" enctype="multipart/form-data" method="POST">
-                        @method('POST')
-                        @csrf
-                        <input type="hidden" name="post_id" id="postID">
-                        <div class="modal-body d-flex align-items-stretch flex-column gap-3">
-                            <div>
-                                <label for="postTitle" class="form-label">Title</label>
-                                <input class="input-tag-title d-block h-100 w-100 form-control" id="postTitle"
-                                    name="title" placeholder="Enter your title here" required />
-                            </div>
-                            <div
-                                class="textarea-wrapper my-1 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center">
-                                <label for="postDescription" class="form-label">Description</label>
-                                <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
-                                    placeholder="Enter your post description"></textarea>
-                            </div>
-                            <div>
-                                <label for="media" class="form-label">Media</label>
-                                <input type="file" class="form-control" id="media" name="media"
-                                    accept="image/*">
-                            </div>
-                            <div class="d-flex align-items-center gap-3 py-2">
-                                <div><strong>Platforms</strong></div>
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_facebook"
-                                            value="1" id="PlatformFacebook">
-                                        <label class="form-check-label" for="PlatformFacebook">
-                                            <i class="fab fa-facebook-f"></i>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_instagram"
-                                            value="1" id="PlatformInstagram">
-                                        <label class="form-check-label" for="PlatformInstagram">
-                                            <i class="fab fa-instagram"></i>
-                                        </label>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_linkedin"
-                                            value="1" id="PlatformLinkedIn">
-                                        <label class="form-check-label" for="PlatformLinkedIn">
-                                            <i class="fab fa-linkedin-in"></i>
-                                        </label>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="d-flex align-items-center gap-3 w-100">
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                        <label for="page" class="form-label d-block w-100 mb-0">Facebook</label>
-                                        <select name="facebook_page" class="d-block w-100 form-select text-black"
-                                            id="facebookPage">
-                                            <option value="">Select Page</option>
-                                        </select>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                        <label for="page" class="form-label d-block w-100 mb-0">Instagram</label>
-                                        <select name="instagram_account" class="d-block w-100 form-select text-black"
-                                            id="instagramPage">
-                                            <option value="">Select Page</option>
-                                        </select>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="w-100 d-flex align-items-center gap-1 flex-column">
-                                        <label for="page" class="form-label d-block w-100 mb-0">LinkedIn</label>
-                                        <select name="linkedin_organization" class="d-block w-100 form-select text-black"
-                                            id="linkedInPage">
-                                            <option value="">Select Page</option>
-                                        </select>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <div>
-                                <button type="submit" class="btn btn-custom" id="repostSaveBtn">Repost</button>
-                            </div>
-                        </div>
-                    </form>
                 </div>
             </div>
-        </div>
+        @endcan
 
         {{ $dataSet->links('user.layouts.pagination') }}
     </section>

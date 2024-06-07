@@ -16,6 +16,7 @@ class ScheduledPostController extends Controller
 
     public function index()
     {
+        if (!Auth::guard('web')->user()->can('scheduled_post')) abort(403);
         return view($this->view);
     }
 
@@ -23,6 +24,8 @@ class ScheduledPostController extends Controller
     public function all(Request $request)
     {
         try {
+            if (!Auth::guard('web')->user()->can('scheduled_post')) abort(403);
+
             $user = Auth::guard('web')->user();
             $data = Post::where('user_id', $user->id)->whereNotNull('scheduled_at')
                 ->where('scheduled_at', '>=', $request->start)

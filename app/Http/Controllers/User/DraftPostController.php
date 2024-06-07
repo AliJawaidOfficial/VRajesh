@@ -38,6 +38,8 @@ class DraftPostController extends Controller
     {
         $user = Auth::guard('web')->user();
 
+        if (!Auth::guard('web')->user()->can('draft_post')) abort(403); 
+
         $postMonths = Post::where('user_id', $user->id)
             ->where('posted', 0)
             ->where('draft', 1)
@@ -64,6 +66,8 @@ class DraftPostController extends Controller
     public function store(Request $request)
     {
         try {
+            if (!Auth::guard('web')->user()->can('draft_post')) abort(403); 
+
             DB::beginTransaction();
 
             $validator = Validator::make(
@@ -189,6 +193,8 @@ class DraftPostController extends Controller
     public function storeAsDraft(Request $request)
     {
         try {
+            if (!Auth::guard('web')->user()->can('draft_post')) abort(403); 
+
             DB::beginTransaction();
 
             $validator = Validator::make(
@@ -329,6 +335,8 @@ class DraftPostController extends Controller
     public function update(Request $request)
     {
         try {
+            if (!Auth::guard('web')->user()->can('draft_post')) abort(403);
+
             DB::beginTransaction();
 
             $validator = Validator::make(

@@ -59,9 +59,9 @@
                                             <div
                                                 class="form-switch p-0 pe-2 d-flex flex-row-reverse justify-content-between mb-2">
                                                 <input type="checkbox" name="permissions[]"
+                                                    id="permission_{{ $i }}" class="form-check-input"
                                                     value="{{ $permission['name'] }}"
-                                                    {{ old('permissions') ? (in_array($permission['name'], old('permissions')) ? 'checked' : '') : '' }}
-                                                    id="permission_{{ $i }}" class="form-check-input" />
+                                                    {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
                                                 <label class="form-check-label"
                                                     for="permission_{{ $i }}">{{ $permission['title'] }}</label>
                                             </div>
@@ -76,8 +76,8 @@
                                             <div
                                                 class="form-switch p-0 pe-2 d-flex flex-row-reverse justify-content-between mb-2">
                                                 <input type="checkbox" name="permissions[]"
-                                                    value="{{ $permission['name'] }}" id="permission_{{ $i }}"
-                                                    class="form-check-input"
+                                                    id="permission_{{ $i }}" class="form-check-input"
+                                                    value="{{ $permission['name'] }}"
                                                     {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
                                                 <label class="form-check-label"
                                                     for="permission_{{ $i }}">{{ $permission['title'] }}</label>
@@ -89,6 +89,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-dark">Save Changes</button>
                 </div>
             </div>
         </form>

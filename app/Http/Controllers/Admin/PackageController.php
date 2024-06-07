@@ -22,23 +22,23 @@ class PackageController extends Controller
         ],
         [
             'name' => 'meta_facebook_text_post',
-            'title' => 'Text Post - Facebook'
+            'title' => 'Text Post | Facebook'
         ],
         [
             'name' => 'meta_facebook_image_post',
-            'title' => 'Image Post - Facebook'
+            'title' => 'Image Post | Facebook'
         ],
         [
             'name' => 'meta_facebook_video_post',
-            'title' => 'Video Post - Facebook'
+            'title' => 'Video Post | Facebook'
         ],
         [
             'name' => 'meta_instagram_image_post',
-            'title' => 'Image Post - Instagram'
+            'title' => 'Image Post | Instagram'
         ],
         [
             'name' => 'meta_instagram_video_post',
-            'title' => 'Video Post - Instagram'
+            'title' => 'Video Post | Instagram'
         ],
     ];
     protected $linkedInPermissions = [
@@ -159,7 +159,7 @@ class PackageController extends Controller
             if (!$data) throw new Exception('Package not found');
 
             $permissions = Permission::all();
-            $rolePermissions = $data->permissions->pluck('id')->toArray();
+            $rolePermissions = $data->permissions->pluck('name')->toArray();    
 
             $facebookPermissions = $this->facebookPermissions;
             $linkedInPermissions = $this->linkedInPermissions;
@@ -216,7 +216,8 @@ class PackageController extends Controller
 
             Session::flash('success', ['text' => 'Package updated successfully']);
 
-            return redirect()->route('admin.package.index');
+            // return redirect()->route('admin.package.index');
+        return redirect()->back()->withInput();
         } catch (Exception $e) {
             Session::flash('error', ['text' => $e->getMessage()]);
             return redirect()->back()->withInput();

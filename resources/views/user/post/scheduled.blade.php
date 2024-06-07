@@ -369,90 +369,122 @@
                                 <label for="postTime">Time</label>
                                 <input type="time" class="form-control" id="postTime" name="schedule_time" required />
                             </div>
-                            <div class="">
-                                <label for="postMedia" class="form-label mb-1">Media</label>
-                                <input type="file" class="form-control" id="postMedia" name="media" accept="image/*">
+                            @if (Auth::guard('web')->user()->canAny([
+                                        'meta_facebook_image_post',
+                                        'meta_facebook_video_post',
+                                        'meta_instagram_image_post',
+                                        'meta_instagram_video_post',
+                                        'linkedin_image_post',
+                                        'linkedin_video_post',
+                                    ]))
+                                <div>
+                                    <label for="media" class="form-label">Media</label>
+                                    <input type="file" class="form-control" id="media" name="media"
+                                        accept="image/*">
+                                </div>
+                            @endif
+                            <div class="d-flex align-items-center gap-3 py-2">
+                                <div><strong>Platforms</strong></div>
+                                
+                                @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
+                                    @if (Auth::guard('web')->user()->meta_access_token != null)
+                                        <label class="d-inline-block platform-checkbox">
+                                            <input type="checkbox" name="on_facebook" onchange="getFacebookPages(this)"
+                                                value="1" data-bs-toggle="facebook-post"
+                                                class="form-check-input toggle-post" />
+                                            -
+                                            <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"
+                                                    style="font-size: 17px"></i></span>
+                                        </label>
+                                    @endif
+                                @endif
+
+                                @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
+                                    @if (Auth::guard('web')->user()->meta_access_token != null)
+                                        <label class="d-inline-block platform-checkbox">
+                                            <input type="checkbox" name="on_instagram" onchange="getInstagramAccounts(this)"
+                                                value="1" data-bs-toggle="instagram-post"
+                                                class="form-check-input toggle-post" />
+                                            -
+                                            <span class="d-inline-block ms-1"><i class="fab fa-instagram"
+                                                    style="font-size: 17px"></i></span>
+                                        </label>
+                                    @endif
+                                @endif
+
+                                @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                    @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                        <label class="d-inline-block platform-checkbox">
+                                            <input type="checkbox" name="on_linkedin"
+                                                onchange="getLinkedInOrganizations(this)" value="1"
+                                                data-bs-toggle="linkedin-post" class="form-check-input toggle-post" />
+                                            -
+                                            <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
+                                                    style="font-size: 17px"></i></span>
+                                        </label>
+                                    @endif
+                                @endif
                             </div>
-                            <div class="">
-                                <label>Platforms</label>
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_facebook"
-                                            onchange="getFacebookPages(this)" value="1" id="postFacebook" />
-                                        <label class="form-check-label" for="postFacebook"><i
-                                                class="fab fa-facebook-f"></i></label>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_instagram"
-                                            onchange="getInstagramAccounts(this)" value="1" id="postInstagram" />
-                                        <label class="form-check-label" for="postInstagram"><i
-                                                class="fab fa-instagram"></i></label>
-                                    </div>
-                                @endif
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="checkbox" name="on_linkedin"
-                                            onchange="getLinkedInOrganizations(this)" value="1" id="postLinkedin" />
-                                        <label class="form-check-label" for="postLinkedin"><i
-                                                class="fab fa-linkedin-in"></i></label>
-                                    </div>
-                                @endif
-                            </div>
+
                             <div class="row">
                                 {{-- Facebook Pages --}}
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="col-md-4">
-                                        <div class="m-0" style="display: none;" id="facebookSelectSection">
-                                            <div class="d-flex flex-column gap-1">
-                                                <p class="mb-0">Facebook Pages:</p>
+                                @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
+                                    @if (Auth::guard('web')->user()->meta_access_token != null)
+                                        <div class="col-md-4">
+                                            <div class="m-0" style="display: none;" id="facebookSelectSection">
+                                                <div class="d-flex flex-column gap-1">
+                                                    <p class="mb-0">Facebook Pages:</p>
 
-                                                <div class="d-flex flex-column gap-1 w-100">
-                                                    <select name="facebook_page" id="facebookPagesSelect"
-                                                        class="form-select w-100">
-                                                        <option value="">Select</option>
-                                                    </select>
+                                                    <div class="d-flex flex-column gap-1 w-100">
+                                                        <select name="facebook_page" id="facebookPagesSelect"
+                                                            class="form-select w-100">
+                                                            <option value="">Select</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 @endif
 
                                 {{-- Instagram Account --}}
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="col-md-4">
-                                        <div class="m-0" style="display: none;" id="instagramSelectSection">
-                                            <div class="d-flex flex-column gap-1">
-                                                <p class="mb-0">Instagram Account:</p>
+                                @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
+                                    @if (Auth::guard('web')->user()->meta_access_token != null)
+                                        <div class="col-md-4">
+                                            <div class="m-0" style="display: none;" id="instagramSelectSection">
+                                                <div class="d-flex flex-column gap-1">
+                                                    <p class="mb-0">Instagram Account:</p>
 
-                                                <div class="d-flex flex-column gap-1 w-100">
-                                                    <select name="instagram_account" id="instagramAccountSelect"
-                                                        class="form-select w-100">
-                                                        <option value="">Select</option>
-                                                    </select>
+                                                    <div class="d-flex flex-column gap-1 w-100">
+                                                        <select name="instagram_account" id="instagramAccountSelect"
+                                                            class="form-select w-100">
+                                                            <option value="">Select</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 @endif
 
-                                {{-- LinkedIn Organizations --}}
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="col-md-4">
-                                        <div class="m-0" style="display: none;" id="linkedinSelectSection">
-                                            <div class="d-flex flex-column gap-1">
-                                                <p class="mb-0">LinkedIn Organizations:</p>
+                                {{-- Instagram Account --}}
+                                @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                    @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                        <div class="col-md-4">
+                                            <div class="m-0" style="display: none;" id="linkedinSelectSection">
+                                                <div class="d-flex flex-column gap-1">
+                                                    <p class="mb-0">LinkedIn Organizations:</p>
 
-                                                <div class="d-flex flex-column gap-1 w-100">
-                                                    <select name="linkedin_organization" id="linkedinOrganizationsSelect"
-                                                        class="form-select w-100">
-                                                        <option value="">Select</option>
-                                                    </select>
+                                                    <div class="d-flex flex-column gap-1 w-100">
+                                                        <select name="linkedin_organization" id="linkedinOrganizationsSelect"
+                                                            class="form-select w-100">
+                                                            <option value="">Select</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 @endif
                             </div>
                         </div>
@@ -676,7 +708,7 @@
                                 </video>`;
                             } else {
                                 html +=
-                                `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                                    `<p class="text-center text-muted my-auto">No image/video published</p>`;
                             }
 
                             html += `
@@ -807,7 +839,6 @@
                 });
             });
         });
-
 
         // Facbook Pages
         function getFacebookPages(element) {

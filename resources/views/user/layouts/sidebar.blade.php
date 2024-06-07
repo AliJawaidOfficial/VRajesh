@@ -66,6 +66,24 @@
             ],
         ],
         [
+            'name' => 'Linkedin Self',
+            'active_url' => 'user.individual.post.*',
+            'icon' => asset('assets/images/icons/arrow-right.png'),
+            'submenu' => [
+                [
+                    'name' => 'Create',
+                    'url' => route('user.individual.post.create'),
+                    'active_url' => 'user.individual.post.create',
+                ],
+                [
+                    'name' => 'Published',
+                    'url' => route('user.individual.post.index'),
+                    'active_url' => 'user.individual.post.index',
+                    'permissions' => ['immediate_post'],
+                ],
+            ],
+        ],
+        [
             'name' => 'Pipelines',
             'active_url' => 'user.linkedin.pipeline.*',
             'icon' => asset('assets/images/icons/arrow-right.png'),

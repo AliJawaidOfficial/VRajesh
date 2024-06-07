@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PackageController as AdminPackageController;
 use App\Http\Controllers\User\DraftPostController;
+use App\Http\Controllers\User\IndivisualPostController;
 use App\Http\Controllers\User\ScheduledPostController;
 
 /*
@@ -133,6 +134,21 @@ Route::name('user.')
                             Route::get('/', 'index');
                             Route::get('/response', 'all')->name('.all');
                         });
+                });
+
+
+            /**
+             * Indivisual Post
+             */
+            Route::prefix('/linkedin-self')
+                ->controller(IndivisualPostController::class)
+                ->name('individual.post.')
+                ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/details/{id}', 'show')->name('show');
+                    Route::get('/create', 'create')->name('create');
+                    Route::post('/create', 'store')->name('store');
+                    Route::post('/{id}/delete', 'destroy')->name('destroy');
                 });
 
 

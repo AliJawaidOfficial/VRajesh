@@ -4,8 +4,6 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
-use App\Services\FacebookService;
-use App\Services\InstagramService;
 use App\Services\LinkedInService;
 use Carbon\Carbon;
 use Exception;
@@ -16,59 +14,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
-class PostController extends Controller
+class IndivisualPostController extends Controller
 {
     protected $linkedinService;
-    protected $facebookService;
-    protected $instagramService;
 
-    public function __construct(
-        private readonly LinkedInService $importLinkedinService,
-        private readonly InstagramService $importinstagramService,
-        private readonly FacebookService $importFacebookService,
-    ) {
+    public function __construct(private readonly LinkedInService $importLinkedinService)
+    {
         $this->linkedinService = $importLinkedinService;
-        $this->facebookService = $importFacebookService;
-        $this->instagramService = $importinstagramService;
-    }
-
-    /**
-     * Get Facebok Pages
-     */
-    public function facebookPages()
-    {
-        $facebookPages = [];
-        try {
-            if (Auth::guard('web')->user()->meta_access_token != null) $facebookPages = $this->facebookService->getPages();
-        } catch (Exception $e) {
-        }
-        return response()->json($facebookPages);
-    }
-
-    /**
-     * Get Instagram Accounts
-     */
-    public function instagramAccounts()
-    {
-        $instagramPages = [];
-        try {
-            if (Auth::guard('web')->user()->meta_access_token != null) $instagramPages = $this->instagramService->getPages();
-        } catch (Exception $e) {
-        }
-        return response()->json($instagramPages);
-    }
-
-    /**
-     * Get LinkedIn Organizations
-     */
-    public function linkedinOrganizations()
-    {
-        $linkedinOrganizations = [];
-        try {
-            if (Auth::guard('web')->user()->linkedin_access_token != null) $linkedinOrganizations = $this->linkedinService->getOrganizations();
-        } catch (Exception $e) {
-        }
-        return response()->json($linkedinOrganizations);
     }
 
     /**
@@ -80,9 +32,9 @@ class PostController extends Controller
 
         $postMonths = Post::where('user_id', $user->id)
             ->where(function ($q) {
-                $q->where('on_linkedin', 1)->whereNotNull('linkedin_company_id');
-                $q->orWhere('on_facebook', 1)->whereNotNull('facebook_page_id');
-                $q->orWhere('on_instagram', 1)->whereNotNull('instagram_account_id');
+                $q->where('on_linkedin', 1)->where('linkedin_company_id', null);
+                $q->orWhere('on_facebook', 1)->where('facebook_page_id', null);
+                $q->orWhere('on_instagram', 1)->where('instagram_account_id', null);
             })
             ->where('posted', 1)
             ->where('draft', 0)
@@ -95,9 +47,9 @@ class PostController extends Controller
 
         $dataSet = Post::where('user_id', $user->id)
             ->where(function ($q) {
-                $q->where('on_linkedin', 1)->whereNotNull('linkedin_company_id');
-                $q->orWhere('on_facebook', 1)->whereNotNull('facebook_page_id');
-                $q->orWhere('on_instagram', 1)->whereNotNull('instagram_account_id');
+                $q->where('on_linkedin', 1)->where('linkedin_company_id', null);
+                $q->orWhere('on_facebook', 1)->where('facebook_page_id', null);
+                $q->orWhere('on_instagram', 1)->where('instagram_account_id', null);
             })
             ->where('posted', 1)
             ->where('draft', 0)
@@ -108,7 +60,7 @@ class PostController extends Controller
 
         $dataSet = $dataSet->paginate(10);
 
-        return view('user.post.index', compact('dataSet', 'postMonths'));
+        return view('user.individual-post.index', compact('dataSet', 'postMonths'));
     }
 
     /**
@@ -137,7 +89,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('user.post.create');
+        return view('user.individual-post.create');
     }
 
     /**
@@ -155,11 +107,8 @@ class PostController extends Controller
                     'description' => 'nullable|required_without:media',
                     'media' => 'nullable|required_if:on_instagram,1',
                     'on_facebook' => 'nullable|boolean',
-                    'facebook_page' => 'nullable|required_if:on_facebook,1',
                     'on_instagram' => 'nullable|boolean',
-                    'instagram_account' => 'nullable|required_if:on_instagram,1',
                     'on_linkedin' => 'nullable|boolean',
-                    'linkedin_organization' => 'nullable|required_if:on_linkedin,1',
                     'schedule_date' => 'nullable|date|after_or_equal:today',
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
@@ -171,12 +120,6 @@ class PostController extends Controller
 
                     'media.required' => 'Media is required',
                     'media.required_if' => 'Media is required for Instagram.',
-
-                    'facebook_page.required_if' => 'Facebook Page is required.',
-
-                    'instagram_account.required_if' => 'Instagram Account is required.',
-
-                    'linkedin_organization.required_if' => 'Linkedin Organization is required.',
 
                     'schedule_date.after_or_equal' => 'Schedule date should be a future date.',
 
@@ -213,75 +156,21 @@ class PostController extends Controller
                 $data->media_type = $media_type;
             }
 
-            // On Facebook
-            if ($request->has('on_facebook')) {
-                $facebook_page = explode(' - ', $request->facebook_page);
-                $facebook_page_id = $facebook_page[0];
-                $facebook_page_access_token = $facebook_page[1];
-                $facebook_page_name = $facebook_page[2];
-
-                $long_facebook_access_token = $this->facebookService->tokenTime($facebook_page_access_token);
-
-                $data->on_facebook = 1;
-                $data->facebook_page_id = $facebook_page_id;
-                $data->facebook_page_access_token = $long_facebook_access_token;
-                $data->facebook_page_name = $facebook_page_name;
-            }
-
-            // On Instagram
-            if ($request->has('on_instagram')) {
-                $instagram_account = explode(' - ', $request->instagram_account);
-                $instagram_account_id = $instagram_account[0];
-                $instagram_account_name = $instagram_account[1];
-
-                $data->on_instagram = 1;
-                $data->instagram_account_id = $instagram_account_id;
-                $data->instagram_account_name = $instagram_account_name;
-            }
-
-            // On Linkedin
-            if ($request->has('on_linkedin')) {
-                $linkedin_organization = explode(' - ', $request->linkedin_organization);
-                $linkedin_organization_id = $linkedin_organization[0];
-                $linkedin_organization_name = $linkedin_organization[1];
-
-                $data->on_linkedin = 1;
-                $data->linkedin_company_id = $linkedin_organization_id;
-                $data->linkedin_company_name = $linkedin_organization_name;
-            }
-
             if ($request->schedule_date != null && $request->schedule_time != null) {
                 $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
+                if ($request->has('on_linkedin')) $data->on_linkedin = 1;
             } else {
                 $assets = env('APP_URL') . '/';
-
-                // On Instagram
-                if ($request->has('on_instagram')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->instagramService->postImage($data->instagram_account_id, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->instagramService->postVideo($data->instagram_account_id, $assets . $data->media, $mediaSize, $request->description);
-                    }
-                }
-
-                // On Facebook
-                if ($request->has('on_facebook')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->facebookService->postImage($data->facebook_page_id, $data->facebook_page_access_token, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->facebookService->postVideo($data->facebook_page_id, $data->facebook_page_access_token, $mediaSize, $assets . $data->media, $request->description);
-                    } else {
-                        $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
-                    }
-                }
 
                 // On Linkedin
                 if ($request->has('on_linkedin')) {
                     if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $post = $this->linkedinService->postImage($data->linkedin_company_id, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $post = $this->linkedinService->postVideo($data->linkedin_company_id, $assets . $data->media, $request->description);
+                        if ($media_type == 'image') $post = $this->linkedinService->individualPostImage($assets . $data->media, $request->description);
+                        if ($media_type == 'video') $post = $this->linkedinService->individualPostVideo($assets . $data->media, $request->description);
                     } else {
-                        $post = $this->linkedinService->postText($data->linkedin_company_id, $request->description);
+                        $post = $this->linkedinService->individualPostText($request->description);
                     }
-                    if (isset($post['status']) && $post['status'] != 200) $errors[] = $post['message'];
+                    $data->on_linkedin = 1;
                 }
 
                 $data->posted = 1;
@@ -326,11 +215,8 @@ class PostController extends Controller
                     'description' => 'nullable|required_without:media',
                     'media' => 'nullable',
                     'on_facebook' => 'nullable|boolean',
-                    'facebook_page' => 'nullable|required_if:on_facebook,1',
                     'on_instagram' => 'nullable|boolean',
-                    'instagram_account' => 'nullable|required_if:on_instagram,1',
                     'on_linkedin' => 'nullable|boolean',
-                    'linkedin_organization' => 'nullable|required_if:on_linkedin,1',
                     'schedule_date' => 'nullable|date|after_or_equal:today',
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
@@ -345,12 +231,6 @@ class PostController extends Controller
 
                     'media.required' => 'Media is required',
                     'media.required_if' => 'Media is required',
-
-                    'facebook_page.required_if' => 'Facebook Page is required.',
-
-                    'instagram_account.required_if' => 'Instagram Account is required.',
-
-                    'linkedin_organization.required_if' => 'Linkedin Organization is required.',
 
                     'schedule_date.after_or_equal' => 'Schedule date should be a future date.',
 
@@ -463,10 +343,10 @@ class PostController extends Controller
                 // On Linkedin
                 if ($request->has('on_linkedin')) {
                     if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->linkedinService->postImage($data->linkedin_company_id, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->linkedinService->postVideo($data->linkedin_company_id, $assets . $data->media, $request->description);
+                        if ($media_type == 'image') $this->linkedinService->individualPostImage($assets . $data->media, $request->description);
+                        if ($media_type == 'video') $this->linkedinService->individualPostVideo($assets . $data->media, $request->description);
                     } else {
-                        $this->linkedinService->postText($data->linkedin_company_id, $request->description);
+                        $this->linkedinService->individualPostText($request->description);
                     }
                 }
 

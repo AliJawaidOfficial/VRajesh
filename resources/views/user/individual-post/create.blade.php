@@ -380,18 +380,18 @@
         });
 
         // Schedule Form
-        $("#scheduleForm").submit(function(e) {
-            e.preventDefault();
-            if ($(this).valid()) {
-                $("#post_schedule_date").val($("#scheduleDate").val());
-                $("#post_schedule_time").val($("#scheduleTime").val());
-                $("#scheduleModal").modal("hide");
-                $("#scheduleModal").css("display", "none");
-                $("#postForm").submit();
-                $("#exampleModal").modal("hide");
-                $("#exampleModal").css("display", "none");
-            }
-        });
+        // $("#scheduleForm").submit(function(e) {
+        //     e.preventDefault();
+        //     if ($(this).valid()) {
+        //         $("#post_schedule_date").val($("#scheduleDate").val());
+        //         $("#post_schedule_time").val($("#scheduleTime").val());
+        //         $("#scheduleModal").modal("hide");
+        //         $("#scheduleModal").css("display", "none");
+        //         $("#postForm").submit();
+        //         $("#exampleModal").modal("hide");
+        //         $("#exampleModal").css("display", "none");
+        //     }
+        // });
 
         // Post Form
         $("#postForm").submit(function(e) {
@@ -399,7 +399,7 @@
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('user.post.store') }}",
+                    url: "{{ route('user.individual.post.store') }}",
                     data: new FormData(this),
                     processData: false,
                     contentType: false,
@@ -422,7 +422,7 @@
                                 showConfirmButton: false,
                                 timer: 700
                             }).then(() => {
-                                location.reload();
+                                // location.reload();
                             });
                         } else {
                             toastr.error(response.error);
@@ -433,126 +433,39 @@
         });
 
         // Draft Form
-        $('#postForm button[name="draft"]').click(function(e) {
-            e.preventDefault();
-            let form = $('#postForm')[0];
-            if ($(this).valid()) {
-                $.ajax({
-                    type: "POST",
-                    url: "{{ route('user.post.draft.store') }}",
-                    data: new FormData(form),
-                    processData: false,
-                    contentType: false,
-                    beforeSend: function() {
-                        showLoadingModal()
-                    },
-                    success: function(response) {
-                        if (response.status == 200) {
-                            hideLoadingModal()
-                            Swal.fire({
-                                icon: 'success',
-                                title: "Post saved as draft",
-                                showConfirmButton: false,
-                                timer: 1500
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            toastr.error(response.error);
+        // $('#postForm button[name="draft"]').click(function(e) {
+        //     e.preventDefault();
+        //     let form = $('#postForm')[0];
+        //     if ($(this).valid()) {
+        //         $.ajax({
+        //             type: "POST",
+        //             url: "{{ route('user.post.draft.store') }}",
+        //             data: new FormData(form),
+        //             processData: false,
+        //             contentType: false,
+        //             beforeSend: function() {
+        //                 showLoadingModal()
+        //             },
+        //             success: function(response) {
+        //                 if (response.status == 200) {
+        //                     hideLoadingModal()
+        //                     Swal.fire({
+        //                         icon: 'success',
+        //                         title: "Post saved as draft",
+        //                         showConfirmButton: false,
+        //                         timer: 1500
+        //                     }).then(() => {
+        //                         location.reload();
+        //                     });
+        //                 } else {
+        //                     toastr.error(response.error);
 
-                            hideLoadingModal()
-                        }
-                    }
-                });
-            }
-        });
-
-        // Facbook Pages
-        function getFacebookPages(element) {
-            if (element.checked) {
-                $("#facebookSelectSection").fadeIn();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.facebook.pages') }}",
-                    beforeSend: function() {
-                        $("#facebookPagesSelect").html(`<option value="">Loading...</option>`);
-                    },
-                    success: function(response) {
-                        html = `<option value="">Select</option>`;
-
-                        if (response.length > 0) {
-                            response.forEach((page) => {
-                                html +=
-                                    `<option value="${page.id} - ${page.access_token} - ${page.name}">${page.name}</option>`
-                            })
-                        } else {
-                            html = `<option value="">No Page Found</option>`;
-                        }
-                        $("#facebookPagesSelect").html(html);
-                    }
-                });
-            } else {
-                $("#facebookSelectSection").fadeOut();
-            }
-        }
-
-        // Instagram Accounts
-        function getInstagramAccounts(element) {
-            if (element.checked) {
-                $("#instagramSelectSection").fadeIn();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.instagram.accounts') }}",
-                    beforeSend: function() {
-                        $("#instagramAccountSelect").html(`<option value="">Loading...</option>`);
-                    },
-                    success: function(response) {
-                        html = `<option value="">Select</option>`;
-
-                        if (response.length > 0) {
-                            response.forEach((account) => {
-                                html +=
-                                    `<option value="${account.ig_business_account} - ${account.name}">${account.name}</option>`
-                            })
-                        } else {
-                            html = `<option value="">No Account Found</option>`;
-                        }
-                        $("#instagramAccountSelect").html(html);
-                    }
-                });
-            } else {
-                $("#instagramSelectSection").fadeOut();
-            }
-        }
-
-        // LinkedIn Organizations
-        function getLinkedInOrganizations(element) {
-            if (element.checked) {
-                $("#linkedinSelectSection").fadeIn();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.linkedin.organizations') }}",
-                    beforeSend: function() {
-                        $("#linkedinOrganizationsSelect").html(`<option value="">Loading...</option>`);
-                    },
-                    success: function(response) {
-                        html = `<option value="">Select</option>`;
-
-                        if (response.length > 0) {
-                            response.forEach((account) => {
-                                html +=
-                                    `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
-                            })
-                        } else {
-                            html = `<option value="">No Account Found</option>`;
-                        }
-                        $("#linkedinOrganizationsSelect").html(html);
-                    }
-                });
-            } else {
-                $("#linkedinSelectSection").fadeOut();
-            }
-        }
+        //                     hideLoadingModal()
+        //                 }
+        //             }
+        //         });
+        //     }
+        // });
     </script>
 @endsection
 
@@ -580,32 +493,6 @@
                             <div class="d-flex align-items-center gap-3">
                                 <p class="mb-0">Check to share on:</p>
 
-                                @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
-                                    @if (Auth::guard('web')->user()->meta_access_token != null)
-                                        <label class="d-inline-block platform-checkbox">
-                                            <input type="checkbox" name="on_facebook" onchange="getFacebookPages(this)"
-                                                value="1" data-bs-toggle="facebook-post"
-                                                class="form-check-input toggle-post" />
-                                            -
-                                            <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"
-                                                    style="font-size: 17px"></i></span>
-                                        </label>
-                                    @endif
-                                @endif
-
-                                @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
-                                    @if (Auth::guard('web')->user()->meta_access_token != null)
-                                        <label class="d-inline-block platform-checkbox">
-                                            <input type="checkbox" name="on_instagram" onchange="getInstagramAccounts(this)"
-                                                value="1" data-bs-toggle="instagram-post"
-                                                class="form-check-input toggle-post" />
-                                            -
-                                            <span class="d-inline-block ms-1"><i class="fab fa-instagram"
-                                                    style="font-size: 17px"></i></span>
-                                        </label>
-                                    @endif
-                                @endif
-
                                 @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
                                     @if (Auth::guard('web')->user()->linkedin_access_token != null)
                                         <label class="d-inline-block platform-checkbox">
@@ -621,10 +508,6 @@
                             </div>
 
                             @if (Auth::guard('web')->user()->canAny([
-                                        'meta_facebook_image_post',
-                                        'meta_facebook_video_post',
-                                        'meta_instagram_image_post',
-                                        'meta_instagram_video_post',
                                         'linkedin_image_post',
                                         'linkedin_video_post',
                                     ]))
@@ -638,82 +521,21 @@
                             @endif
                         </div>
 
-                        <div class="row">
-                            {{-- Facebook Pages --}}
-                            @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="col-md-4">
-                                        <div class="m-0" style="display: none;" id="facebookSelectSection">
-                                            <div class="d-flex flex-column gap-1">
-                                                <p class="mb-0">Facebook Pages:</p>
-
-                                                <div class="d-flex flex-column gap-1 w-100">
-                                                    <select name="facebook_page" id="facebookPagesSelect"
-                                                        class="form-select w-100">
-                                                        <option value="">Select</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endif
-
-                            {{-- Instagram Account --}}
-                            @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="col-md-4">
-                                        <div class="m-0" style="display: none;" id="instagramSelectSection">
-                                            <div class="d-flex flex-column gap-1">
-                                                <p class="mb-0">Instagram Account:</p>
-
-                                                <div class="d-flex flex-column gap-1 w-100">
-                                                    <select name="instagram_account" id="instagramAccountSelect"
-                                                        class="form-select w-100">
-                                                        <option value="">Select</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endif
-
-                            {{-- Instagram Account --}}
-                            @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="col-md-4">
-                                        <div class="m-0" style="display: none;" id="linkedinSelectSection">
-                                            <div class="d-flex flex-column gap-1">
-                                                <p class="mb-0">LinkedIn Organizations:</p>
-
-                                                <div class="d-flex flex-column gap-1 w-100">
-                                                    <select name="linkedin_organization" id="linkedinOrganizationsSelect"
-                                                        class="form-select w-100">
-                                                        <option value="">Select</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endif
-                        </div>
                     </div>
 
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">
 
                         <div>
-                            @can('draft_post')
+                            {{-- @can('draft_post')
                                 <button type="button" name="draft" class="btn btn-custom">Save as Draft</button>
-                            @endcan
+                            @endcan --}}
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
-                            @can('scheduled_post')
+                            {{-- @can('scheduled_post')
                                 <button type="button" class="btn btn-custom" data-bs-toggle="modal"
                                     data-bs-target="#scheduleModal">Schedule</button>
-                            @endcan
+                            @endcan --}}
                             @can('immediate_post')
                                 <button type="submit" name="post" class="btn btn-custom">Post</button>
                             @endcan
@@ -724,48 +546,6 @@
 
             <div class="col-md-4">
                 <div class="w-100 bg-white p-4 rounded-6 overflow-scroll d-flex flex-column gap-1" id="postPreview">
-                    {{-- Facebook Post Preview --}}
-                    <div class="card rounded" style="display: none" id="facebook-post">
-                        <div
-                            class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
-                            <div class="d-flex align-items-center">
-                                <img src="{{ Auth::guard('web')->user()->meta_avatar }}" alt="Profile Picture"
-                                    class="rounded-circle">
-                                <div class="ms-2">
-                                    <h6 class="mb-0 line-clap" style="-webkit-line-clamp: 1;">
-                                        {{ Auth::guard('web')->user()->meta_name }}</h6>
-                                    <small class="text-muted">1h · <img src="{{ asset('assets/images/icons/globe.png') }}"
-                                            width="16" alt=""></small>
-                                </div>
-                            </div>
-                            <div>
-                                <img src="{{ asset('assets/images/icons/three-dot-icons.png') }}" width="20px"
-                                    style="min-width: 20px" alt="">
-                            </div>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="px-4 mb-3 post-description"></div>
-                            <div class="post-media">
-                                <img src="#" alt="Post Image" class="img-fluid" style="display: none"
-                                    id="postImage">
-                                <video controls class="w-100" style="display: none" id="postVideo">
-                                    <source src="#" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                            </div>
-                        </div>
-                        <div class="card-footer d-flex justify-content-between">
-                            <div>
-                                <span>&#128077;&#128514;&#128546;</span>
-                                <span class="like-count">20</span>
-                            </div>
-                            <div>
-                                <span>8 comments</span>
-                                <span class="ms-3">44 shares</span>
-                            </div>
-                        </div>
-                    </div>
-
                     {{-- LinkedIn Post Preview --}}
                     <div class="card rounded" style="display: none" id="linkedin-post">
                         <div
@@ -830,92 +610,20 @@
 
                         </div>
                     </div>
-
-                    {{-- Instagram Post Preview --}}
-                    <div class="card rounded" style="display: none" id="instagram-post">
-                        <div
-                            class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
-                            <div class="d-flex align-items-center">
-                                <img src="{{ Auth::guard('web')->user()->meta_avatar }}" alt="Profile Picture"
-                                    class="rounded-circle">
-                                <div class="ms-2">
-                                    <h6 class="mb-0">{{ Auth::guard('web')->user()->meta_name }}</h6>
-                                    <small class="text-muted">Original audio</small>
-                                </div>
-                            </div>
-                            <div style="width: fit-content">
-                                <img src="{{ asset('assets/images/icons/three-dot-icons.png') }}" style="min-width: 20px"
-                                    width="20px" alt="">
-                            </div>
-                        </div>
-                        <div class="card-body p-0 position-relative">
-                            <div class="post-media">
-                                <img src="#" class="img-fluid" style="display: none" id="postImage">
-                                <video controls class="w-100" style="display: none" id="postVideo">
-                                    <source src="#" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                            </div>
-                        </div>
-                        <div class="card-footer d-flex flex-column">
-                            <div class="actions">
-                                <span><svg aria-label="Like" class="x1lliihq x1n2onr6 xyb1xck" fill="currentColor"
-                                        height="24" role="img" vie wBox="0 0 24 24" width="24">
-                                        <title>Like</title>
-                                        <path
-                                            d="M16.792 3.904A4.989 4.989 0 0 1 21.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-2.143-1.823-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 0 1 4.708-5.218 4.21 4.21 0 0 1 3.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 0 1 3.679-1.938m0-2a6.04 6.04 0 0 0-4.797 2.127 6.052 6.052 0 0 0-4.787-2.127A6.985 6.985 0 0 0 .5 9.122c0 3.61 2.55 5.827 5.015 7.97.283.246.569.494.853.747l1.027.918a44.998 44.998 0 0 0 3.518 3.018 2 2 0 0 0 2.174 0 45.263 45.263 0 0 0 3.626-3.115l.922-.824c.293-.26.59-.519.885-.774 2.334-2.025 4.98-4.32 4.98-7.94a6.985 6.985 0 0 0-6.708-7.218Z">
-                                        </path>
-                                    </svg></span>
-                                <span><svg aria-label="Comment" class="x1lliihq x1n2onr6 x5n08af" fill="currentColor"
-                                        height="24" role="img" viewBox="0 0 24 24" width="24">
-                                        <title>Comment</title>
-                                        <path d="M20.656 17.008a9.993 9.993 0 1 0-3.59 3.615L22 22Z" fill="none"
-                                            stroke="currentColor" stroke-linejoin="round" stroke-width="2"></path>
-                                    </svg></span>
-                                <span><svg aria-label="Share Post" class="x1lliihq x1n2onr6 x5n08af" fill="currentColor"
-                                        height="24" role="img" viewBox="0 0 24 24" width="24">
-                                        <title>Share Post</title>
-                                        <line fill="none" stroke="currentColor" stroke-linejoin="round"
-                                            stroke-width="2" x1="22" x2="9.218" y1="3"
-                                            y2="10.083"></line>
-                                        <polygon fill="none"
-                                            points="11.698 20.334 22 3.001 2 3.001 9.218 10.084 11.698 20.334"
-                                            stroke="currentColor" stroke-linejoin="round" stroke-width="2"></polygon>
-                                    </svg></span>
-                            </div>
-                            <div class="likes">789,187 likes</div>
-                            <div class="caption post-description">
-                                <span class="username">karuneshtalwar</span> This is a default post description
-                            </div>
-                            <div class="comments text-muted">View all 6,273 comments</div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Loading Modal -->
-    <!--<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">-->
-    <!--    <div class="modal-dialog modal-dialog-centered">-->
-    <!--        <div class="modal-content d-flex align-items-center justify-content-center p-5 bg-transparent border-0">-->
-    <!--            <div class="spinner-border text-white" style="width: 3rem; height: 3rem;" role="status">-->
-    <!--                <span class="visually-hidden">Loading...</span>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
-    <!--</div>-->
-
     <section class="main-content-wrapper d-flex flex-column">
-        {{-- ... (Rest of your Blade content) ... --}}
-
         <div id="loadingModal">
             <div id="loadingSpinner"></div>
         </div>
     </section>
 
     <!-- Schedule Modal -->
-    @can('scheduled_post')
+    {{-- @can('scheduled_post')
         <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -941,5 +649,5 @@
                 </div>
             </div>
         </div>
-    @endcan
+    @endcan --}}
 @endsection

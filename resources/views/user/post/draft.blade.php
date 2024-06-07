@@ -333,7 +333,6 @@
             });
         }
         
-        // Function to transfer post data to the modal for editing, scheduling or reposting
         async function transferPostData(modalId) {
             const title = $('#modalPostTitle').text();
             const description = $('#modalPostDescription').html().replace(/<br>/g, '\n');
@@ -395,20 +394,21 @@
                 $('#' + modalId + " #instagramPage").html(instagram_pages);
             } else {
 
-                $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
+                $('#' + modalId + " #instagramPage").html('<option value="">Select</option>');
             }
             if ($("#linkedin-post-detail").is(":checked")) {
                 var linkedin_organizations = await getLinkedInOrganizations($("#linkedin-post-detail"));
                 $('#' + modalId + " #linkedInPage").html(linkedin_organizations);
             } else {
 
-                $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
+                $('#' + modalId + " #linkedInPage").html('<option value="">Select</option>');
             }
 
 
             $('#postDetail').modal('hide');
             $('#' + modalId).modal('show');
         }
+
 
         @can('draft_post')
             // Draft Form

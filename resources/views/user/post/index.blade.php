@@ -394,14 +394,14 @@
                 $('#' + modalId + " #instagramPage").html(instagram_pages);
             } else {
 
-                $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
+                $('#' + modalId + " #instagramPage").html('<option value="">Select</option>');
             }
             if ($("#linkedin-post-detail").is(":checked")) {
                 var linkedin_organizations = await getLinkedInOrganizations($("#linkedin-post-detail"));
                 $('#' + modalId + " #linkedInPage").html(linkedin_organizations);
             } else {
 
-                $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
+                $('#' + modalId + " #linkedInPage").html('<option value="">Select</option>');
             }
 
 

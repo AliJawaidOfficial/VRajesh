@@ -150,9 +150,6 @@ class ConnectController extends Controller
             $user->save();
 
             return redirect($this->linkedinService->generateAuthUrl2());
-
-            Session::flash('success', ['text' => 'Your Linkedin account connected successfully.']);
-            return redirect()->route('user.connect');
         } catch (Exception $e) {
             Session::flash('error', ['text' => 'Something went wrong. Please try again.']);
             return redirect()->route('user.connect');

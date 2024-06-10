@@ -36,7 +36,7 @@ class FacebookService
         if ($user_id === null) {
             $this->accessToken = Auth::guard('web')->user()->meta_access_token;
         } else {
-            $user = User::find($user_id);
+            $user = User::where('id', $user_id)->first();
             $this->accessToken = $user->meta_access_token;
         }
     }
@@ -170,8 +170,7 @@ class FacebookService
             $response = curl_exec($ch);
             curl_close($ch);
 
-            Session::flash('success', ['text' => 'Post created successfully']);
-            return redirect()->back();
+            return $response;
         } catch (Exception $e) {
             return $e->getMessage();
         }

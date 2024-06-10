@@ -129,7 +129,7 @@ class LinkedInService
             $this->personUrn = Auth::guard('web')->user()->linkedin_urn;
             $this->accessToken = Auth::guard('web')->user()->linkedin_access_token;
         } else {
-            $user = User::find($user_id);
+            $user = User::where('id', $user_id)->first();
             $this->personUrn = $user->linkedin_urn;
             $this->accessToken = $user->linkedin_access_token;
         }
@@ -140,9 +140,10 @@ class LinkedInService
         $this->organizationUrn = $organization_id;
     }
 
-    public function setCommunityAccessToken()
+    public function setCommunityAccessToken($user_id = null)
     {
-        $this->community_accessToken = Auth::guard('web')->user()->linkedin_community_access_token;
+        if ($user_id == null) $this->community_accessToken = Auth::guard('web')->user()->linkedin_community_access_token;
+        else $this->community_accessToken = User::where('id', $user_id)->first()->linkedin_community_access_token;
     }
 
     /**
@@ -265,9 +266,8 @@ class LinkedInService
             $url = 'https://api.linkedin.com/rest/posts';
 
             $this->init($user_id);
-
             $this->setOrganizationUrn($organization_id);
-            $this->setCommunityAccessToken();
+            $this->setCommunityAccessToken($user_id);
 
             $params = [
                 'author' => "urn:li:organization:" . $this->organizationUrn,
@@ -300,6 +300,8 @@ class LinkedInService
 
             if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
 
+            return $response;
+
             $data = json_decode($response, true);
 
             return $data;
@@ -318,7 +320,7 @@ class LinkedInService
 
             $this->init($user_id);
             $this->setOrganizationUrn($organization_id);
-            $this->setCommunityAccessToken();
+            $this->setCommunityAccessToken($user_id);
 
             $params = [
                 'registerUploadRequest' => [
@@ -484,11 +486,11 @@ class LinkedInService
 
             $this->init($user_id);
             $this->setOrganizationUrn($organization_id);
-            $this->setCommunityAccessToken();
+            $this->setCommunityAccessToken($user_id);
 
             $params = [
                 'registerUploadRequest' => [
-                    'owner' => "urn:li:person:" . $this->organizationUrn,
+                    'owner' => "urn:li:organization:" . $this->organizationUrn,
                     'recipes' => ['urn:li:digitalmediaRecipe:feedshare-video'],
                     'serviceRelationships' => [
                         [

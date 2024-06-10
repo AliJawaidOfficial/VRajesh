@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ScheduledPost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Exception;
@@ -39,5 +40,12 @@ class ScheduledPostController extends Controller
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    public function job()
+    {
+        $posts = Post::where('posted', 0)->where('draft', 0)->where('scheduled_at', '<=', now())->get();
+        ScheduledPost::dispatch();
+        return $posts;
     }
 }

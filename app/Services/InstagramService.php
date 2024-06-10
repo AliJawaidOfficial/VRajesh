@@ -29,7 +29,7 @@ class InstagramService
             $user = Auth::guard('web')->user();
             $this->accessToken = $user->meta_access_token;
         } else {
-            $user = User::find($user_id);
+            $user = User::where('id', $user_id)->first();
             $this->accessToken = $user->meta_access_token;
         }
     }

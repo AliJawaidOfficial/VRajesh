@@ -37,6 +37,9 @@ use App\Http\Controllers\User\ScheduledPostController;
 |--------------------------------------------------------------------------
 */
 
+// Jobs
+Route::get('/scheduled/post/job', [ScheduledPostController::class, 'job'])->name('post.index');
+
 Route::name('user.')
     ->group(function () {
 

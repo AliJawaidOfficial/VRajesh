@@ -9,77 +9,116 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Post;
 use App\Services\FacebookService;
+use App\Services\InstagramService;
 use App\Services\LinkedInService;
 use Exception;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 class ScheduledPost implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $linkedinService;
-    protected $facebookService;
-
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(LinkedInService $linkedin_service, FacebookService $facebook_service)
-    {
-        $this->linkedinService = $linkedin_service;
-        $this->facebookService = $facebook_service;
-    }
-
     /**
      * Execute the job.
      */
     public function handle(): void
     {
-        $posts = Post::where('scheduled_at', '<=', now())->where('posted', 0)->where('draft', 0)->get();
+        Log::info('Scheduled Job running...');
+        $posts = Post::where('posted', 0)->where('draft', 0)->where('scheduled_at', '<=', now())->get();
 
         foreach ($posts as $post) {
             try {
-                if ($post->on_facebook == 1) $this->processFacebookPost($post);
                 if ($post->on_linkedin == 1) $this->processLinkedinPost($post);
+                if ($post->on_facebook == 1) $this->processFacebookPost($post);
                 if ($post->on_instagram == 1) $this->processInstagramPost($post);
+
+                Post::where('id', $post->id)->update(['posted' => 1]);
             } catch (Exception $e) {
-                Log::error('Failed to process post ID ' . $post->id . ': ' . $e->getMessage());
+                Log::error($e->getMessage());
             }
-            Post::where('id', $post->id)->update(['posted' => 1]);
         }
     }
 
-    protected function processFacebookPost($post)
+
+
+    /**
+     * Linkedin Post
+     */
+    public function processLinkedinPost($post)
     {
-        if ($post->media) {
-            $media_path = public_path($post->media);
-            $media_size = filesize($post->media);
-            if ($post->media_type == 'image') $this->facebookService->postImage($media_path, $post->description);
-            if ($post->media_type == 'video') $this->facebookService->postVideo($media_size, $media_path, $post->description);
+        $organizationId = $post->linkedin_company_id;
+        $description = $post->description;
+        $user_id = $post->user_id;
+        $media = $post->media;
+        $media_type = $post->media_type;
+
+        $service = new LinkedInService();
+        if ($media == null) {
+            $service->postText($organizationId, $description, $user_id);
         } else {
-            $this->facebookService->postText($post->description);
+            $media = public_path($media);
+            if (File::exists($media)) {
+                $media_type = File::mimeType($media);
+                if ($media_type == 'image') $posted = $service->postImage($organizationId, $media, $description, $user_id);
+                if ($media_type == 'video') $posted = $service->postVideo($organizationId, $media, $description, $user_id);
+                Log::info($posted);
+            }
         }
     }
 
-    protected function processInstagramPost($post)
+
+
+    /**
+     * Facebook Post
+     */
+    public function processFacebookPost($post)
     {
-        if ($post->media) {
-            $media_path = public_path($post->media);
-            $media_size = filesize($post->media);
-            // if ($post->media_type == 'image') $this->facebookService->postImage($post->media, $post->description);
-            // if ($post->media_type == 'video') $this->facebookService->postVideo($media_size, $post->media, $post->description);
+        $pageId = $post->facebook_page_id;
+        $pageAccessToken = $post->facebook_page_access_token;
+        $description = $post->description;
+        $userId = $post->user_id;
+        $media = $post->media;
+        $media_type = $post->media_type;
+
+        $service = new FacebookService();
+        if ($media == null) {
+            $service->postText($pageId, $pageAccessToken, $description, $userId);
         } else {
-            // $this->facebookService->postText($post->description);
+            $media = public_path($media);
+
+            if (file_exists($media)) {
+                $media_size = File::size($media);
+
+                if ($media_type == 'image') $service->postImage($pageId, $pageAccessToken, $media, $description, $userId);
+                if ($media_type == 'video') $service->postVideo($pageId, $pageAccessToken, $media_size, $media, $description, $userId);
+            }
         }
     }
 
-    protected function processLinkedinPost($post)
+
+
+    /**
+     * Instagram Post
+     */
+    public function processInstagramPost($post)
     {
-        if ($post->media) {
-            $media_path = public_path($post->media);
-            if ($post->media_type == 'image') $this->linkedinService->postImage($media_path, $post->description);
-            if ($post->media_type == 'video') $this->linkedinService->postVideo($media_path, $post->description);
-        } else {
-            $this->linkedinService->postText($post->description);
+        $igUserId = $post->instagram_account_id;
+        $description = $post->description;
+        $userId = $post->user_id;
+        $media = $post->media;
+        $media_type = $post->media_type;
+
+        $service = new InstagramService();
+        if ($media != null) {
+            $media = public_path($media);
+            if (File::exists($media)) {
+                $media_size = File::size($media);
+
+                if ($media_type == 'image') $posted = $service->postImage($igUserId, $media, $description, $userId);
+                if ($media_type == 'video') $posted = $service->postVideo($igUserId, $media, $media_size, $description, $userId);
+                Log::info($posted);
+            }
         }
     }
 }

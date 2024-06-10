@@ -14,12 +14,14 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::create([
-        //     'first_name' => 'Ali',
-        //     'last_name' => 'Jawaid',
-        //     'email' => 'alijawaidofficial.pk@gmail.com',
-        //     'email_verified_at' => now(),
-        //     'password' => Hash::make('aj12345'),
-        // ]);
+        User::create([
+            'first_name' => 'Ali',
+            'last_name' => 'Jawaid',
+            'email' => 'alijawaidofficial.pk@gmail.com',
+            'meta_email' => 'alijawaidofficial.pk@gmail.com',
+            'linkedin_email' => 'alijawaidofficial.pk@gmail.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('admin'),
+        ]);
     }
 }

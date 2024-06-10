@@ -775,9 +775,15 @@
             function addScheduleButtons() {
                 var calendarCells = document.querySelectorAll('.fc-daygrid-day');
                 var now = new Date();
+                now.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0); // Reset time part to midnight
 
                 calendarCells.forEach(function(cell) {
                     var cellDate = new Date(cell.getAttribute('data-date'));
+                    cellDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0); // Reset time part to midnight
+
+
+
+                    console.log(cellDate,now);
 
                     if (cellDate >= now) {
                         var button = document.createElement('button');
@@ -788,7 +794,8 @@
                             $("#schedulePostModal").modal("show");
                             $("#postDate").val(cellDate.toISOString().split('T')[0]);
                         });
-
+                    
+                        console.log(cellDate >= now);
                         cell.appendChild(button);
                     }
                 });

@@ -12,12 +12,11 @@ class LinkedInService
 
     protected $clientId;
     protected $clientSecret;
+    protected $accessToken;
 
     protected $clientId2;
     protected $clientSecret2;
-
-    protected $accessToken;
-    protected $community_accessToken;
+    protected $communityAccessToken;
 
     protected $personUrn;
     protected $organizationUrn;
@@ -31,15 +30,42 @@ class LinkedInService
         $this->clientSecret2 = env('LINKEDIN_CLIENT_SECRET_2');
     }
 
+    public function init($user_id = null)
+    {
+        if ($user_id === null) {
+            $this->personUrn = Auth::guard('web')->user()->linkedin_urn;
+            $this->accessToken = Auth::guard('web')->user()->linkedin_access_token;
+            $this->communityAccessToken = Auth::guard('web')->user()->linkedin_community_access_token;
+        } else {
+            $user = User::where('id', $user_id)->first();
+            $this->personUrn = $user->linkedin_urn;
+            $this->accessToken = $user->linkedin_access_token;
+            $this->communityAccessToken = $user->linkedin_community_access_token;
+        }
+    }
+
+    public function setOrganizationUrn($organization_id)
+    {
+        $this->organizationUrn = $organization_id;
+    }
+
+
     /**
+     * =================================================================================================
      * Auth
+     * =================================================================================================
+     */
+
+
+    /**
+     * Login Auth
      */
     public function generateAuthUrl()
     {
         $param = [
             'response_type' => 'code',
             'client_id' => $this->clientId,
-            'scope' => 'openid profile email w_member_social r_organization_admin',
+            'scope' => 'openid profile email w_member_social r_organization_admin r_liteprofile',
             'redirect_uri' => route('user.connect.linkedin.callback'),
             'state' => uniqid(),
         ];
@@ -60,7 +86,9 @@ class LinkedInService
         return $url;
     }
 
-
+    /**
+     * Community Management Auth
+     */
     public function generateAccessToken($code)
     {
         try {
@@ -123,28 +151,7 @@ class LinkedInService
         }
     }
 
-    public function init($user_id = null)
-    {
-        if ($user_id === null) {
-            $this->personUrn = Auth::guard('web')->user()->linkedin_urn;
-            $this->accessToken = Auth::guard('web')->user()->linkedin_access_token;
-        } else {
-            $user = User::where('id', $user_id)->first();
-            $this->personUrn = $user->linkedin_urn;
-            $this->accessToken = $user->linkedin_access_token;
-        }
-    }
 
-    public function setOrganizationUrn($organization_id)
-    {
-        $this->organizationUrn = $organization_id;
-    }
-
-    public function setCommunityAccessToken($user_id = null)
-    {
-        if ($user_id == null) $this->community_accessToken = Auth::guard('web')->user()->linkedin_community_access_token;
-        else $this->community_accessToken = User::where('id', $user_id)->first()->linkedin_community_access_token;
-    }
 
     /**
      * User
@@ -169,8 +176,12 @@ class LinkedInService
         }
     }
 
+
+
     /**
-     * Get Organizations
+     * =================================================================================================
+     * Organizations
+     * =================================================================================================
      */
     public function getOrganizations($user_id = null)
     {
@@ -251,10 +262,9 @@ class LinkedInService
 
 
     /**
+     * =================================================================================================
      * Post
-     * Text
-     * Image
-     * Video
+     * =================================================================================================
      */
 
     /**
@@ -267,7 +277,6 @@ class LinkedInService
 
             $this->init($user_id);
             $this->setOrganizationUrn($organization_id);
-            $this->setCommunityAccessToken($user_id);
 
             $params = [
                 'author' => "urn:li:organization:" . $this->organizationUrn,
@@ -285,7 +294,7 @@ class LinkedInService
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->community_accessToken,
+                'Authorization: Bearer ' . $this->communityAccessToken,
                 'X-Restli-Protocol-Version: 2.0.0',
                 'LinkedIn-Version: 202403',
                 'Content-Type: application/json',
@@ -320,7 +329,6 @@ class LinkedInService
 
             $this->init($user_id);
             $this->setOrganizationUrn($organization_id);
-            $this->setCommunityAccessToken($user_id);
 
             $params = [
                 'registerUploadRequest' => [
@@ -340,7 +348,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->community_accessToken,
+                'Authorization: Bearer ' . $this->communityAccessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -375,7 +383,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $image);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->community_accessToken,
+                'Authorization: Bearer ' . $this->communityAccessToken,
                 'Content-Type: application/octet-stream',
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -401,7 +409,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->community_accessToken,
+                'Authorization: Bearer ' . $this->communityAccessToken,
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
@@ -451,7 +459,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->community_accessToken,
+                'Authorization: Bearer ' . $this->communityAccessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -474,8 +482,6 @@ class LinkedInService
         }
     }
 
-
-
     /**
      * Video
      */
@@ -486,7 +492,6 @@ class LinkedInService
 
             $this->init($user_id);
             $this->setOrganizationUrn($organization_id);
-            $this->setCommunityAccessToken($user_id);
 
             $params = [
                 'registerUploadRequest' => [
@@ -506,7 +511,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->community_accessToken,
+                'Authorization: Bearer ' . $this->communityAccessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -519,7 +524,7 @@ class LinkedInService
             $data = json_decode($response, true);
 
             if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
-            
+
             $upload_url = $data['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
             $asset_id = $data['value']['asset'];
 
@@ -543,7 +548,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_POSTFIELDS, $video);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->community_accessToken,
+                'Authorization: Bearer ' . $this->communityAccessToken,
                 'Content-Type: application/octet-stream',
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -569,7 +574,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->community_accessToken,
+                'Authorization: Bearer ' . $this->communityAccessToken,
             ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
@@ -624,7 +629,7 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->community_accessToken,
+                'Authorization: Bearer ' . $this->communityAccessToken,
                 'Content-Type: application/json',
             ]);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
@@ -649,15 +654,9 @@ class LinkedInService
     }
 
 
-    /**
-     * Indivisual Post
-     * Text
-     * Image
-     * Video
-     */
 
     /**
-     * Text
+     * Indivisual Text Post
      */
     public function individualPostText($text, $user_id = null)
     {
@@ -705,6 +704,9 @@ class LinkedInService
         }
     }
 
+    /**
+     * Indivisual Image Post
+     */
     public function individualPostImage($imagePath, $title, $user_id = null)
     {
         try {
@@ -862,6 +864,9 @@ class LinkedInService
         }
     }
 
+    /**
+     * Indivisual Video Post
+     */
     public function individualPostVideo($video, $title, $user_id = null)
     {
         try {
@@ -1023,6 +1028,75 @@ class LinkedInService
                 'status' => 500,
                 'error' => $e->getMessage(),
             ];
+        }
+    }
+
+
+
+    /**
+     * =================================================================================================
+     * Sale Navigator
+     * =================================================================================================
+     */
+    public function salesNavigatorLeads()
+    {
+        try {
+            $url = 'https://api.linkedin.com/rest/complianceEvents?q=memberAndApplication';
+
+            $this->init();
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $this->accessToken,
+                'LinkedIn-Version: 202310',
+                'Content-Type: application/json',
+            ]);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+            if ($response === false) throw new Exception(curl_error($ch));
+            curl_close($ch);
+
+            $data = json_decode($response, true);
+
+            return $data;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
+
+
+    /**
+     * =================================================================================================
+     * Connections
+     * =================================================================================================
+     */
+    public function connections()
+    {
+        try {
+            $url = 'https://api.linkedin.com/v2/connections?q=viewer&start=0&count=10';
+
+            $this->init();
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $this->communityAccessToken,
+                'Content-Type: application/json',
+            ]);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+            if ($response === false) throw new Exception(curl_error($ch));
+            curl_close($ch);
+
+            $data = json_decode($response, true);
+
+            return $data;
+        } catch (Exception $e) {
+            return $e->getMessage();
         }
     }
 }

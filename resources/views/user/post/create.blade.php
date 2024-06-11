@@ -553,6 +553,30 @@
                 $("#linkedinSelectSection").fadeOut();
             }
         }
+        
+        $(document).ready(function () {
+            getPixels('photos', 'ocean');
+        });
+
+        // Pixels
+        function getPixels(type, q, page = 1, per_page = 10) {
+            $.ajax({
+                type: "GET",
+                url: `{{ URL::to('pixels/${type}/${q}') }}`,
+                data: {
+                    page: page,
+                    per_page: per_page
+                },
+                success: function(response) {
+                    if (response.status == 200) {
+                        if (type == 'photos') console.table(response.data.photos);
+                        if (type == 'videos') console.table(response.data.videos);
+                    } else {
+                        toastr.error(response.error);
+                    }
+                }
+            });
+        }
     </script>
 @endsection
 

@@ -29,6 +29,8 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PackageController as AdminPackageController;
 use App\Http\Controllers\User\DraftPostController;
 use App\Http\Controllers\User\IndivisualPostController;
+use App\Http\Controllers\User\LinkedIn\SalesNavigatorController;
+use App\Http\Controllers\User\PixelsController;
 use App\Http\Controllers\User\ScheduledPostController;
 
 /*
@@ -106,26 +108,27 @@ Route::name('user.')
                 ->controller(PostController::class)
                 ->name('post.')
                 ->group(function () {
+
                     Route::get('/', 'index')->name('index');
                     Route::get('/details/{id}', 'show')->name('show');
-                    
+
                     Route::get('/create', 'create')->name('create');
                     Route::post('/create', 'store')->name('store');
                     Route::post('/create/new', 'newStore')->name('new.store');
                     Route::post('/{id}/delete', 'destroy')->name('destroy');
-                    
+
                     /**
                      * Draft Post
                      */
                     Route::prefix('/draft')
-                    ->controller(DraftPostController::class)
-                    ->name('draft')
-                    ->group(function () {
-                        Route::get('/', 'index');
-                        Route::post('/', 'store')->name('.store');
-                        Route::post('/new', 'storeAsDraft')->name('.store.new');
-                        Route::post('/update', 'update')->name('.update');
-                    });
+                        ->controller(DraftPostController::class)
+                        ->name('draft')
+                        ->group(function () {
+                            Route::get('/', 'index');
+                            Route::post('/', 'store')->name('.store');
+                            Route::post('/new', 'storeAsDraft')->name('.store.new');
+                            Route::post('/update', 'update')->name('.update');
+                        });
 
                     /**
                      * Scheduled Post
@@ -162,7 +165,30 @@ Route::name('user.')
                 ->name('linkedin.')
                 ->group(function () {
 
+                    Route::prefix('/leads')
+                        ->name('leads.')
+                        ->group(function () {
+
+                            Route::prefix('/sales-navigator')
+                                ->name('sales-navigator.')
+                                ->controller(SalesNavigatorController::class)
+                                ->group(function () {
+                                    Route::get('/', 'index')->name('index');
+                                    Route::get('/all', 'all')->name('all');
+                                });
+                        });
+
                     Route::get('/pipeline', [PipelineController::class, 'index'])->name('pipeline.index');
+                });
+
+            /**
+             * Pixels
+             */
+            Route::prefix('/pixels')
+                ->name('pixels.')
+                ->controller(PixelsController::class)
+                ->group(function () {
+                    Route::get('/{type}/{q}', 'search')->name('search');
                 });
         });
     });

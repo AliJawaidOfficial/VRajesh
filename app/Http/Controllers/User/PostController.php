@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Services\FacebookService;
 use App\Services\InstagramService;
 use App\Services\LinkedInService;
+use App\Services\PixelsService;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -21,15 +22,18 @@ class PostController extends Controller
     protected $linkedinService;
     protected $facebookService;
     protected $instagramService;
+    protected $pixelsService;
 
     public function __construct(
         private readonly LinkedInService $importLinkedinService,
         private readonly InstagramService $importinstagramService,
         private readonly FacebookService $importFacebookService,
+        private readonly PixelsService $importedPixelsService,
     ) {
         $this->linkedinService = $importLinkedinService;
         $this->facebookService = $importFacebookService;
         $this->instagramService = $importinstagramService;
+        $this->pixelsService = $importedPixelsService;
     }
 
     /**

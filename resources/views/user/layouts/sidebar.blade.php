@@ -90,40 +90,40 @@
                 ],
             ],
         ],
-        [
-            'name' => 'Leads',
-            'active_url' => 'user.linkedin.leads.*',
-            'icon' => asset('assets/images/icons/arrow-right.png'),
-            'submenu' => [
-                [
-                    'name' => 'Sales Navigator',
-                    'url' => route('user.linkedin.leads.sales-navigator.index'),
-                    'active_url' => 'user.linkedin.leads.sales-navigator.*',
-                ],
-            ],
-        ],
-        [
-            'name' => 'Pipelines',
-            'active_url' => 'user.linkedin.pipeline.*',
-            'icon' => asset('assets/images/icons/arrow-right.png'),
-            'submenu' => [
-                [
-                    'name' => 'B1',
-                    'url' => route('user.linkedin.pipeline.index'),
-                    'active_url' => 'user.linkedin.pipeline.index',
-                ],
-                [
-                    'name' => 'B2',
-                    'url' => route('user.linkedin.pipeline.index'),
-                    'active_url' => '',
-                ],
-                [
-                    'name' => 'B3',
-                    'url' => route('user.linkedin.pipeline.index'),
-                    'active_url' => '',
-                ],
-            ],
-        ],
+        // [
+        //     'name' => 'Leads',
+        //     'active_url' => 'user.linkedin.leads.*',
+        //     'icon' => asset('assets/images/icons/arrow-right.png'),
+        //     'submenu' => [
+        //         [
+        //             'name' => 'Sales Navigator',
+        //             'url' => route('user.linkedin.leads.sales-navigator.index'),
+        //             'active_url' => 'user.linkedin.leads.sales-navigator.*',
+        //         ],
+        //     ],
+        // ],
+        // [
+        //     'name' => 'Pipelines',
+        //     'active_url' => 'user.linkedin.pipeline.*',
+        //     'icon' => asset('assets/images/icons/arrow-right.png'),
+        //     'submenu' => [
+        //         [
+        //             'name' => 'B1',
+        //             'url' => route('user.linkedin.pipeline.index'),
+        //             'active_url' => 'user.linkedin.pipeline.index',
+        //         ],
+        //         [
+        //             'name' => 'B2',
+        //             'url' => route('user.linkedin.pipeline.index'),
+        //             'active_url' => '',
+        //         ],
+        //         [
+        //             'name' => 'B3',
+        //             'url' => route('user.linkedin.pipeline.index'),
+        //             'active_url' => '',
+        //         ],
+        //     ],
+        // ],
     ];
 @endphp
 

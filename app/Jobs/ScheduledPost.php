@@ -38,6 +38,7 @@ class ScheduledPost implements ShouldQueue
                 Log::error($e->getMessage());
             }
         }
+        Log::info('Scheduled Job completed...');
     }
 
 
@@ -90,8 +91,9 @@ class ScheduledPost implements ShouldQueue
             if (file_exists($media)) {
                 $media_size = File::size($media);
 
-                if ($media_type == 'image') $service->postImage($pageId, $pageAccessToken, $media, $description, $userId);
-                if ($media_type == 'video') $service->postVideo($pageId, $pageAccessToken, $media_size, $media, $description, $userId);
+                if ($media_type == 'image') $posted = $service->postImage($pageId, $pageAccessToken, $media, $description, $userId);
+                if ($media_type == 'video') $posted = $service->postVideo($pageId, $pageAccessToken, $media_size, $media, $description, $userId);
+                Log::info($posted);
             }
         }
     }

@@ -171,7 +171,12 @@ class DraftPostController extends Controller
                 $data->linkedin_company_name = $linkedin_organization_name;
             }
 
-            if ($request->schedule_date != null && $request->schedule_time != null) $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
+            if ($request->schedule_date != null && $request->schedule_time != null) {
+                $ip = $request->ip();
+                $countryAndTimezone = getCountryAndTimezone($ip);
+                $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
+                $data->scheduled_at = $request->schedule_date . ' ' . $time;
+            }
 
             $data->save();
 

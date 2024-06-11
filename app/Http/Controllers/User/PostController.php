@@ -139,7 +139,7 @@ class PostController extends Controller
     /**
      * Post Create
      */
-    public function create()
+    public function create(Request $request)
     {
         return view('user.post.create');
     }
@@ -255,7 +255,10 @@ class PostController extends Controller
             }
 
             if ($request->schedule_date != null && $request->schedule_time != null) {
-                $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
+                $ip = $request->ip();
+                $countryAndTimezone = getCountryAndTimezone($ip);
+                $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
+                $data->scheduled_at = $request->schedule_date . ' ' . $time;
             } else {
                 $assets = env('APP_URL') . '/';
 
@@ -442,7 +445,10 @@ class PostController extends Controller
             }
 
             if ($request->schedule_date != null && $request->schedule_time != null) {
-                $data->scheduled_at = $request->schedule_date . ' ' . $request->schedule_time;
+                $ip = $request->ip();
+                $countryAndTimezone = getCountryAndTimezone($ip);
+                $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
+                $data->scheduled_at = $request->schedule_date . ' ' . $time;
             } else {
                 $assets = env('APP_URL') . '/';
 

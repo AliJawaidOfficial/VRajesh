@@ -58,3 +58,31 @@ function timeAgo($dateTime)
         return $years . ' year' . ($years === 1 ? '' : 's') . ' ago';
     }
 }
+
+
+// Get Country And Timezone
+function getCountryAndTimezone($ip)
+{
+    $response = file_get_contents("http://ip-api.com/json/{$ip}");
+    $data = json_decode($response, true);
+
+    if ($data['status'] === 'success') {
+        return [
+            'country' => $data['country'],
+            'timezone' => $data['timezone']
+        ];
+    } else {
+        return [
+            'country' => 'Unknown',
+            'timezone' => 'Unknown'
+        ];
+    }
+}
+
+// Convert Timezone To UTC
+function convertTimeToUtc($time, $timezone)
+{
+    $date = new DateTime($time, new DateTimeZone($timezone));
+    $date->setTimezone(new DateTimeZone('UTC'));
+    return $date->format('H:i:s');
+}

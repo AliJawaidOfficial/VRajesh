@@ -44,9 +44,9 @@ class PixelsService
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
+            $data = json_decode($response, true);
 
             if ($httpCode != 200) throw new Exception('Pexels API error: ' . $response);
-            $data = json_decode($response, true);
 
             return [
                 'status' => '200',

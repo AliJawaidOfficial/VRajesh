@@ -563,7 +563,7 @@
             getPixels('photos', $(this).val());
         });
 
-        function getPixels(type, q, page = 1, per_page = 10) {
+        function getPixels(type, q = 'coding', page = 1, per_page = 50) {
             $.ajax({
                 type: "GET",
                 url: `{{ URL::to('pixels/${type}/${q}') }}`,
@@ -580,7 +580,7 @@
                         console.log(response.data);
                         if (type == 'photos') {
                             $.each(response.data.photos, function (indexInArray, photo) {
-                                html += `<div class="col-6 col-md-4 col-lg-3"><img src="${photo.src.landscape}" class="img-fluid" /></div>`;
+                                html += `<div class="col-6 col-md-4 col-lg-3 col-xl-2 p-0"><img src="${photo.src.landscape}" class="img-fluid" /></div>`;
                             });
                         }
 
@@ -938,17 +938,20 @@
 
     <!-- Pixels Images Modal -->
     <div class="modal fade" id="imagesModal" tabindex="-1" aria-labelledby="imagesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="imagesModalLabel">Images</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" class="form-control mb-2" id="imagesModalSearchInput" placeholder="Search...">
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control border-dark" id="imagesModalSearchInput" placeholder="Search...">
+                        <span class="input-group-text bg-dark text-white"><i class="fas fa-search"></i></span>
+                    </div>
                     <form id="scheduleForm" method="POST">
                         @csrf
-                        <div class="row my-2" id="images"></div>
+                        <div class="row m-1" id="images"></div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-primary ms-auto">Choose</button>
                         </div>

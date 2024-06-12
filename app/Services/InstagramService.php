@@ -199,6 +199,7 @@ class InstagramService
 
             $params = [
                 'media_type' => 'REELS',
+                'video_url' => $media,
                 'upload_type' => 'resumable',
                 'caption' => $title,
                 'access_token' => $this->accessToken,
@@ -208,7 +209,7 @@ class InstagramService
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $this->accessToken]);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: OAuth ' . $this->accessToken]);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             $response = curl_exec($ch);
@@ -219,8 +220,9 @@ class InstagramService
             if (isset($data['error'])) throw new Exception($data['error']['message']);
 
             $uri = $data['uri'];
+            $containerId = $data['id'];
 
-            return $this->postVideo2($uri, $media, $mediaSize);
+            return $this->postVideo2($uri, $containerId, $media, $mediaSize);
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -229,7 +231,7 @@ class InstagramService
         }
     }
 
-    public function postVideo2($url, $media, $mediaSize)
+    public function postVideo2($url, $containerId, $media, $mediaSize)
     {
         try {
             $headers = [
@@ -254,9 +256,42 @@ class InstagramService
 
             if (isset($data['error'])) throw new Exception($data['error']['message']);
 
+            $this->postVideo3($containerId);
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function postVideo3($containerId)
+    {
+        try {
+            $url = "$this->baseUrl/$this->version/$this->igUserId/media_publish";
+            $params = [
+                'creation_id' => $containerId,
+                'access_token' => $this->accessToken,
+            ];
+            $headers = ['Authorization: OAuth ' . $this->accessToken];
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            $data = json_decode($response, true);
+
+            if (isset($data['error'])) throw new Exception($data['error']['message']);
+
             return [
                 'status' => 200,
-                'data' => $data,
             ];
         } catch (Exception $e) {
             return [

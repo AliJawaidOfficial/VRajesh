@@ -258,6 +258,7 @@
             align-items: center;
             justify-content: center;
             border-right: 1px solid #ddd;
+            padding-right: 20px;
         }
 
         .post-details {
@@ -308,7 +309,7 @@
             font-size: 20px;
             font-weight: bold;
             border-bottom: 1px solid #dee2e6;
-            padding-bottom: 14px;
+            padding-bottom: 10px;
             padding-top: 0px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -319,13 +320,20 @@
         .modal-post-date {
             font-size: 14px;
             border-bottom: 1px solid #dee2e6;
-            padding: 5px 0px;
+            padding: 5px 0px 12px;
         }
 
         .modal-post-description {
             font-size: 14px;
-            border-bottom: 1px solid #dee2e6;
-            padding: 5px 0px;
+            padding: 0px;
+            position: relative;
+            top: 0%;
+        }
+
+        .plaform-page-detail {
+            border-top: 1px solid #dee2e6;
+            margin-top: 10px;
+            padding-top: 10px;
         }
     </style>
 @endsection
@@ -508,17 +516,17 @@
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body d-flex">
-                        <div class="media-preview w-50 p-3">
+                        <div class="media-preview w-50">
                             <p class="text-center text-muted my-auto">No image/video published</p>
                             <!-- Placeholder for media preview -->
                         </div>
-                        <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
-                            <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle"></span></h4>
+                        <div class="post-details d-flex flex-column align-items-stretch w-50">
+                            <h4 class="modal-post-title">Title: <span id="modalPostTitle"></span></h4>
                             <p class="modal-post-date mb-1"><strong>Published on:</strong> <span
                                     id="modalPostDate"></span>
                             </p>
                             <div class="modal-post-description flex-grow-1" style="max-height: 200px; overflow-y: auto;">
-                                <strong>Description:</strong> <span id="modalPostDescription"></span>
+                                <p class="mb-0"><strong>Description:</strong></p> <span id="modalPostDescription"></span>
                             </div>
                             <input type="hidden" id="postDetailId">
                             <div class="d-flex align-items-center gap-3 py-2">
@@ -545,7 +553,7 @@
                     </div>
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
-                            <button type="button" class="btn btn-custom" onclick="deletePost()">Delete</button>
+                            <button type="button" class="btn btn-custom" onclick="deletePost()"><i class="fas fa-trash d-inline-block me-1"></i> Delete</button>
                         </div>
                     </div>
                 </div>
@@ -619,25 +627,22 @@
             });
 
             calendar.render();
-
             function addMonthYearSelects() {
                 var headerToolbar = document.querySelector('.fc-toolbar-chunk:last-child');
+                
                 var monthSelect = document.createElement('select');
                 monthSelect.id = 'monthSelect';
                 monthSelect.className = 'form-select d-inline-block w-auto';
-                monthSelect.innerHTML = `${Array.from({ length: 12 }, (_, i) => ` < option value = "${i}" > $ {
-                    new Date(0, i).toLocaleString('default', {
-                        month: 'long'
-                    })
-                } < /option>`).join('')}`;
+                monthSelect.innerHTML = `${Array.from({ length: 12 }, (_, i) => 
+                    `<option value="${i}">${new Date(0, i).toLocaleString('default', { month: 'long' })}</option>`
+                ).join('')}`;
 
                 var yearSelect = document.createElement('select');
                 yearSelect.id = 'yearSelect';
                 yearSelect.className = 'form-select d-inline-block w-auto';
-                yearSelect.innerHTML = `${Array.from({ length: 11 }, (_, i) => ` < option value =
-                    "${new Date().getFullYear() - 5 + i}" > $ {
-                        new Date().getFullYear() - 5 + i
-                    } < /option>`).join('')}`;
+                yearSelect.innerHTML = `${Array.from({ length: 11 }, (_, i) => 
+                    `<option value="${new Date().getFullYear() - 5 + i}">${new Date().getFullYear() - 5 + i}</option>`
+                ).join('')}`;
 
                 headerToolbar.appendChild(monthSelect);
                 headerToolbar.appendChild(yearSelect);
@@ -646,16 +651,17 @@
                 var currentDate = new Date();
                 monthSelect.value = currentDate.getMonth(); // getMonth() returns 0-11
                 yearSelect.value = currentDate.getFullYear();
-            }
 
-            document.addEventListener('change', function(event) {
-                if (event.target.id === 'monthSelect' || event.target.id === 'yearSelect') {
-                    const month = document.getElementById('monthSelect').value;
-                    const year = document.getElementById('yearSelect').value;
-                    const date = new Date(year, month, 1); // Month is zero-based in JavaScript Date
-                    calendar.gotoDate(date);
-                }
-            });
+                // Add event listener to update calendar on change
+                document.addEventListener('change', function(event) {
+                    if (event.target.id === 'monthSelect' || event.target.id === 'yearSelect') {
+                        const month = document.getElementById('monthSelect').value;
+                        const year = document.getElementById('yearSelect').value;
+                        const date = new Date(year, month, 1);
+                        calendar.gotoDate(date); // Assuming 'calendar' is your FullCalendar instance
+                    }
+                });
+            }
 
             addMonthYearSelects();
 
@@ -696,7 +702,7 @@
                             let mediaType = response.data.media_type;
                             let mediaContent = response.data.media;
 
-                            html += `<div class="media-preview w-50 p-3">`;
+                            html += `<div class="media-preview w-50">`;
 
                             if (mediaType == 'image') {
                                 html +=
@@ -712,16 +718,16 @@
                             }
 
                             html += `</div>
-                                     <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
-                                        <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
+                                     <div class="post-details d-flex flex-column align-items-stretch w-50">
+                                        <h4 class="modal-post-title">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
                                         <p class="modal-post-date mb-1"><strong>Created on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.created_at)}</span></p>
-                                        <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
+                                        <div class="modal-post-description flex-grow-1 d-flex align-items-stretch flex-column"
                                             style="max-height: 200px; overflow-y: auto;">
-                                            <strong>Description:</strong> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
+                                            <p class="mb-0" style="position:sticky; top:0;background-color:#fff;padding: 10px 0px 5px;"><strong>Description:</strong></p> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
                                         </div>
                                         <input type="hidden" id="postDetailId" value="${response.data.id}"/>
                                         <div class="py-2">
-                                            <div class="mb-2">
+                                            <div class="mb-2 plaform-page-detail">
                                                 <strong>Platforms & Pages:</strong>
                                             </div>
                                     `;

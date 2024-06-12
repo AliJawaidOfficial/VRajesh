@@ -168,7 +168,7 @@
                     <div class="d-flex">
                         <span>${newBoardTitle}</span> 
                         <span id="count-${newBoardId}">(0)</span>
-                        <button class="delete-board-btn" onclick="deleteBoard('${newBoardId}')">Delete</button>
+                        <button class="delete-board-btn" onclick="deleteBoard('${newBoardId}')"><i class="fas fa-trash d-inline-block me-1"></i> Delete</button>
                         <button class="add-item-btn" data-board-id="${newBoardId}" data-bs-toggle="modal" data-bs-target="#updateListModal">Add Item</button>
                     </div>
                     `,
@@ -196,12 +196,12 @@
                     var newItemId = generateRandomId();
                     board.item.push({
                         id: newItemId,
-                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')">Delete</button>`
+                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')"><i class="fas fa-trash d-inline-block me-1"></i> Delete</button>`
                     });
                     document.getElementById(inputId).value = ''; // Clear the input field
                     kanban.addElement(boardId, {
                         id: newItemId,
-                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')">Delete</button>`
+                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')"><i class="fas fa-trash d-inline-block me-1"></i> Delete</button>`
                     });
                     updateBoardCount(boardId); // Update the board count
                 }
@@ -261,7 +261,7 @@
                     // Add the new item to the board's item list
                     board.item.push({
                         id: newItemId,
-                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')">Delete</button>`
+                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')"><i class="fas fa-trash d-inline-block me-1"></i> Delete</button>`
                     });
                     // Clear the input field and close the modal
                     document.getElementById('newItemTitle').value = '';
@@ -269,7 +269,7 @@
                     // Add the new item to the Kanban board
                     kanban.addElement(boardId, {
                         id: newItemId,
-                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')">Delete</button>`
+                        title: `${newItemTitle} <button class="delete-item-btn" onclick="deleteItem('${newItemId}', '${boardId}')"><i class="fas fa-trash d-inline-block me-1"></i> Delete</button>`
                     });
                     updateBoardCount(boardId); // Update the board count
                 }

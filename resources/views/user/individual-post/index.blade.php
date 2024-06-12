@@ -114,6 +114,7 @@
             align-items: center;
             justify-content: center;
             border-right: 1px solid #ddd;
+            padding-right: 20px;
         }
 
         .post-details {
@@ -166,7 +167,7 @@
             font-size: 20px;
             font-weight: bold;
             border-bottom: 1px solid #dee2e6;
-            padding-bottom: 14px;
+            padding-bottom: 10px;
             padding-top: 0px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -177,13 +178,20 @@
         .modal-post-date {
             font-size: 14px;
             border-bottom: 1px solid #dee2e6;
-            padding: 5px 0px;
+            padding: 5px 0px 12px;
         }
 
         .modal-post-description {
             font-size: 14px;
-            border-bottom: 1px solid #dee2e6;
-            padding: 5px 0px;
+            padding: 0px;
+            position: relative;
+            top: 0%;
+        }
+
+        .plaform-page-detail {
+            border-top: 1px solid #dee2e6;
+            margin-top: 10px;
+            padding-top: 10px;
         }
     </style>
 @endsection
@@ -205,7 +213,7 @@
                         let mediaContent = response.data.media;
 
                         html += `
-                            <div class="media-preview w-50 p-3">
+                            <div class="media-preview w-50">
                         `;
 
                         if (mediaType == 'image') {
@@ -221,16 +229,16 @@
                         }
                         html += `
                             </div>
-                            <div class="post-details d-flex flex-column align-items-stretch ms-3 w-50">
-                                <h4 class="modal-post-title mb-2">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
+                            <div class="post-details d-flex flex-column align-items-stretch w-50">
+                                <h4 class="modal-post-title">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
                                 <p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.created_at)}</span></p>
-                                <div class="modal-post-description flex-grow-1 d-flex align-items-stretch"
+                                <div class="modal-post-description flex-grow-1 d-flex align-items-stretch flex-column"
                                     style="max-height: 200px; overflow-y: auto;">
-                                    <strong>Description:</strong> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
+                                    <p class="mb-0" style="position:sticky; top:0;background-color:#fff;padding: 10px 0px 5px;"><strong>Description:</strong></p> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
                                 </div>
                                 <input type="hidden" id="postDetailId" value="${response.data.id}"/>
                                 <div class="py-2">
-                                    <div class="mb-2">
+                                    <div class="mb-2 plaform-page-detail">
                                         <strong>Platforms:</strong>
                                     </div>
                         `;
@@ -613,20 +621,20 @@
                     <div class="modal-body d-flex"></div>
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
-                            <button type="button" class="btn btn-custom" onclick="deletePost()">Delete</button>
+                            <button type="button" class="btn btn-custom" onclick="deletePost()"><i class="fas fa-trash d-inline-block me-1"></i> Delete</button>
                             {{-- @can('draft_post')
                                 <button type="button" class="btn btn-custom"
-                                    onclick="transferPostData('draftPostModal')">Draft</button>
+                                    onclick="transferPostData('draftPostModal')"><i class="fas fa-folder d-inline-block me-1"></i> Draft</button>
                             @endcan --}}
                         </div>
                         <div>
                             {{-- @can('scheduled_post')
                                 <button type="button" class="btn btn-custom"
-                                    onclick="transferPostData('schedulePostModal')">Schedule</button>
+                                    onclick="transferPostData('schedulePostModal')"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                             @endcan --}}
                             {{-- @can('re_post')
                                 <button type="button" class="btn btn-custom"
-                                    onclick="transferPostData('repostModal')">Repost</button>
+                                    onclick="transferPostData('repostModal')"><i class="fas fa-share-square d-inline-block me-1"></i> Repost</button>
                             @endcan --}}
                         </div>
                     </div>
@@ -866,7 +874,7 @@
                             </div>
                             <div class="modal-footer">
                                 <div>
-                                    <button type="submit" class="btn btn-custom" id="scheduleSaveBtn">Schedule</button>
+                                    <button type="submit" class="btn btn-custom" id="scheduleSaveBtn"> <i class="fas fa-calendar-alt d-inline-block me-1"></i>Schedule</button>
                                 </div>
                             </div>
                         </form>
@@ -982,7 +990,7 @@
                             </div>
                             <div class="modal-footer">
                                 <div>
-                                    <button type="submit" class="btn btn-custom" id="repostSaveBtn">Repost</button>
+                                    <button type="submit" class="btn btn-custom" id="repostSaveBtn"><i class="fas fa-share-square d-inline-block me-1"></i> Repost</button>
                                 </div>
                             </div>
                         </form>

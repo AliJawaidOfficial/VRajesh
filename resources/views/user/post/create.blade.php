@@ -154,7 +154,7 @@
         }
 
         .btn-custom {
-            width: 140px;
+            width: 145px;
             font-weight: bold;
             color: #fff;
             background-image: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important;
@@ -553,8 +553,8 @@
                 $("#linkedinSelectSection").fadeOut();
             }
         }
-        
-        $(document).ready(function () {
+
+        $(document).ready(function() {
             getPixels('photos', 'ocean');
         });
 
@@ -667,8 +667,8 @@
                             @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
                                 @if (Auth::guard('web')->user()->meta_access_token != null)
                                     <div class="col-md-4">
-                                        <div class="m-0" style="display: none;" id="facebookSelectSection">
-                                            <div class="d-flex flex-column gap-1">
+                                        <div class="mb-2" style="display: none;" id="facebookSelectSection">
+                                            <div class="d-flex flex-column gap-2">
                                                 <p class="mb-0">Facebook Pages:</p>
 
                                                 <div class="d-flex flex-column gap-1 w-100">
@@ -687,8 +687,8 @@
                             @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
                                 @if (Auth::guard('web')->user()->meta_access_token != null)
                                     <div class="col-md-4">
-                                        <div class="m-0" style="display: none;" id="instagramSelectSection">
-                                            <div class="d-flex flex-column gap-1">
+                                        <div class="mb-2" style="display: none;" id="instagramSelectSection">
+                                            <div class="d-flex flex-column gap-2">
                                                 <p class="mb-0">Instagram Account:</p>
 
                                                 <div class="d-flex flex-column gap-1 w-100">
@@ -707,8 +707,8 @@
                             @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
                                 @if (Auth::guard('web')->user()->linkedin_access_token != null)
                                     <div class="col-md-4">
-                                        <div class="m-0" style="display: none;" id="linkedinSelectSection">
-                                            <div class="d-flex flex-column gap-1">
+                                        <div class="mb-2" style="display: none;" id="linkedinSelectSection">
+                                            <div class="d-flex flex-column gap-2">
                                                 <p class="mb-0">LinkedIn Organizations:</p>
 
                                                 <div class="d-flex flex-column gap-1 w-100">
@@ -729,17 +729,17 @@
 
                         <div>
                             @can('draft_post')
-                                <button type="button" name="draft" class="btn btn-custom">Save as Draft</button>
+                                <button type="button" name="draft" class="btn btn-custom"><i class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
                             @endcan
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             @can('scheduled_post')
                                 <button type="button" class="btn btn-custom" data-bs-toggle="modal"
-                                    data-bs-target="#scheduleModal">Schedule</button>
+                                    data-bs-target="#scheduleModal"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                             @endcan
                             @can('immediate_post')
-                                <button type="submit" name="post" class="btn btn-custom">Post</button>
+                                <button type="submit" name="post" class="btn btn-custom"><i class="fas fa-share-square d-inline-block me-1"></i> Post</button>
                             @endcan
                         </div>
                     </div>
@@ -919,24 +919,11 @@
         </div>
     </section>
 
-    <!-- Loading Modal -->
-    <!--<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">-->
-    <!--    <div class="modal-dialog modal-dialog-centered">-->
-    <!--        <div class="modal-content d-flex align-items-center justify-content-center p-5 bg-transparent border-0">-->
-    <!--            <div class="spinner-border text-white" style="width: 3rem; height: 3rem;" role="status">-->
-    <!--                <span class="visually-hidden">Loading...</span>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
-    <!--</div>-->
 
-    <section class="main-content-wrapper d-flex flex-column">
-        {{-- ... (Rest of your Blade content) ... --}}
-
-        <div id="loadingModal">
-            <div id="loadingSpinner"></div>
-        </div>
-    </section>
+    {{-- ... (Rest of your Blade content) ... --}}
+    <div id="loadingModal">
+        <div id="loadingSpinner"></div>
+    </div>
 
     <!-- Schedule Modal -->
     @can('scheduled_post')
@@ -959,7 +946,7 @@
                                 <label for="scheduleTime" class="form-label">Time</label>
                                 <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">Schedule</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                         </form>
                     </div>
                 </div>

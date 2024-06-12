@@ -527,17 +527,17 @@
 
                         <div>
                             {{-- @can('draft_post')
-                                <button type="button" name="draft" class="btn btn-custom">Save as Draft</button>
+                                <button type="button" name="draft" class="btn btn-custom"><i class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
                             @endcan --}}
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             {{-- @can('scheduled_post')
                                 <button type="button" class="btn btn-custom" data-bs-toggle="modal"
-                                    data-bs-target="#scheduleModal">Schedule</button>
+                                    data-bs-target="#scheduleModal"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                             @endcan --}}
                             @can('immediate_post')
-                                <button type="submit" name="post" class="btn btn-custom">Post</button>
+                                <button type="submit" name="post" class="btn btn-custom"><i class="fas fa-share-square d-inline-block me-1"></i> Post</button>
                             @endcan
                         </div>
                     </div>
@@ -643,7 +643,7 @@
                                 <label for="scheduleTime" class="form-label">Time</label>
                                 <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">Schedule</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                         </form>
                     </div>
                 </div>

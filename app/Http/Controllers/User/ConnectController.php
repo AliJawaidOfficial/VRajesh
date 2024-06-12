@@ -61,6 +61,7 @@ class ConnectController extends Controller
     {
         return Socialite::driver('facebook')
             ->scopes([
+                'publish_video',
                 'email',
                 'public_profile',
                 'pages_show_list',

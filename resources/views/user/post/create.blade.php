@@ -554,11 +554,15 @@
             }
         }
 
-        $(document).ready(function() {
-            getPixels('photos', 'ocean');
+        // Pixels Modal
+        function openPixelsModal() {
+            $("#imagesModal").modal('show');
+        }
+
+        $("#imagesModalSearchInput").keyup(function(e) {
+            getPixels('photos', $(this).val());
         });
 
-        // Pixels
         function getPixels(type, q, page = 1, per_page = 10) {
             $.ajax({
                 type: "GET",
@@ -567,12 +571,23 @@
                     page: page,
                     per_page: per_page
                 },
+                beforeSend: function() {
+                    $("#imagesModal #images").html(`<div class="col-12 text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`);
+                },
                 success: function(response) {
+                    html = '';
                     if (response.status == 200) {
-                        if (type == 'photos') console.table(response.data.photos);
-                        if (type == 'videos') console.table(response.data.videos);
+                        console.log(response.data);
+                        if (type == 'photos') {
+                            $.each(response.data.photos, function (indexInArray, photo) {
+                                html += `<div class="col-6 col-md-4 col-lg-3"><img src="${photo.src.landscape}" class="img-fluid" /></div>`;
+                            });
+                        }
+
+                        $("#imagesModal #images").html(html);
                     } else {
                         toastr.error(response.error);
+                        return null;
                     }
                 }
             });
@@ -658,6 +673,8 @@
                                     <input class="d-block w-100 form-control d-none" type="file" name="media"
                                         accept="video/*, image/*" id="mediaInput" />
                                     <button type="button" class="remove-media-btn" style="display: none;">&times;</button>
+                                    <button type="button" class="btn btn-dark btn-sm"
+                                        onclick="openPixelsModal()">Pixels</button>
                                 </div>
                             @endif
                         </div>
@@ -919,6 +936,27 @@
         </div>
     </section>
 
+    <!-- Pixels Images Modal -->
+    <div class="modal fade" id="imagesModal" tabindex="-1" aria-labelledby="imagesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imagesModalLabel">Images</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-2" id="imagesModalSearchInput" placeholder="Search...">
+                    <form id="scheduleForm" method="POST">
+                        @csrf
+                        <div class="row my-2" id="images"></div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary ms-auto">Choose</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {{-- ... (Rest of your Blade content) ... --}}
     <div id="loadingModal">

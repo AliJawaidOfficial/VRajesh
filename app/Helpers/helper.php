@@ -73,8 +73,8 @@ function getCountryAndTimezone($ip)
         ];
     } else {
         return [
-            'country' => 'Unknown',
-            'timezone' => 'Unknown'
+            'country' => 'Pakistan',
+            'timezone' => 'Asia/Karachi'
         ];
     }
 }

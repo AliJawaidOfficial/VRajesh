@@ -284,6 +284,12 @@
             padding: 0.8em 1.2em;
             border-radius: 50%;
         }
+
+        .btn-pxel {
+            width: 30px;
+            height: 30px;
+            padding: 0px
+        }
     </style>
 @endsection
 
@@ -832,15 +838,16 @@
                                         'linkedin_video_post',
                                     ]))
                                 <div class="d-flex align-items-center">
+                                    <button type="button" class="btn btn-transparent btn-pxel" data-bs-toggle="modal"
+                                        data-bs-target="#imagesModal">
+                                        <img src="{{ asset('assets/images/pixel-logo.png') }}" class="w-100" alt=""/>
+                                    </button>
                                     <label for="mediaInput" class="btn btn-transparent text-primary"><i
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>
                                     <input class="d-block w-100 form-control d-none" type="file" name="media"
                                         accept="video/*, image/*" id="mediaInput" />
                                     <button type="button" class="remove-media-btn" style="display: none;">&times;</button>
-                                    <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#imagesModal">
-                                        Pixel
-                                    </button>
+
                                 </div>
                             @endif
                         </div>

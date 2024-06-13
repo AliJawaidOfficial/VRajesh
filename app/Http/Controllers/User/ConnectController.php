@@ -10,18 +10,22 @@ use Illuminate\Support\Facades\Session;
 use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use App\Services\FacebookService;
+use App\Services\GoogleService;
 use App\Services\LinkedInService;
 
 class ConnectController extends Controller
 {
-    protected $linkedinService;
     protected $facebookService;
+    protected $googleService;
+    protected $linkedinService;
 
     public function __construct(
         private readonly FacebookService $importFacebook,
+        private readonly GoogleService $importGoogle,
         private readonly LinkedInService $importLinkedin,
     ) {
         $this->facebookService = $importFacebook;
+        $this->googleService = $importGoogle;
         $this->linkedinService = $importLinkedin;
     }
 
@@ -49,10 +53,23 @@ class ConnectController extends Controller
                 'user_avatar' => (Auth::guard('web')->user()->linkedin_access_token != null) ? Auth::guard('web')->user()->linkedin_avatar : null,
                 'user_name' => (Auth::guard('web')->user()->linkedin_access_token != null) ? Auth::guard('web')->user()->linkedin_name : null,
                 'user_email' => (Auth::guard('web')->user()->linkedin_access_token != null) ? Auth::guard('web')->user()->linkedin_email : null,
+            ],
+            [
+                'image' => 'assets/images/icons/icons-google.png',
+                'text' => 'Connect With Google',
+                'is_connected' => (Auth::guard('web')->user()->google_access_token != null) ? 1 : 0,
+                'connect_route' => 'user.connect.google',
+                'disconnect_route' => 'user.connect.google.disconnect',
+                'permission' => 'connect_google',
+                'user_avatar' => (Auth::guard('web')->user()->google_access_token != null) ? Auth::guard('web')->user()->google_avatar : null,
+                'user_name' => (Auth::guard('web')->user()->google_access_token != null) ? Auth::guard('web')->user()->google_name : null,
+                'user_email' => (Auth::guard('web')->user()->google_access_token != null) ? Auth::guard('web')->user()->google_email : null,
             ]
         ];
         return view('user.connect.index', compact('platforms'));
     }
+
+
 
     /**
      * Facebook
@@ -113,6 +130,59 @@ class ConnectController extends Controller
         $user->save();
 
         Session::flash('success', ['text' => 'Your Facebook account disconnected.']);
+        return redirect()->route('user.connect');
+    }
+
+
+
+    /**
+     * Google
+     */
+    public function google()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function googleCallback(Request $request)
+    {
+        try {
+            $user = Socialite::driver('google')->user();
+
+            $response = [
+                'id' => $user->getId(),
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+                'avatar' => $user->getAvatar(),
+                'token' => $user->token,
+            ];
+
+            return $response;
+            // $user = User::where('id', Auth::guard('web')->user()->id)->where('meta_email', $response['email'])->first();
+
+            // if (!$user) throw new Exception('Sorry this google account is not register with us.');
+
+            // $user->meta_access_token = $response['token'];
+            // $user->meta_name = $response['name'];
+            // $user->meta_avatar = $response['avatar'];
+            // $user->save();
+
+            // Session::flash('success', ['text' => 'Your Facebook account connected successfully.']);
+            // return redirect()->route('user.connect');
+        } catch (Exception $e) {
+            Session::flash('error', ['text' => $e->getMessage()]);
+            return redirect()->route('user.connect');
+        }
+    }
+
+    public function googleDisconnect()
+    {
+        $user = User::where('id', Auth::guard('web')->user()->id)->first();
+        // $user->meta_access_token = null;
+        // $user->meta_avatar = null;
+        // $user->meta_name = null;
+        $user->save();
+
+        Session::flash('success', ['text' => 'Your Google account disconnected.']);
         return redirect()->route('user.connect');
     }
 

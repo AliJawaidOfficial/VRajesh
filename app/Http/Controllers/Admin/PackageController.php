@@ -59,6 +59,12 @@ class PackageController extends Controller
             'title' => 'Video Post - LinkedIn'
         ],
     ];
+    protected $googlePermissions = [
+        [
+            'name' => 'connect_google',
+            'title' => 'Connect With Google'
+        ],
+    ];
     protected $otherPermissions = [
         [
             'name' => 'immediate_post',
@@ -99,6 +105,7 @@ class PackageController extends Controller
     public function create()
     {
         $facebookPermissions = $this->facebookPermissions;
+        $googlePermissions = $this->googlePermissions;
         $linkedInPermissions = $this->linkedInPermissions;
         $otherPermissions = $this->otherPermissions;
 
@@ -106,6 +113,7 @@ class PackageController extends Controller
             $this->view . 'create',
             compact(
                 'facebookPermissions',
+                'googlePermissions',
                 'linkedInPermissions',
                 'otherPermissions'
             )
@@ -162,6 +170,7 @@ class PackageController extends Controller
             $rolePermissions = $data->permissions->pluck('name')->toArray();    
 
             $facebookPermissions = $this->facebookPermissions;
+            $googlePermissions = $this->googlePermissions;
             $linkedInPermissions = $this->linkedInPermissions;
             $otherPermissions = $this->otherPermissions;    
 
@@ -172,6 +181,7 @@ class PackageController extends Controller
                     'permissions',
                     'rolePermissions',
                     'facebookPermissions',
+                    'googlePermissions',
                     'linkedInPermissions',
                     'otherPermissions'
                 )

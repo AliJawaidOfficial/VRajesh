@@ -27,7 +27,7 @@ class PixelsService
                 'page' => $page,
                 'per_page' => $per_page,
                 'query' => $query,
-                'size' => 'medium',
+                'size' => 'small',
                 'orientation' => 'landscape',
                 'locale' => 'en-US',
             ];

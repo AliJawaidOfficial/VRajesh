@@ -629,7 +629,7 @@
 
             $.ajax({
                 type: "GET",
-                url: `http://vrajesh.localhost/pixels/photos/${q}?page=${page}&per_page=${per_page}&q=${q}`,
+                url: `{{ env('APP_URL') }}/pixels/photos/${q}?page=${page}&per_page=${per_page}&q=${q}`,
                 beforeSend: function() {
                     isLoading = true;
                     $("#loading-indicator").show();

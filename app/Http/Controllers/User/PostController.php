@@ -157,7 +157,7 @@ class PostController extends Controller
                 [
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
-                    'media' => 'nullable|required_if:on_instagram,1',
+                    'media' => 'nullable|required_if:on_instagram,1|max:524288',
                     'on_facebook' => 'nullable|boolean',
                     'facebook_page' => 'nullable|required_if:on_facebook,1',
                     'on_instagram' => 'nullable|boolean',
@@ -175,6 +175,7 @@ class PostController extends Controller
 
                     'media.required' => 'Media is required',
                     'media.required_if' => 'Media is required for Instagram.',
+                    'media.max' => 'Media size should be less than 5MB.',
 
                     'facebook_page.required_if' => 'Facebook Page is required.',
 
@@ -331,7 +332,7 @@ class PostController extends Controller
                     'post_id' => 'required|exists:posts,id',
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
-                    'media' => 'nullable',
+                    'media' => 'nullable|required_if:on_instagram,1|max:524288',
                     'on_facebook' => 'nullable|boolean',
                     'facebook_page' => 'nullable|required_if:on_facebook,1',
                     'on_instagram' => 'nullable|boolean',
@@ -345,13 +346,12 @@ class PostController extends Controller
                     'post_id.required' => 'Invalid Request',
                     'post_id.exists' => 'Invalid Request',
 
-                    'title.required' => 'Title is required',
-
                     'description.required' => 'Description is required',
                     'description.required_without' => 'Description is required',
 
                     'media.required' => 'Media is required',
-                    'media.required_if' => 'Media is required',
+                    'media.required_if' => 'Media is required for Instagram.',
+                    'media.max' => 'Media size should be less than 5MB.',
 
                     'facebook_page.required_if' => 'Facebook Page is required.',
 

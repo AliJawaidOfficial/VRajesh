@@ -842,7 +842,7 @@
                                         data-bs-target="#imagesModal">
                                         <img src="{{ asset('assets/images/pixel-logo.png') }}" class="w-100" alt=""/>
                                     </button>
-                                    <label for="mediaInput" class="btn btn-transparent text-primary"><i
+                                    <label for="mediaInput" class="btn btn-transparent text-dark"><i
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>
                                     <input class="d-block w-100 form-control d-none" type="file" name="media"
                                         accept="video/*, image/*" id="mediaInput" />

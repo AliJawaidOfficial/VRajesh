@@ -844,7 +844,7 @@
                                     </button>
                                     <label for="mediaInput" class="btn btn-transparent text-dark"><i
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>
-                                    <input class="d-block w-100 form-control d-none" type="file" name="media[]"
+                                    <input class="d-block w-100 form-control d-none" type="file" name="media[]" multiple
                                         accept="video/*, image/*" id="mediaInput" />
                                     <button type="button" class="remove-media-btn" style="display: none;">&times;</button>
 

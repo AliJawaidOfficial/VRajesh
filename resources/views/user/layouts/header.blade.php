@@ -1,7 +1,7 @@
 <header class="top-header d-flex w-100 align-items-end justify-content-end gap-3">
 
 
-    <div class="d-flex align-items-center alert-wrapper">
+    <div class="d-flex align-items-center justify-content-between alert-wrapper flex-grow-1">
         <div class="toggle-button">
             <button class="hamburger" id="toggleSidebar">
                 <img src="{{ asset('assets/images/icons/hamberger.png') }}" style="filter: invert(100%)" alt=""></button>

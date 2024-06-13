@@ -269,7 +269,7 @@ body {
 }
 
 .logo .main-logo {
-	width: 120px;
+	width: 200px;
 }
 
 .logo .cancel-icon {
@@ -774,9 +774,9 @@ body {
 		justify-content: space-between;
 	}
 
-	.logo .main-logo {
+	/* .logo .main-logo {
 		width: 100px;
-	}
+	} */
 
 	.logo .cancel-icon {
 		display: block;

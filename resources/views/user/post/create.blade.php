@@ -240,6 +240,50 @@
                 transform: translate(-50%, -50%) rotate(360deg);
             }
         }
+
+
+        #imagesModal .input-group {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+        }
+
+        #images * {
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            /* Chrome, Safari, Edge */
+            -moz-user-select: none;
+            /* Firefox */
+            -ms-user-select: none;
+            /* Internet Explorer/Edge */
+            user-select: none;
+            /* Non-prefixed version, supported by most browsers */
+        }
+
+        .selectable-image {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .selected-container {
+            outline: 2px solid #007bff;
+            position: relative;
+            z-index: 10;
+        }
+
+        .selected-container::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0.8em 1.2em;
+            border-radius: 50%;
+        }
     </style>
 @endsection
 
@@ -554,44 +598,164 @@
             }
         }
 
-        // Pixels Modal
-        function openPixelsModal() {
-            $("#imagesModal").modal('show');
+        // Pixel API Functionality
+        var currentPage = 1;
+        var perPage = 12;
+        var isLoading = false;
+        var imagesLoaded = 0;
+        var totalImages = 0;
+        var selectedImage = null;
+
+        // Function to load more images
+        function loadMoreImages() {
+            if (!isLoading) {
+                currentPage++;
+                getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+            }
         }
 
-        $("#imagesModalSearchInput").keyup(function(e) {
-            getPixels('photos', $(this).val());
-        });
+        // Function to fetch images from the server
+        function getPixels(type, q, page = 1, per_page = 12) {
+            console.log("Fetching images. Page:", page);
+            if (q.length == 0) {
+                q = 'green';
+            }
 
-        function getPixels(type, q = 'coding', page = 1, per_page = 50) {
             $.ajax({
                 type: "GET",
-                url: `{{ URL::to('pixels/${type}/${q}') }}`,
-                data: {
-                    page: page,
-                    per_page: per_page
-                },
+                url: `http://vrajesh.localhost/pixels/photos/${q}?page=${page}&per_page=${per_page}&q=${q}`,
                 beforeSend: function() {
-                    $("#imagesModal #images").html(`<div class="col-12 text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>`);
+                    isLoading = true;
+                    $("#loading-indicator").show();
+                    $("#load-more-btn").hide();
                 },
                 success: function(response) {
-                    html = '';
+                    console.log("Success response:", response);
                     if (response.status == 200) {
-                        console.log(response.data);
-                        if (type == 'photos') {
-                            $.each(response.data.photos, function (indexInArray, photo) {
-                                html += `<div class="col-6 col-md-4 col-lg-3 col-xl-2 p-0"><img src="${photo.src.landscape}" class="img-fluid" /></div>`;
-                            });
-                        }
+                        var html = '';
+                        totalImages += response.data.photos.length;
+                        $.each(response.data.photos, function(indexInArray, photo) {
+                            html += `<div class="col-lg-4 p-0">
+                        <img src="${photo.src.landscape}" class="img-fluid selectable-image" data-image-id="${photo.id}" data-src="${photo.src.landscape}" />
+                     </div>`;
+                        });
+                        $("#images").append(html);
 
-                        $("#imagesModal #images").html(html);
+                        if (response.data.total_pages > page) {
+                            console.log("More pages available. Showing load more button.");
+                            // $("#loading-indicator").hide();
+                        } else {
+                            console.log("All images loaded.");
+                        }
                     } else {
                         toastr.error(response.error);
-                        return null;
                     }
+                },
+                error: function(xhr, status, error) {
+                    toastr.error("An error occurred while fetching images.");
+                },
+                complete: function() {
+                    isLoading = false;
+                    $("#loading-indicator").hide();
+                    $("#load-more-btn").show();
                 }
             });
         }
+
+        // Initial load of images when modal is shown
+        $("#imagesModal").on('show.bs.modal', function() {
+            currentPage = 1;
+            totalImages = 0;
+            imagesLoaded = 0;
+            $("#images").html("");
+            getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+        });
+
+        // Attach click event handler to the "Load More" button
+        $("#load-more-btn").click(loadMoreImages);
+
+        // Event delegation for image selection
+        $(document).on('click', '.selectable-image', function() {
+            var imageId = $(this).data('image-id');
+            var imageUrl = $(this).data('src');
+
+            // Remove selection from previously selected image
+            if (selectedImage) {
+                selectedImage.removeClass('selected');
+                selectedImage.closest('div').removeClass('selected-container');
+            }
+
+            // Toggle selection on the clicked image
+            if (!selectedImage || selectedImage.data('image-id') !== imageId) {
+                selectedImage = $(this);
+                selectedImage.addClass('selected');
+                selectedImage.closest('div').addClass('selected-container');
+                $("#imagesModalDoneBtn").prop("disabled", false); // Enable Done button when an image is selected
+            } else {
+                selectedImage = null;
+                $("#imagesModalDoneBtn").prop("disabled", true); // Disable Done button when no image is selected
+            }
+        });
+
+        // Function to handle "Done" button click
+        $(document).on('click', '#imagesModalDoneBtn', function() {
+            if (selectedImage) {
+                var imageUrl = selectedImage.data('src');
+
+                // Strip query parameters from the image URL
+                var cleanImageUrl = imageUrl.split('?')[0];
+
+                const doneBtn = document.getElementById("imagesModalDoneBtn")
+
+                doneBtn.innerHTML = '<i class="fa fa-spinner fa-pulse"></i>';
+
+                doneBtn.disabled = true;
+
+                // Fetch image as blob using the cleaned URL
+                fetch(cleanImageUrl)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        var fileName = cleanImageUrl.split('/').pop();
+                        var file = new File([blob], fileName, {
+                            type: blob.type
+                        });
+
+                        // Create a DataTransfer object and add the file
+                        var dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+
+                        console.log(file);
+
+                        // Get the file input element and set its files property
+                        var mediaInput = document.getElementById('mediaInput');
+                        if (mediaInput) {
+                            mediaInput.files = dataTransfer.files;
+                        }
+
+                        // Trigger the file input change event
+                        mediaInput.dispatchEvent(new Event('change', {
+                            bubbles: true
+                        }));
+
+                        // Close the modal
+                        $('#imagesModal').modal('hide');
+
+                        doneBtn.innerHTML = 'Done';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching image:', error);
+                    });
+            }
+        });
+
+        // Attach click event handler to the search button
+        $("#searchButton").click(function() {
+            currentPage = 1;
+            totalImages = 0;
+            imagesLoaded = 0;
+            $("#images").html("");
+            getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+        });
     </script>
 @endsection
 
@@ -673,8 +837,10 @@
                                     <input class="d-block w-100 form-control d-none" type="file" name="media"
                                         accept="video/*, image/*" id="mediaInput" />
                                     <button type="button" class="remove-media-btn" style="display: none;">&times;</button>
-                                    <button type="button" class="btn btn-dark btn-sm"
-                                        onclick="openPixelsModal()">Pixels</button>
+                                    <button type="button" class="btn btn-dark btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#imagesModal">
+                                        Pixel
+                                    </button>
                                 </div>
                             @endif
                         </div>
@@ -746,17 +912,20 @@
 
                         <div>
                             @can('draft_post')
-                                <button type="button" name="draft" class="btn btn-custom"><i class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
+                                <button type="button" name="draft" class="btn btn-custom"><i
+                                        class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
                             @endcan
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             @can('scheduled_post')
                                 <button type="button" class="btn btn-custom" data-bs-toggle="modal"
-                                    data-bs-target="#scheduleModal"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
+                                    data-bs-target="#scheduleModal"><i class="fas fa-calendar-alt d-inline-block me-1"></i>
+                                    Schedule</button>
                             @endcan
                             @can('immediate_post')
-                                <button type="submit" name="post" class="btn btn-custom"><i class="fas fa-share-square d-inline-block me-1"></i> Post</button>
+                                <button type="submit" name="post" class="btn btn-custom"><i
+                                        class="fas fa-share-square d-inline-block me-1"></i> Post</button>
                             @endcan
                         </div>
                     </div>
@@ -938,28 +1107,38 @@
 
     <!-- Pixels Images Modal -->
     <div class="modal fade" id="imagesModal" tabindex="-1" aria-labelledby="imagesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="imagesModalLabel">Images</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header flex-column">
+                    <div class="d-flex align-items-center w-100 justify-content-between">
+                        <h5 class="modal-title" id="imagesModalLabel">Images</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="input-group mt-2">
+                        <input type="text" class="form-control border-dark" id="imagesModalSearchInput"
+                            placeholder="Search...">
+                        <button class="btn btn-dark px-5" id="searchButton"><i class="fas fa-search"></i></button>
+                    </div>
                 </div>
                 <div class="modal-body">
-                    <div class="input-group mb-2">
-                        <input type="text" class="form-control border-dark" id="imagesModalSearchInput" placeholder="Search...">
-                        <span class="input-group-text bg-dark text-white"><i class="fas fa-search"></i></span>
+
+                    <div class="row m-1" id="images"></div>
+                    <div class="text-center mt-3">
+                        <button id="load-more-btn" class="btn btn-dark rounded-circle p-3"><i
+                                class="fas fa-undo"></i></button>
                     </div>
-                    <form id="scheduleForm" method="POST">
-                        @csrf
-                        <div class="row m-1" id="images"></div>
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary ms-auto">Choose</button>
-                        </div>
-                    </form>
+                    <div id="loading-indicator" class="text-center mt-3" style="display: none;">
+                        <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="imagesModalDoneBtn" disabled>Done</button>
                 </div>
             </div>
         </div>
     </div>
+
 
     {{-- ... (Rest of your Blade content) ... --}}
     <div id="loadingModal">
@@ -987,7 +1166,8 @@
                                 <label for="scheduleTime" class="form-label">Time</label>
                                 <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
                             </div>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
+                            <button type="submit" class="btn btn-primary"><i
+                                    class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                         </form>
                     </div>
                 </div>

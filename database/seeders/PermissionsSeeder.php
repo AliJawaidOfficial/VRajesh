@@ -23,6 +23,10 @@ class PermissionsSeeder extends Seeder
                 'guard_name' => 'web'
             ],
             [
+                'name' => 'connect_google',
+                'guard_name' => 'web'
+            ],
+            [
                 'name' => 'meta_facebook_text_post',
                 'guard_name' => 'web'
             ],

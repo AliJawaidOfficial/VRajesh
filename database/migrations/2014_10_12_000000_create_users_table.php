@@ -31,6 +31,11 @@ return new class extends Migration
             $table->text('linkedin_avatar')->nullable();
             $table->string('linkedin_name')->nullable();
             $table->string('linkedin_email')->nullable();
+            
+            $table->text('google_access_token')->nullable();
+            $table->text('google_avatar')->nullable();
+            $table->string('google_name')->nullable();
+            $table->string('google_email')->nullable();
 
 
             $table->rememberToken();

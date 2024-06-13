@@ -36,6 +36,11 @@ class User extends Authenticatable
         'linkedin_name',
         'linkedin_email',
 
+        'google_access_token',
+        'google_avatar',
+        'google_name',
+        'google_email',
+
         'email_verified_at'
     ];
 

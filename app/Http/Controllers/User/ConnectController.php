@@ -156,18 +156,16 @@ class ConnectController extends Controller
                 'token' => $user->token,
             ];
 
-            return $response;
-            // $user = User::where('id', Auth::guard('web')->user()->id)->where('meta_email', $response['email'])->first();
+            $user = User::where('id', Auth::guard('web')->user()->id)->where('google_email', $response['email'])->first();
+            if (!$user) throw new Exception('Sorry this google account is not register with us.');
 
-            // if (!$user) throw new Exception('Sorry this google account is not register with us.');
+            $user->google_access_token = $response['token'];
+            $user->google_avatar = $response['avatar'];
+            $user->google_name = $response['name'];
+            $user->save();
 
-            // $user->meta_access_token = $response['token'];
-            // $user->meta_name = $response['name'];
-            // $user->meta_avatar = $response['avatar'];
-            // $user->save();
-
-            // Session::flash('success', ['text' => 'Your Facebook account connected successfully.']);
-            // return redirect()->route('user.connect');
+            Session::flash('success', ['text' => 'Your Google account connected successfully.']);
+            return redirect()->route('user.connect');
         } catch (Exception $e) {
             Session::flash('error', ['text' => $e->getMessage()]);
             return redirect()->route('user.connect');
@@ -177,9 +175,9 @@ class ConnectController extends Controller
     public function googleDisconnect()
     {
         $user = User::where('id', Auth::guard('web')->user()->id)->first();
-        // $user->meta_access_token = null;
-        // $user->meta_avatar = null;
-        // $user->meta_name = null;
+        $user->google_access_token = null;
+        $user->google_avatar = null;
+        $user->google_name = null;
         $user->save();
 
         Session::flash('success', ['text' => 'Your Google account disconnected.']);

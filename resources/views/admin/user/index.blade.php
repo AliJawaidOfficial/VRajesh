@@ -256,10 +256,10 @@
                                     <div class="d-flex gap-1">
                                         <a href="{{ route('admin.user.edit', $data->id) }}" class="btn btn-dark btn-sm"><i
                                                 class="fas fa-edit"></i></a>
-                                        <button type="button" onclick="login({{ $data->id }})"
+                                        {{-- <button type="button" onclick="login({{ $data->id }})"
                                             class="btn btn-dark btn-sm">
                                             <i class="fas fa-sign-in-alt"></i>
-                                        </button>
+                                        </button> --}}
                                         <button type="button" onclick="deleteRecord({{ $data->id }})"
                                             class="btn btn-dark btn-sm">
                                             <i class="fas fa-trash"></i>

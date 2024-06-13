@@ -59,6 +59,13 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
+                                <label for="google_email" class="form-label">Google Valid Email</label>
+                                <input type="text" name="google_email" value="{{ old('google_email') }}" id="google_email"
+                                    class="form-control" placeholder="Enter Google Email" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
                                 <label for="linkedin_email" class="form-label">LinkedIn Valid Email</label>
                                 <input type="text" name="linkedin_email" value="{{ old('linkedin_email') }}"
                                     id="linkedin_email" class="form-control" placeholder="Enter LinkedIn Email" />

@@ -60,6 +60,7 @@ class UserController extends Controller
                     'password' => 'required|string|min:8|max:20|confirmed',
                     'meta_email' => 'nullable|string|email|max:255',
                     'linkedin_email' => 'nullable|string|email|max:255',
+                    'google_email' => 'nullable|string|email|max:255',
                     'package' => 'required|exists:roles,id',
                 ],
                 [
@@ -85,6 +86,9 @@ class UserController extends Controller
                     'linkedin_email.email' => 'Linkedin Email is invalid',
                     'linkedin_email.max' => 'Linkedin Email is too long',
 
+                    'google_email.email' => 'Google Email is invalid',
+                    'google_email.max' => 'Google Email is too long',
+
                     'package.required' => 'Package is required',
                     'package.exists' => 'Package not found',
                 ]
@@ -100,6 +104,7 @@ class UserController extends Controller
             $data->password = Hash::make($request->password);
             $data->meta_email = $request->meta_email;
             $data->linkedin_email = $request->linkedin_email;
+            $data->google_email = $request->google_email;
             $data->save();
 
             $role = Role::where('id', $request->package)->first();
@@ -169,6 +174,7 @@ class UserController extends Controller
                         'email' => 'required|string|email|max:255|unique:users,email,' . $id,
                         'meta_email' => 'nullable|string|email|max:255',
                         'linkedin_email' => 'nullable|string|email|max:255',
+                        'google_email' => 'nullable|string|email|max:255',
                         'package' => 'required|exists:roles,id',
                     ],
                     [
@@ -189,6 +195,9 @@ class UserController extends Controller
                         'linkedin_email.email' => 'Linkedin Email is invalid',
                         'linkedin_email.max' => 'Linkedin Email is too long',
 
+                        'google_email.email' => 'Google Email is invalid',
+                        'google_email.max' => 'Google Email is too long',
+
                         'package.required' => 'Package is required',
                         'package.exists' => 'Package not found',
                     ]
@@ -203,6 +212,7 @@ class UserController extends Controller
                 $data->email_verified_at = now();
                 $data->meta_email = $request->meta_email;
                 $data->linkedin_email = $request->linkedin_email;
+                $data->google_email = $request->google_email;
                 $data->save();
 
                 $role = Role::where('id', $request->package)->first();

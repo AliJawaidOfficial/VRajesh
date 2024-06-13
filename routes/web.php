@@ -85,6 +85,11 @@ Route::name('user.')
                     Route::get('/facebook/callback', 'facebookCallback')->name('.facebook.callback');
                     Route::get('/facebook/disconnect', 'facebookDisconnect')->name('.facebook.disconnect');
 
+                    // Google
+                    Route::get('/google', 'google')->name('.google');
+                    Route::get('/google/callback', 'googleCallback')->name('.google.callback');
+                    Route::get('/google/disconnect', 'googleDisconnect')->name('.google.disconnect');
+
                     // Linkedin
                     Route::get('/linkedin', 'linkedin')->name('.linkedin');
                     Route::get('/linkedin/callback', 'linkedinCallback')->name('.linkedin.callback');

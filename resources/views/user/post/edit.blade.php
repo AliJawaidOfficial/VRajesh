@@ -513,6 +513,49 @@
         var selectedImages = [];
         var images = [];
 
+        const asset = `{{ env('APP_URL') }}`;
+        let posts = @json($post->media).split(',');
+
+
+        let newposts = posts.map((post) => {
+            return asset + '/' + post;
+        })
+
+
+        console.log(posts);
+
+        function setImage() {
+
+            const fetchPromises = newposts.map((image,index) => {
+                return fetch(image)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const fileName = posts[index].split('http://vrajesh.localhost/')[0];
+                        console.log(fileName)
+                        console.log(image)
+                        const file = new File([blob], fileName, {
+                            type: blob.type
+                        });
+                        if (!validateFiles(images)) {
+                            return;
+                        }
+                        images.push(file);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching image:', error);
+                    });
+            });
+
+            // Wait for all fetch operations to complete
+            Promise.all(fetchPromises).then(() => {
+
+                showPreview()
+                $('#imagesModal .btn-close').click(); // Close the modal
+            });
+        }
+
+        setImage();
+
         // Function to load more images
         function loadMoreImages() {
             if (!isLoading) {
@@ -975,25 +1018,7 @@
                     style="height: calc(100vh - (0px + 73px + 40px));">
                     <h5>Uploaded Images</h5>
                     <div class="row" id="uploadedImages">
-                        @if ($post->media != null)
-                            @if ($post->media_type == 'image')
-                                @foreach (explode(',', $post->media) as $index => $media)
-                                    <div class="preview-wrapper">
-                                        <img src="{{ asset($media) }}" alt="" class="preview"
-                                            data-index="{{ $index }}">
-                                        <button class="remove-btn">×</button>
-                                    </div>
-                                @endforeach
-                            @elseif ($post->media_type == 'video')
-                                @foreach (explode(',', $post->media) as $index => $media)
-                                    <div class="preview-wrapper">
-                                        <video src="{{ asset($media) }}" class="preview"
-                                            data-index="{{ $index }}"></video>
-                                        <button class="remove-btn">×</button>
-                                    </div>
-                                @endforeach
-                            @endif
-                        @endif
+
                     </div>
                 </div>
             </div>

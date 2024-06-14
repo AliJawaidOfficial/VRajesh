@@ -341,82 +341,10 @@
             });
         }
         
-        async function transferPostData(modalId) {
-            const title = $('#modalPostTitle').text();
-            const description = $('#modalPostDescription').html().replace(/<br>/g, '\n');
-
-            $('#' + modalId + ' #postTitle').val(title);
-            $('#' + modalId + ' #postDescription').val(description);
-            $('#' + modalId + ' #PlatformFacebook').attr("checked", $("#facebook-post-detail").is(":checked"));
-            $('#' + modalId + ' #PlatformInstagram').attr("checked", $("#instagram-post-detail").is(":checked"));
-            $('#' + modalId + ' #PlatformLinkedIn').attr("checked", $("#linkedin-post-detail").is(":checked"));
-
-
-            $('#' + modalId + ' #PlatformFacebook').change(async function() {
-                console.log(this)
-                if (this.checked) {
-                    var facebook_pages = await getFacebookPages($('#' + modalId + ' #PlatformFacebook'));
-                    $('#' + modalId + " #facebookPage").html(facebook_pages);
-                } else {
-                    $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
-                }
-
-            });
-
-            $('#' + modalId + ' #PlatformInstagram').change(async function() {
-                console.log(this)
-                if (this.checked) {
-                    var instagram_pages = await getInstagramAccounts($('#' + modalId +
-                        ' #PlatformInstagram'));
-                    $('#' + modalId + " #instagramPage").html(instagram_pages);
-                } else {
-
-                    $('#' + modalId + " #instagramPage").html('<option value="">Select</option>');
-                }
-            });
-
-            $('#' + modalId + ' #PlatformLinkedIn').change(async function() {
-
-                console.log(this)
-                if (this.checked) {
-                    var linkedin_organizations = await getLinkedInOrganizations($('#' + modalId +
-                        ' #PlatformLinkedIn'));
-                    $('#' + modalId + " #linkedInPage").html(linkedin_organizations);
-                } else {
-
-                    $('#' + modalId + " #linkedInPage").html('<option value="">Select</option>');
-                }
-
-            });
-
-            $('#' + modalId + ' #postID').val($("#postDetailId").val());
-
-            if ($("#facebook-post-detail").is(":checked")) {
-                var facebook_pages = await getFacebookPages($("#facebook-post-detail"));
-                $('#' + modalId + " #facebookPage").html(facebook_pages);
-            } else {
-                $('#' + modalId + " #facebookPage").html('<option value="">Select</option>');
-            }
-            if ($("#instagram-post-detail").is(":checked")) {
-                var instagram_pages = await getInstagramAccounts($("#instagram-post-detail"));
-                $('#' + modalId + " #instagramPage").html(instagram_pages);
-            } else {
-
-                $('#' + modalId + " #instagramPage").html('<option value="">Select</option>');
-            }
-            if ($("#linkedin-post-detail").is(":checked")) {
-                var linkedin_organizations = await getLinkedInOrganizations($("#linkedin-post-detail"));
-                $('#' + modalId + " #linkedInPage").html(linkedin_organizations);
-            } else {
-
-                $('#' + modalId + " #linkedInPage").html('<option value="">Select</option>');
-            }
-
-
-            $('#postDetail').modal('hide');
-            $('#' + modalId).modal('show');
+        async function transferPostData(action) {
+            let id = $("#postDetailId").val();
+            window.location.href = `{{ route('user.post.index') }}/${id}/${action}`;
         }
-
 
         @can('draft_post')
             // Draft Form
@@ -721,20 +649,21 @@
                     <div class="modal-body d-flex"></div>
                     <div class="modal-footer d-flex justify-content-between">
                         <div>
-                            <button type="button" class="btn btn-custom" onclick="deletePost()"><i class="fas fa-trash d-inline-block me-1"></i> Delete</button>
+                            <button type="button" class="btn btn-custom" onclick="deletePost()"><i
+                                    class="fas fa-trash d-inline-block me-1"></i> Delete</button>
                             @can('draft_post')
-                                <button type="button" class="btn btn-custom"
-                                    onclick="transferPostData('draftPostModal')">Edit</button>
+                                <a type="button" class="btn btn-custom" onclick="transferPostData('draft')"><i
+                                        class="fas fa-pen d-inline-block me-1"></i> Edit</a>
                             @endcan
                         </div>
                         <div>
                             @can('scheduled_post')
-                                <button type="button" class="btn btn-custom"
-                                    onclick="transferPostData('schedulePostModal')"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
+                                <button type="button" class="btn btn-custom" onclick="transferPostData('schedule')"><i
+                                        class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                             @endcan
                             @can('immediate_post')
-                                <button type="button" class="btn btn-custom"
-                                    onclick="transferPostData('repostModal')"><i class="fas fa-share-square d-inline-block me-1"></i> Post</button>
+                                <button type="button" class="btn btn-custom" onclick="transferPostData('repost')"><i
+                                        class="fas fa-share-square d-inline-block me-1"></i> Repost</button>
                             @endcan
                         </div>
                     </div>

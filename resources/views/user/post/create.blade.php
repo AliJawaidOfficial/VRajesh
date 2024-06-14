@@ -344,7 +344,7 @@
                                 showConfirmButton: false,
                                 timer: 700
                             }).then(() => {
-                                // location.reload();
+                                window.location.href = "{{ route('user.post.index') }}";
                             });
                         } else {
                             toastr.error(response.error);
@@ -378,7 +378,7 @@
                                 showConfirmButton: false,
                                 timer: 1500
                             }).then(() => {
-                                location.reload();
+                                window.location.href = "{{ route('user.post.draft') }}";
                             });
                         } else {
                             toastr.error(response.error);

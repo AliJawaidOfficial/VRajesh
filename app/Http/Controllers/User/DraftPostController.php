@@ -39,7 +39,7 @@ class DraftPostController extends Controller
     {
         $user = Auth::guard('web')->user();
 
-        if (!Auth::guard('web')->user()->can('draft_post')) abort(403); 
+        if (!Auth::guard('web')->user()->can('draft_post')) abort(403);
 
         $postMonths = Post::where('user_id', $user->id)
             ->where('posted', 0)
@@ -67,7 +67,7 @@ class DraftPostController extends Controller
     public function store(Request $request)
     {
         try {
-            if (!Auth::guard('web')->user()->can('draft_post')) abort(403); 
+            if (!Auth::guard('web')->user()->can('draft_post')) abort(403);
 
             $validator = Validator::make(
                 $request->all(),
@@ -215,7 +215,7 @@ class DraftPostController extends Controller
     public function storeAsDraft(Request $request)
     {
         try {
-            if (!Auth::guard('web')->user()->can('draft_post')) abort(403); 
+            if (!Auth::guard('web')->user()->can('draft_post')) abort(403);
 
             $validator = Validator::make(
                 $request->all(),
@@ -380,14 +380,13 @@ class DraftPostController extends Controller
         try {
             if (!Auth::guard('web')->user()->can('draft_post')) abort(403);
 
-            DB::beginTransaction();
-
             $validator = Validator::make(
                 $request->all(),
                 [
                     'post_id' => 'required|exists:posts,id',
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
+                    'media_type' => 'nullable|required_if:media,1|in:image,video',
                     'media' => 'nullable|required_if:on_instagram,1|max:524288',
                     'on_facebook' => 'nullable|boolean',
                     'facebook_page' => 'nullable|required_if:on_facebook,1',
@@ -399,8 +398,8 @@ class DraftPostController extends Controller
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
                 [
-                    'post_id.required' => 'Invalid request.',
-                    'post_id.exists' => 'Invalid request.',
+                    'post_id.required' => 'Invalid Request',
+                    'post_id.exists' => 'Invalid Request',
 
                     'title.required' => 'Title is required',
 
@@ -420,12 +419,41 @@ class DraftPostController extends Controller
                     'schedule_date.after_or_equal' => 'Schedule date should be a future date.',
 
                     'schedule_time.after_or_equal' => 'Schedule time should be a future time.',
+
+                    'media_type.in' => 'Invalid Request',
+                    'media_type.required_if' => 'Invalid Request',
                 ]
             );
+
+            $validator->after(function ($validator) use ($request) {
+                if ($request->has('media') && $request->media_type == 'image') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['jpg', 'jpeg', 'png', 'gif'])) $validator->errors()->add('media', 'Media should be jpg, jpeg and png');
+                    }
+                }
+
+                if ($request->has('media') && $request->media_type == 'video') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['mp4', 'mpeg', 'avi'])) $validator->errors()->add('media', 'Media should be mp4, mpeg and avi');
+                    }
+                }
+            });
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
             if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
+
+            $oldPost = Post::where('id', $request->post_id)->first();
+            if ($oldPost->media != null) {
+                foreach (explode(',', $oldPost->media) as $media) {
+                    if (file_exists(public_path($media))) {
+                        unlink(public_path($media));
+                    } 
+                } 
+                $oldPost->media = null;
+                $oldPost->media_type =  null;
+                $oldPost->save();
+            }
 
             $data = Post::where('id', $request->post_id)->first();
             if (!$data) throw new Exception('Post not found.');
@@ -435,23 +463,20 @@ class DraftPostController extends Controller
             $data->description = str_replace('\n', "\n", $request->description);
             $data->draft = 1;
 
-            $mediaType = null;
-            $media_type = null;
-            
-            if ($request->hasFile('media')) {
-                $media = $request->file('media');
-                $mediaName = time() . '.' . $media->getClientOriginalExtension();
-                $mediaType = $media->getMimeType();
-                $media->move(public_path('posts'), $mediaName);
-                $onlyMediaPath = 'posts/' . $mediaName;
+            if ($request->media) {
+                foreach ($request->media as $media) {
+                    $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
+                    $mediaSize = $media->getSize();
+                    $media->move(public_path('posts'), $mediaName);
+                    $mediaPath = 'posts/' . $mediaName;
 
-                if (str_starts_with($mediaType, 'image/')) $media_type = 'image';
-                if (str_starts_with($mediaType, 'video/')) $media_type = 'video';
+                    $mediaPaths[] = $mediaPath;
+                    $mediaSizes[] = $mediaSize;
+                }
 
-                $data->media = $onlyMediaPath;
-                $data->media_type = $media_type;
+                $data->media = implode(',', $mediaPaths);
+                $data->media_type = $request->media_type;
             }
-
 
             // On Facebook
             if ($request->has('on_facebook')) {
@@ -504,8 +529,6 @@ class DraftPostController extends Controller
             }
 
             $data->save();
-
-            DB::commit();
 
             Session::flash('success', ['text' => 'Post updated successfully']);
 

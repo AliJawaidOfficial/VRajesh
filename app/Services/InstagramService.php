@@ -146,8 +146,6 @@ class InstagramService
                 if (isset($data['id'])) $creationIds[] = $data['id'];
             }
 
-            // return [$errors, $creationIds];
-
             if (!empty($creationIds)) return $this->postImage2($creationIds, $text);
         } catch (Exception $e) {
             return [
@@ -181,7 +179,7 @@ class InstagramService
             $data = json_decode($response, true);
             if (isset($data['error'])) throw new Exception($data['error']['message']);
 
-            $this->postImage3($data['id']);
+            return $this->postImage3($data['id']);
         } catch (Exception $e) {
             return [
                 'status' => 500,

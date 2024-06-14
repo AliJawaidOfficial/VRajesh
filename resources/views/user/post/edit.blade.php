@@ -318,7 +318,6 @@
                 formData.append('media[]', file);
             });
 
-            console.log("submit");
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
@@ -354,16 +353,68 @@
             }
         });
 
-
         // Draft Form
         $('#postForm button[name="draft"]').click(function(e) {
             e.preventDefault();
+
+            const mediatype = images[0].type === 'video/mp4' ? 'video' : 'image'
+            $("#mediaType").val(mediatype);
             let form = $('#postForm')[0];
+            let formData = new FormData(form);
+            
+            images.forEach((file, index) => {
+                formData.append('media[]', file);
+            });
+
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('user.post.draft.store') }}",
-                    data: new FormData(form),
+                    url: "{{ route('user.post.draft.update') }}",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        showLoadingModal()
+                    },
+                    success: function(response) {
+                        if (response.status == 200) {
+                            hideLoadingModal()
+                            Swal.fire({
+                                icon: 'success',
+                                title: "Post saved as draft",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                window.location.href = "{{ route('user.post.draft') }}";
+                            });
+                        } else {
+                            toastr.error(response.error);
+
+                            hideLoadingModal()
+                        }
+                    }
+                });
+            }
+        });
+
+    // Save as Draft
+        $('#postForm button[name="save_as_draft"]').click(function(e) {
+            e.preventDefault();
+
+            const mediatype = images[0].type === 'video/mp4' ? 'video' : 'image'
+            $("#mediaType").val(mediatype);
+            let form = $('#postForm')[0];
+            let formData = new FormData(form);
+
+            images.forEach((file, index) => {
+                formData.append('media[]', file);
+            });
+
+            if ($(this).valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('user.post.draft.store.new') }}",
+                    data: formData,
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
@@ -512,49 +563,47 @@
         var totalImages = 0;
         var selectedImages = [];
         var images = [];
-
         const asset = `{{ env('APP_URL') }}`;
         let postsData = @json($post->media);
-        let posts = postsData..split(',');
 
-        let newposts = posts.map((post) => {
-            return asset + '/' + post;
-        })
+        if (typeof postsData != null) {
+            let posts = postsData.split(',');
 
+            let newposts = posts.map((post) => {
+                return asset + '/' + post;
+            })
 
-        console.log(posts);
-
-        function setImage() {
-
-            const fetchPromises = newposts.map((image,index) => {
-                return fetch(image)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const fileName = posts[index].split('http://vrajesh.localhost/')[0];
-                        console.log(fileName)
-                        console.log(image)
-                        const file = new File([blob], fileName, {
-                            type: blob.type
+            function setImage() {
+                const fetchPromises = newposts.map((image, index) => {
+                    return fetch(image)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            const fileName = posts[index].split('http://vrajesh.localhost/')[0];
+                            console.log(fileName)
+                            console.log(image)
+                            const file = new File([blob], fileName, {
+                                type: blob.type
+                            });
+                            if (!validateFiles(images)) {
+                                return;
+                            }
+                            images.push(file);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching image:', error);
                         });
-                        if (!validateFiles(images)) {
-                            return;
-                        }
-                        images.push(file);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching image:', error);
-                    });
-            });
+                });
 
-            // Wait for all fetch operations to complete
-            Promise.all(fetchPromises).then(() => {
+                // Wait for all fetch operations to complete
+                Promise.all(fetchPromises).then(() => {
 
-                showPreview()
-                $('#imagesModal .btn-close').click(); // Close the modal
-            });
+                    showPreview()
+                    $('#imagesModal .btn-close').click(); // Close the modal
+                });
+            }
+
+            setImage();
         }
-
-        setImage();
 
         // Function to load more images
         function loadMoreImages() {
@@ -852,6 +901,7 @@
                     @csrf
                     <input type="date" name="schedule_date" id="post_schedule_date" class="d-none" />
                     <input type="time" name="schedule_time" id="post_schedule_time" class="d-none" />
+                    <input type="hidden" name="post_id" value="{{ $post->id }}">
 
                     <div class="d-flex flex-column flex-grow-1">
                         <div class="mb-3">
@@ -993,20 +1043,32 @@
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">
                         <div>
                             @can('draft_post')
-                                <button type="button" name="draft" class="btn btn-custom"><i
-                                        class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
+                                @if ($action == 'draft')
+                                    @if ($post->draft == 1)
+                                        <button type="button" name="draft" class="btn btn-custom"><i
+                                                class="fas fa-folder d-inline-block me-1"></i> Save changes</button>
+                                    @else
+                                        <button type="button" name="save_as_draft" class="btn btn-custom"><i
+                                                class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
+                                    @endif
+                                @endif
                             @endcan
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             @can('scheduled_post')
-                                <button type="button" class="btn btn-custom" data-bs-toggle="modal"
-                                    data-bs-target="#scheduleModal"><i class="fas fa-calendar-alt d-inline-block me-1"></i>
-                                    Schedule</button>
+                                @if ($action == 'schedule')
+                                    <button type="button" class="btn btn-custom" data-bs-toggle="modal"
+                                        data-bs-target="#scheduleModal"><i
+                                            class="fas fa-calendar-alt d-inline-block me-1"></i>
+                                        Schedule</button>
+                                @endif
                             @endcan
-                            @can('immediate_post')
-                                <button type="submit" name="post" class="btn btn-custom"><i
-                                        class="fas fa-share-square d-inline-block me-1"></i> Post</button>
+                            @can('re_post')
+                                @if ($action == 'repost')
+                                    <button type="submit" name="post" class="btn btn-custom"><i
+                                            class="fas fa-share-square d-inline-block me-1"></i> Post</button>
+                                @endif
                             @endcan
                         </div>
                     </div>

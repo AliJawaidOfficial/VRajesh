@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
@@ -333,7 +334,7 @@ class PostController extends Controller
                                 $request->description
                             );
                     } else {
-                        $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
+                        $posted = $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
                     }
                 }
 
@@ -387,8 +388,6 @@ class PostController extends Controller
     public function newStore(Request $request)
     {
         try {
-            DB::beginTransaction();
-
             $validator = Validator::make(
                 $request->all(),
                 [
@@ -595,13 +594,10 @@ class PostController extends Controller
                 $oldPost->delete();
             }
 
-            DB::commit();
-
             return response()->json([
                 'status' => 200,
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
             return response()->json([
                 'status' => 500,
                 'error' => $e->getMessage()

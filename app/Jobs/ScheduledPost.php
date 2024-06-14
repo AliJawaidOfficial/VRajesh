@@ -33,7 +33,8 @@ class ScheduledPost implements ShouldQueue
                 if ($post->on_facebook == 1) $this->processFacebookPost($post);
                 if ($post->on_instagram == 1) $this->processInstagramPost($post);
 
-                Post::where('id', $post->id)->update(['posted' => 1]);
+                Log::info("test");
+                // Post::where('id', $post->id)->update(['posted' => 1]);
             } catch (Exception $e) {
                 Log::error($e->getMessage());
             }
@@ -56,14 +57,19 @@ class ScheduledPost implements ShouldQueue
 
         $service = new LinkedInService();
         if ($media == null) {
-            $service->postText($organizationId, $description, $user_id);
+            $posted = $service->postText($organizationId, $description, $user_id);
         } else {
             $media = public_path($media);
             if (File::exists($media)) {
                 $media_type = File::mimeType($media);
-                if ($media_type == 'image') $posted = $service->postImage($organizationId, $media, $description, $user_id);
-                if ($media_type == 'video') $posted = $service->postVideo($organizationId, $media, $description, $user_id);
-                Log::info($posted);
+                if ($media_type == 'image') {
+                    $posted = $service->postImage($organizationId, $media, $description, $user_id);
+                    Log::info($posted);
+                }
+                if ($media_type == 'video') {
+                    $posted = $service->postVideo($organizationId, $media, $description, $user_id);
+                    Log::info($posted);
+                }
             }
         }
     }
@@ -75,6 +81,7 @@ class ScheduledPost implements ShouldQueue
      */
     public function processFacebookPost($post)
     {
+        Log::info("test");
         $pageId = $post->facebook_page_id;
         $pageAccessToken = $post->facebook_page_access_token;
         $description = $post->description;
@@ -90,12 +97,13 @@ class ScheduledPost implements ShouldQueue
 
                 if ($media_type == 'image') {
                     $posted = $service->postImages($pageId, $pageAccessToken, $media, $description, $userId);
+                    Log::info($posted);
                 }
                 if ($media_type == 'video') {
                     $media_size = File::size(public_path($media));
                     $posted = $service->postVideo($pageId, $pageAccessToken, $media_size, $media, $description, $userId);
+                    Log::info($posted);
                 }
-                Log::info($posted);
             }
         }
     }
@@ -118,9 +126,14 @@ class ScheduledPost implements ShouldQueue
             if (file_exists(public_path($media))) {
                 $media_size = File::size($media);
 
-                if ($media_type == 'image') $posted = $service->postImage($igUserId, $media, $description, $userId);
-                if ($media_type == 'video') $posted = $service->postVideo($igUserId, $media, $media_size, $description, $userId);
-                Log::info($posted);
+                if ($media_type == 'image') {
+                    $posted = $service->postImage($igUserId, $media, $description, $userId);
+                    Log::info($posted);
+                }
+                if ($media_type == 'video') {
+                    $posted = $service->postVideo($igUserId, $media, $media_size, $description, $userId);
+                    Log::info($posted);
+                }
             }
         }
     }

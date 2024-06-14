@@ -214,6 +214,7 @@
 
                         html += `
                             <div class="media-preview w-50">
+                                <div class="d-flex flex-wrap justify-content-start align-items-start w-100 overflow-auto">
                         `;
 
                         if (mediaContent != null) {
@@ -221,7 +222,7 @@
                             if (mediaType == 'image') {
                                 $.each(mediaContent, function(index, image) {
                                     html +=
-                                        `<img src="${asset}${image}" class="img-fluid w-100 rounded mb-1" />`;
+                                        `<img src="${asset}${image}" class="img-fluid rounded mb-1" style="width: 100px; height: 100px;" />`;
                                 });
                             } else if (mediaType == 'video') {
                                 $.each(mediaContent, function(index, video) {
@@ -234,7 +235,9 @@
                             html += `<p class="text-center text-muted my-auto">No image/video published</p>`;
                         }
 
+
                         html += `
+                                </div>
                             </div>
                             <div class="post-details d-flex flex-column align-items-stretch w-50">
                                 <h4 class="modal-post-title">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
@@ -347,7 +350,7 @@
                 }
             });
         }
-        
+
         async function transferPostData(action) {
             let id = $("#postDetailId").val();
             window.location.href = `{{ route('user.post.index') }}/${id}/${action}`;
@@ -924,7 +927,8 @@
                             </div>
                             <div class="modal-footer">
                                 <div>
-                                    <button type="submit" class="btn btn-custom" id="scheduleSaveBtn"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
+                                    <button type="submit" class="btn btn-custom" id="scheduleSaveBtn"><i
+                                            class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                                 </div>
                             </div>
                         </form>
@@ -1048,7 +1052,8 @@
                             </div>
                             <div class="modal-footer">
                                 <div>
-                                    <button type="submit" class="btn btn-custom" id="repostSaveBtn"><i class="fas fa-share-square d-inline-block me-1"></i> Repost</button>
+                                    <button type="submit" class="btn btn-custom" id="repostSaveBtn"><i
+                                            class="fas fa-share-square d-inline-block me-1"></i> Repost</button>
                                 </div>
                             </div>
                         </form>

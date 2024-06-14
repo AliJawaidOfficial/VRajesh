@@ -344,11 +344,11 @@
                                 showConfirmButton: false,
                                 timer: 700
                             }).then(() => {
-                                if ($schedule_date != "") {
+                                @if ($schedule_date != "")
                                     window.location.href = "{{ route('user.post.scheduled') }}";
-                                } else {
+                                @else
                                     window.location.href = "{{ route('user.post.index') }}";
-                                }
+                                @endif
                             });
                         } else {
                             toastr.error(response.error);
@@ -362,12 +362,25 @@
         // Draft Form
         $('#postForm button[name="draft"]').click(function(e) {
             e.preventDefault();
+
+            if (images[0] != undefined) {
+                const mediatype = images[0]?.type === 'video/mp4' ? 'video' : 'image'
+                $("#mediaType").val(mediatype);
+            }
+
             let form = $('#postForm')[0];
+            let formData = new FormData(form);
+
+            // Append each file in the images array to the FormData
+            images.forEach((file, index) => {
+                formData.append('media[]', file);
+            });
+
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
                     url: "{{ route('user.post.draft.store') }}",
-                    data: new FormData(form),
+                    data: formData,
                     processData: false,
                     contentType: false,
                     beforeSend: function() {

@@ -214,7 +214,7 @@
 
                         html += `
                             <div class="media-preview w-50">
-                                <div class="d-flex flex-column w-100">
+                                <div class="d-flex flex-wrap justify-content-start align-items-start w-100 overflow-auto">
                         `;
 
                         if (mediaContent != null) {
@@ -222,7 +222,7 @@
                             if (mediaType == 'image') {
                                 $.each(mediaContent, function(index, image) {
                                     html +=
-                                        `<img src="${asset}${image}" class="img-fluid w-100 rounded mb-1" />`;
+                                        `<img src="${asset}${image}" class="img-fluid rounded mb-1" style="width: 100px; height: 100px;" />`;
                                 });
                             } else if (mediaType == 'video') {
                                 $.each(mediaContent, function(index, video) {

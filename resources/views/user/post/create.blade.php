@@ -307,9 +307,10 @@
         $("#postForm").submit(function(e) {
             e.preventDefault();
 
-            const mediatype = images[0].type === 'video/mp4' ? 'video' : 'image'
-
-            $("#mediaType").val(mediatype);
+            if (images[0] != undefined) {
+                const mediatype = images[0]?.type === 'video/mp4' ? 'video' : 'image'
+                $("#mediaType").val(mediatype);
+            }
 
             let formData = new FormData(this);
 
@@ -318,7 +319,6 @@
                 formData.append('media[]', file);
             });
 
-            console.log("submit");
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
@@ -344,7 +344,11 @@
                                 showConfirmButton: false,
                                 timer: 700
                             }).then(() => {
-                                window.location.href = "{{ route('user.post.index') }}";
+                                if ($schedule_date != "") {
+                                    window.location.href = "{{ route('user.post.scheduled') }}";
+                                } else {
+                                    window.location.href = "{{ route('user.post.index') }}";
+                                }
                             });
                         } else {
                             toastr.error(response.error);
@@ -354,7 +358,7 @@
             }
         });
 
-        
+
         // Draft Form
         $('#postForm button[name="draft"]').click(function(e) {
             e.preventDefault();
@@ -780,8 +784,10 @@
             <div class="col-md-8">
                 <form id="postForm" class="p-4 bg-white rounded-6" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <input type="date" name="schedule_date" id="post_schedule_date" class="d-none" />
+                    <input type="date" name="schedule_date" id="post_schedule_date" value="{{ $schedule_date }}"
+                        class="d-none" />
                     <input type="time" name="schedule_time" id="post_schedule_time" class="d-none" />
+                    <input type="hidden" name="media_type" id="mediaType" />
 
                     <div class="d-flex flex-column flex-grow-1">
                         <div class="mb-3">
@@ -855,7 +861,6 @@
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>
                                     <input class="d-block w-100 form-control d-none" type="file" name="media[]" multiple
                                         accept="video/*, image/*" id="mediaInput" />
-                                    <input type="hidden" name="media_type" value="image" id="mediaType" />
                                 </div>
                             @endif
                         </div>
@@ -923,8 +928,10 @@
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">
                         <div>
                             @can('draft_post')
-                                <button type="button" name="draft" class="btn btn-custom"><i
-                                        class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
+                                @if ($schedule_date == null)
+                                    <button type="button" name="draft" class="btn btn-custom"><i
+                                            class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
+                                @endif
                             @endcan
                         </div>
 
@@ -935,8 +942,10 @@
                                     Schedule</button>
                             @endcan
                             @can('immediate_post')
-                                <button type="submit" name="post" class="btn btn-custom"><i
-                                        class="fas fa-share-square d-inline-block me-1"></i> Post</button>
+                                @if ($schedule_date == null)
+                                    <button type="submit" name="post" class="btn btn-custom"><i
+                                            class="fas fa-share-square d-inline-block me-1"></i> Post</button>
+                                @endif
                             @endcan
                         </div>
                     </div>
@@ -1012,7 +1021,7 @@
                             <div class="mb-3">
                                 <label for="scheduleDate" class="form-label">Date</label>
                                 <input type="date" min="{{ date('Y-m-d') }}" class="form-control" id="scheduleDate"
-                                    name="schedule_date" required>
+                                    name="schedule_date" value="{{ $schedule_date }}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="scheduleTime" class="form-label">Time</label>

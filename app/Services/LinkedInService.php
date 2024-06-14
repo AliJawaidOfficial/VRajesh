@@ -338,16 +338,15 @@ class LinkedInService
                 $imagePath = env('APP_URL') . '/' . $image;
 
                 // Step 1
-                $step1 = $this->postImage1($organization_id, $images, $title, $user_id);
-                return $step1;
+                $step1 = $this->postImage1();
                 $upload_url = $step1['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
                 $asset_id = $step1['value']['asset'];
 
                 // Step 2
-                $step2 = $this->postImage2($upload_url, $imagePath, $asset_id, $title);
+                $step2 = $this->postImage2($upload_url, $imagePath);
 
                 // Step 3
-                $step = $this->postImage3($asset_id, $title);
+                $step = $this->postImage3($asset_id);
 
                 $assetsIds[] = $asset_id;
             }
@@ -363,7 +362,7 @@ class LinkedInService
         }
     }
 
-    public function postImage1($organization_id, $images, $title, $user_id = null)
+    public function postImage1()
     {
         try {
             $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
@@ -407,7 +406,7 @@ class LinkedInService
         }
     }
 
-    public function postImage2($upload_url, $imagePath, $asset_id, $title)
+    public function postImage2($upload_url, $imagePath)
     {
         try {
             $image = file_get_contents($imagePath);
@@ -435,7 +434,7 @@ class LinkedInService
         }
     }
 
-    public function postImage3($asset_id, $title)
+    public function postImage3($asset_id)
     {
         try {
             $url = "https://api.linkedin.com/v2/assets/{$asset_id}/action=completeUpload";

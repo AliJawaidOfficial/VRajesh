@@ -86,13 +86,15 @@ class ScheduledPost implements ShouldQueue
         if ($media == null) {
             $service->postText($pageId, $pageAccessToken, $description, $userId);
         } else {
-            $media = public_path($media);
+            if (file_exists(public_path($media))) {
 
-            if (file_exists($media)) {
-                $media_size = File::size($media);
-
-                if ($media_type == 'image') $posted = $service->postImage($pageId, $pageAccessToken, $media, $description, $userId);
-                if ($media_type == 'video') $posted = $service->postVideo($pageId, $pageAccessToken, $media_size, $media, $description, $userId);
+                if ($media_type == 'image') {
+                    $posted = $service->postImages($pageId, $pageAccessToken, $media, $description, $userId);
+                }
+                if ($media_type == 'video') {
+                    $media_size = File::size(public_path($media));
+                    $posted = $service->postVideo($pageId, $pageAccessToken, $media_size, $media, $description, $userId);
+                }
                 Log::info($posted);
             }
         }
@@ -113,8 +115,7 @@ class ScheduledPost implements ShouldQueue
 
         $service = new InstagramService();
         if ($media != null) {
-            $media = public_path($media);
-            if (File::exists($media)) {
+            if (file_exists(public_path($media))) {
                 $media_size = File::size($media);
 
                 if ($media_type == 'image') $posted = $service->postImage($igUserId, $media, $description, $userId);

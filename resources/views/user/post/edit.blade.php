@@ -514,8 +514,8 @@
         var images = [];
 
         const asset = `{{ env('APP_URL') }}`;
-        let posts = @json($post->media).split(',');
-
+        let postsData = @json($post->media);
+        let posts = postsData..split(',');
 
         let newposts = posts.map((post) => {
             return asset + '/' + post;

@@ -203,7 +203,7 @@
         function showPostDetail(id) {
             $.ajax({
                 type: "GET",
-                url: `{{ route('user.post.index') }}/details/${id}`,
+                url: `{{ route('user.post.index') }}/details/show/${id}`,
                 dataType: "json",
                 success: function(response) {
                     if (response.status == 200) {
@@ -216,17 +216,24 @@
                             <div class="media-preview w-50">
                         `;
 
-                        if (mediaType == 'image') {
-                            html +=
-                                `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
-                        } else if (mediaType == 'video') {
-                            html += `<video controls class="w-100 rounded mb-1">
-                                <source src="${asset}${mediaContent}" type="video/mp4">
-                                Your browser does not support the video tag.
-                              </video>`;
+                        if (mediaContent != null) {
+                            mediaContent = mediaContent.split(',');
+                            if (mediaType == 'image') {
+                                $.each(mediaContent, function(index, image) {
+                                    html +=
+                                        `<img src="${asset}${image}" class="img-fluid w-100 rounded mb-1" />`;
+                                });
+                            } else if (mediaType == 'video') {
+                                $.each(mediaContent, function(index, video) {
+                                    html +=
+                                        `<video controls class="w-100 rounded mb-1">
+                                        <source src="${asset}${video}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                                });
+                            }
                         } else {
-                            html += `<p class="text-center text-muted my-auto">No image/video saved</p>`;
+                            html += `<p class="text-center text-muted my-auto">No image/video published</p>`;
                         }
+
                         html += `
                             </div>
                             <div class="post-details d-flex flex-column align-items-stretch w-50">

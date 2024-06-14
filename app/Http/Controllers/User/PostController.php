@@ -146,7 +146,8 @@ class PostController extends Controller
      */
     public function create(Request $request)
     {
-        return view('user.post.create');
+        $schedule_date = $request->has('schedule_date') ? $request->schedule_date : null;
+        return view('user.post.create', compact('schedule_date'));
     }
 
     /**
@@ -302,15 +303,13 @@ class PostController extends Controller
                                 $request->description
                             );
 
-                        if ($data->media_type == 'vidoe')
+                        if ($data->media_type == 'video')
                             $posted = $this->instagramService->postVideo(
                                 $data->instagram_account_id,
                                 explode(',', $data->media)[0],
-                                $mediaSizes,
+                                $mediaSizes[0],
                                 $request->description
                             );
-
-                        return $posted;
                     }
                 }
 
@@ -357,7 +356,6 @@ class PostController extends Controller
                     } else {
                         $posted = $this->linkedinService->postText($data->linkedin_company_id, $request->description);
                     }
-                    if (isset($post['status']) && $post['status'] != 200) $errors[] = $post['message'];
                 }
 
                 $data->posted = 1;
@@ -521,21 +519,45 @@ class PostController extends Controller
                 $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
                 $data->scheduled_at = $request->schedule_date . ' ' . $time;
             } else {
-                $assets = env('APP_URL') . '/';
-
-                // On Instagram
                 if ($request->has('on_instagram')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->instagramService->postImage($data->instagram_account_id, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->instagramService->postVideo($data->instagram_account_id, $assets . $data->media, $mediaSize, $request->description);
+                    if ($data->media != null) {
+
+                        if ($data->media_type == 'image')
+                            $posted = $this->instagramService->postImage(
+                                $data->instagram_account_id,
+                                $data->media,
+                                $request->description
+                            );
+
+                        if ($data->media_type == 'video')
+                            $posted = $this->instagramService->postVideo(
+                                $data->instagram_account_id,
+                                explode(',', $data->media)[0],
+                                $mediaSizes[0],
+                                $request->description
+                            );
                     }
                 }
 
                 // On Facebook
                 if ($request->has('on_facebook')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->facebookService->postImage($data->facebook_page_id, $data->facebook_page_access_token, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->facebookService->postVideo($data->facebook_page_id, $data->facebook_page_access_token, $mediaSize, $assets . $data->media, $request->description);
+                    if ($data->media != null) {
+                        if ($data->media_type == 'image')
+                            $posted = $this->facebookService->postImages(
+                                $data->facebook_page_id,
+                                $data->facebook_page_access_token,
+                                $data->media,
+                                $request->description
+                            );
+
+                        if ($data->media_type == 'video')
+                            $posted = $this->facebookService->postVideo(
+                                $data->facebook_page_id,
+                                $data->facebook_page_access_token,
+                                $mediaSizes[0],
+                                explode(',', $data->media)[0],
+                                $request->description
+                            );
                     } else {
                         $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
                     }
@@ -543,11 +565,22 @@ class PostController extends Controller
 
                 // On Linkedin
                 if ($request->has('on_linkedin')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->linkedinService->postImage($data->linkedin_company_id, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->linkedinService->postVideo($data->linkedin_company_id, $assets . $data->media, $request->description);
+                    if ($data->media != null) {
+                        if ($data->media_type == 'image')
+                            $posted = $this->linkedinService->postImage(
+                                $data->linkedin_company_id,
+                                $data->media,
+                                $request->description
+                            );
+
+                        if ($data->media_type == 'video')
+                            $posted = $this->linkedinService->postVideo(
+                                $data->linkedin_company_id,
+                                explode(',', $data->media)[0],
+                                $request->description
+                            );
                     } else {
-                        $this->linkedinService->postText($data->linkedin_company_id, $request->description);
+                        $posted = $this->linkedinService->postText($data->linkedin_company_id, $request->description);
                     }
                 }
 

@@ -115,10 +115,8 @@ Route::name('user.')
                 ->group(function () {
 
                     Route::get('/', 'index')->name('index');
-                    Route::get('/details/{id}', 'show')->name('show');
-
                     Route::get('/create', 'create')->name('create');
-                    Route::get('/{id}/{action}', 'edit')->name('edit');
+                    Route::get('/details/show/{id}', 'show')->name('show');
 
                     Route::post('/create', 'store')->name('store');
                     Route::post('/create/new', 'newStore')->name('new.store');
@@ -147,6 +145,9 @@ Route::name('user.')
                             Route::get('/', 'index');
                             Route::get('/response', 'all')->name('.all');
                         });
+
+                        
+                    Route::get('/{id}/{action}', 'edit')->name('edit');
                 });
 
 

@@ -693,7 +693,7 @@
             }
 
             function fetchEventDetails(eventId) {
-                const apiUrl = `{{ route('user.post.index') }}/details/${eventId}`;
+                const apiUrl = `{{ route('user.post.index') }}/details/show/${eventId}`;
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(response => {
@@ -788,18 +788,13 @@
                     var cellDate = new Date(cell.getAttribute('data-date'));
                     cellDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0); // Reset time part to midnight
 
-
-
-                    console.log(cellDate,now);
-
                     if (cellDate >= now) {
                         var button = document.createElement('button');
                         button.innerHTML = '<i class="fas fa-plus"></i>';
                         button.className = 'schedule-button';
                         button.addEventListener('click', function() {
-                            $("#schedulePostForm").trigger("reset");
-                            $("#schedulePostModal").modal("show");
-                            $("#postDate").val(cellDate.toISOString().split('T')[0]);
+                            let date = cellDate.toISOString().split('T')[0];
+                            window.location.href = `{{ route('user.post.create') }}?schedule_date=${date}`;
                         });
                     
                         console.log(cellDate >= now);

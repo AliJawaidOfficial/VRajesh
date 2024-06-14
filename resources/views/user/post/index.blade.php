@@ -203,7 +203,7 @@
         function showPostDetail(id) {
             $.ajax({
                 type: "GET",
-                url: `{{ route('user.post.index') }}/details/${id}`,
+                url: `{{ route('user.post.index') }}/details/show/${id}`,
                 dataType: "json",
                 success: function(response) {
                     if (response.status == 200) {

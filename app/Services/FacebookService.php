@@ -233,11 +233,10 @@ class FacebookService
             $this->pageId = $page_id;
             $this->pageAccessToken = $page_access_token;
 
-            $videoPath = env('APP_URL') . '/' . explode(',', $video)[0];
-            $videoSize = $videoSizes[0];
+            $videoPath = env('APP_URL') . '/' . $video;
 
             // Step 1
-            $response = $this->postVideo1($videoSize);
+            $response = $this->postVideo1($videoSizes);
             if (isset($response['error'])) throw new Exception($response['error']['message']);
 
             $responseData = json_decode($response, true);

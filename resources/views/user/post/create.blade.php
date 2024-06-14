@@ -306,22 +306,29 @@
         // Post Form
         $("#postForm").submit(function(e) {
             e.preventDefault();
+
+            let formData = new FormData(this);
+
+            // Append each file in the images array to the FormData
+            images.forEach((file, index) => {
+                formData.append('media[]', file);
+            });
+
             console.log("submit");
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
                     url: "{{ route('user.post.store') }}",
-                    data: new FormData(this),
+                    data: formData,
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
-                        showLoadingModal()
+                        showLoadingModal();
                     },
                     success: function(response) {
-
                         $("#post_schedule_date").val("");
                         $("#post_schedule_time").val("");
-                        hideLoadingModal()
+                        hideLoadingModal();
 
                         $("#scheduleModal").removeClass("show");
                         $("#scheduleModal").css("display", "none");
@@ -333,7 +340,7 @@
                                 showConfirmButton: false,
                                 timer: 700
                             }).then(() => {
-                                location.reload();
+                                // location.reload();
                             });
                         } else {
                             toastr.error(response.error);
@@ -342,7 +349,6 @@
                 });
             }
         });
-
         // Draft Form
         $('#postForm button[name="draft"]').click(function(e) {
             e.preventDefault();
@@ -472,6 +478,7 @@
         var imagesLoaded = 0;
         var totalImages = 0;
         var selectedImages = [];
+        var images = [];
 
         // Function to load more images
         function loadMoreImages() {
@@ -483,7 +490,10 @@
 
         // Function to fetch images from the server
         function getPixels(type, q, page = 1, per_page = 12) {
-            console.log("selectedImages", selectedImages);
+            const mediaInput = document.getElementById('mediaInput');
+            console.log("mediaInput", mediaInput.files);
+            console.log("images", images);
+
             if (q.length == 0) {
                 q = 'green';
             }
@@ -497,22 +507,16 @@
                     $("#load-more-btn").hide();
                 },
                 success: function(response) {
-                    console.log("Success response:", response);
                     if (response.status == 200) {
                         var html = '';
                         totalImages += response.data.photos.length;
                         $.each(response.data.photos, function(indexInArray, photo) {
                             html += `<div class="col-lg-4 p-0">
                         <img src="${photo.src.landscape}" class="img-fluid selectable-image" data-image-id="${photo.id}" data-src="${photo.src.landscape}" />
-                     </div>`;
+                    </div>`;
                         });
                         $("#images").append(html);
 
-                        if (response.data.total_pages > page) {
-                            console.log("More pages available. Showing load more button.");
-                        } else {
-                            console.log("All images loaded.");
-                        }
                     } else {
                         toastr.error(response.error);
                     }
@@ -540,6 +544,15 @@
         // Attach click event handler to the "Load More" button
         $("#load-more-btn").click(loadMoreImages);
 
+        // Attach click event handler to the search button
+        $("#searchButton").click(function() {
+            currentPage = 1;
+            totalImages = 0;
+            imagesLoaded = 0;
+            $("#images").html("");
+            getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+        });
+
         // Event delegation for image selection
         $(document).on('click', '.selectable-image', function() {
             var imageId = $(this).data('image-id');
@@ -563,242 +576,192 @@
                 0); // Enable Done button when images are selected
         });
 
-        // Function to handle "Done" button click
-        $(document).on('click', '#imagesModalDoneBtn', function() {
-            // Handle Done button click
-            $("#imagesModalDoneBtn").prop("disabled", true); // Disable Done button
-
-            if (selectedImages.length > 0) {
-                const mediaInput = document.getElementById('mediaInput');
-                const dataTransfer = new DataTransfer();
-
-                const fetchPromises = selectedImages.map(image => {
-                    const cleanImageUrl = image.src.split('?')[0];
-                    return fetch(cleanImageUrl)
-                        .then(response => response.blob())
-                        .then(blob => {
-                            const fileName = cleanImageUrl.split('/').pop();
-                            const file = new File([blob], fileName, {
-                                type: blob.type
-                            });
-                            dataTransfer.items.add(file);
-                        })
-                        .catch(error => {
-                            console.error('Error fetching image:', error);
-                        });
-                });
-
-                // Wait for all fetch operations to complete
-                Promise.all(fetchPromises).then(() => {
-                    for (let i = 0; i < mediaInput.files.length; i++) {
-                        dataTransfer.items.add(mediaInput.files[i]);
-                    }
-                    mediaInput.files = dataTransfer.files;
-                    handleFileUploads(mediaInput);
-                    $('#imagesModal .btn-close').click(); // Close the modal
-                });
-
-                selectedImages.length = 0;
-            }
-        });
-
-        // Attach click event handler to the search button
-        $("#searchButton").click(function() {
-            currentPage = 1;
-            totalImages = 0;
-            imagesLoaded = 0;
-            $("#images").html("");
-            getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
-        });
-
-        // Handle file uploads and previews
-        let uploadedFiles = [];
-
-        function handleFileUploads(input) {
-            const fileInput = input;
-            const files = Array.from(fileInput.files);
-
-            const previewContainer = document.getElementById('uploadedImages');
-            const imageTypes = ["jpeg", "jpg", "png", "gif"];
-            const videoTypes = ["mp4", "avi", "mov", "mpeg"];
-            let fileType = null;
-            let isVideoFile = false;
-            let isValid = true;
-            let errorMessage = "";
-
-            // Check file types and sizes
-            let videoFileCount = 0;
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const fileMimeType = file.type.split('/')[1];
-                const fileMimeTypeCategory = file.type.split('/')[0];
-                const fileSizeMB = file.size / (1024 * 1024); // size in MB
-
-                if (fileMimeTypeCategory === 'image') {
-                    if (!imageTypes.includes(fileMimeType) || fileSizeMB > 5) {
-                        isValid = false;
-                        errorMessage =
-                            "Invalid image file. Accepted formats: jpeg, jpg, png, gif. Size must be less than 5 MB.";
-                        break;
-                    }
-                } else if (fileMimeTypeCategory === 'video') {
-                    if (!videoTypes.includes(fileMimeType) || fileSizeMB > 500) {
-                        isValid = false;
-                        errorMessage =
-                            "Invalid video file. Accepted formats: mp4, avi, mov, mpeg. Size must be less than 5 MB.";
-                        break;
-                    }
-                } else {
-                    isValid = false;
-                    errorMessage = "Unsupported file type.";
-                    break;
-                }
-
-                if (fileType === null) {
-                    fileType = fileMimeTypeCategory;
-                    if (fileMimeTypeCategory === 'video') {
-                        videoFileCount++;
-                        isVideoFile = true;
-                    }
-                } else if (fileType !== fileMimeTypeCategory) {
-                    isValid = false;
-                    errorMessage = "You can only upload either images or a video at a time, not both.";
-                    break;
-                } else if (fileMimeTypeCategory === 'video') {
-                    videoFileCount++;
-                }
-            }
-
-            if (videoFileCount > 1) {
-                isValid = false;
-                errorMessage = "You can only upload one video at a time.";
-            }
-
-            if (!isValid) {
-                alert(errorMessage);
-                fileInput.value = ''; // Reset the file input
-                return;
-            }
-
-            // If a video file is selected, remove all existing images
-            if (isVideoFile) {
-                removeExistingMedia('image');
-            } else {
-                // If images are selected, remove existing video
-                removeExistingMedia('video');
-            }
-
-            if (fileType === 'image') {
-                $("#mediaType").val('image');
-            } else if (fileType === 'video') {
-                $("#mediaType").val('video');
-            }
-
-            // Preview files
-            files.forEach((file, index) => {
-                const reader = new FileReader();
-                const existingFileIndex = uploadedFiles.findIndex(uploadedFile => uploadedFile.name === file.name &&
-                    uploadedFile.size === file.size);
-
-                if (existingFileIndex !== -1) {
-                    return;
-                }
-
-                reader.onload = function(event) {
-                    const mediaElement = fileType === 'image' ? new Image() : document.createElement('video');
-                    mediaElement.src = event.target.result;
-                    mediaElement.classList.add('preview');
-                    mediaElement.dataset.index = uploadedFiles.length;
-                    // Remove controls attribute for video
-                    if (fileType === 'video') {
-                        mediaElement.controls = false;
-                    }
-
-                    const removeBtn = document.createElement('button');
-                    removeBtn.innerHTML = '×';
-                    removeBtn.classList.add('remove-btn');
-                    removeBtn.onclick = function() {
-                        removeFile(parseInt(mediaElement.dataset.index));
-                    };
-
-                    const previewWrapper = document.createElement('div');
-                    previewWrapper.classList.add('preview-wrapper');
-                    previewWrapper.appendChild(mediaElement);
-                    previewWrapper.appendChild(removeBtn);
-                    previewContainer.appendChild(previewWrapper);
-
-                    uploadedFiles.push(file);
-                };
-
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function removeExistingMedia(mediaType) {
-            uploadedFiles = uploadedFiles.filter(file => file.type.split('/')[0] !== mediaType);
-            const previews = document.querySelectorAll('.preview-wrapper');
-            previews.forEach(preview => {
-                const mediaElement = preview.querySelector('.preview');
-                if (mediaElement.tagName.toLowerCase() === (mediaType === 'image' ? 'img' : 'video')) {
-                    preview.remove();
-                }
-            });
-        }
-
-        function removeFile(index) {
-            const fileType = uploadedFiles[index].type.split('/')[0];
-            uploadedFiles.splice(index, 1);
-
-            // Remove from input files
-            const mediaInput = document.getElementById('mediaInput');
-            const dataTransfer = new DataTransfer();
-            for (let i = 0; i < mediaInput.files.length; i++) {
-                if (i !== index) {
-                    dataTransfer.items.add(mediaInput.files[i]);
-                }
-            }
-            mediaInput.files = dataTransfer.files;
-
-            // Update selectedImages array
-            selectedImages = selectedImages.filter((img, i) => i !== index);
-
-            const previews = document.querySelectorAll('.preview-wrapper');
-            previews.forEach(preview => {
-                const mediaElement = preview.querySelector('.preview');
-                const previewIndex = parseInt(mediaElement.dataset.index);
-                if (previewIndex === index) {
-                    preview.remove();
-                } else if (previewIndex > index) {
-                    mediaElement.dataset.index = previewIndex - 1;
-                }
-            });
-        }
-
-        document.getElementById('mediaInput').addEventListener('change', function() {
-            handleFileUploads(this);
-        });
-
-        // Function to handle images from pixel selection
-        function handlePixelSelection(selectedImagesFromPixel) {
-            // Convert the selected images to File objects and handle them as file uploads
-            const dataTransfer = new DataTransfer();
-            selectedImagesFromPixel.forEach(image => {
+        // Function to update input files after selecting images from modal
+        function updateInputFiles() {
+            const fetchPromises = selectedImages.map(image => {
                 const cleanImageUrl = image.src.split('?')[0];
-                fetch(cleanImageUrl)
+                return fetch(cleanImageUrl)
                     .then(response => response.blob())
                     .then(blob => {
                         const fileName = cleanImageUrl.split('/').pop();
                         const file = new File([blob], fileName, {
                             type: blob.type
                         });
-                        dataTransfer.items.add(file);
-                        handleFileUploads({
-                            files: dataTransfer.files
-                        });
+                        if (!validateFiles(images)) {
+                            return;
+                        }
+                        images.push(file);
                     })
                     .catch(error => {
                         console.error('Error fetching image:', error);
                     });
+            });
+
+            // Wait for all fetch operations to complete
+            Promise.all(fetchPromises).then(() => {
+
+                showPreview()
+                $('#imagesModal .btn-close').click(); // Close the modal
+            });
+
+            selectedImages.length = 0;
+
+            // Reset modal done button
+            $("#imagesModalDoneBtn").prop("disabled", true);
+            $("#imagesModalDoneBtn").html('<i class="fas fa-check"></i> Done');
+
+        }
+
+        // Event listener for the modal's done button click event
+        $(document).on('click', '#imagesModalDoneBtn', function() {
+            // Handle Done button click
+            $("#imagesModalDoneBtn").prop("disabled", true); // Disable Done button
+            // add loader in the done button
+            $("#imagesModalDoneBtn").html(
+                '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
+            )
+
+            if (selectedImages.length > 0) {
+                updateInputFiles();
+            } else {
+                $('#imagesModal .btn-close').click(); // Close the modal if no images are selected
+            }
+        });
+
+        // Function to validate file selection
+        document.getElementById('mediaInput').addEventListener('change', function() {
+            const mediaInput = this;
+            const newFiles = Array.from(this.files);
+
+            if (!validateFiles(newFiles)) {
+                // Clear the input field by replacing it with a new input element
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.name = 'media[]';
+                newInput.multiple = true;
+                newInput.accept = 'video/*, image/*';
+                newInput.id = 'mediaInput';
+                newInput.className = 'd-block w-100 form-control d-none';
+
+                // Add the event listener to the new input element
+                newInput.addEventListener('change', arguments.callee);
+
+                // Replace the old input element with the new one
+                mediaInput.parentNode.replaceChild(newInput, mediaInput);
+                return;
+            }
+
+            newFiles.forEach(file => {
+                images.push(file);
+            });
+
+            // Clear the input field by replacing it with a new input element
+            const newInput = document.createElement('input');
+            newInput.type = 'file';
+            newInput.name = 'media[]';
+            newInput.multiple = true;
+            newInput.accept = 'video/*, image/*';
+            newInput.id = 'mediaInput';
+            newInput.className = 'd-block w-100 form-control d-none';
+
+            // Add the event listener to the new input element
+            newInput.addEventListener('change', arguments.callee);
+
+            // Replace the old input element with the new one
+            mediaInput.parentNode.replaceChild(newInput, mediaInput);
+
+            showPreview()
+        });
+
+        // Function to validate file selection
+        function validateFiles(files) {
+            let videoCount = 0;
+            let imageCount = 0;
+
+            for (let file of files) {
+                if (file.type.startsWith('video/')) {
+                    if (file.size > 500 * 1024 * 1024) { // 500MB limit for videos
+                        toastr.error(`Video ${file.name} exceeds the 500MB size limit and will not be added.`);
+                        continue;
+                    }
+                    videoCount++;
+                } else if (file.type.startsWith('image/')) {
+                    if (file.size > 5 * 1024 * 1024) { // 5MB limit for images
+                        toastr.error(`Image ${file.name} exceeds the 5MB size limit and will not be added.`);
+                        continue;
+                    }
+                    imageCount++;
+                }
+            }
+
+            for (let file of images) {
+                if (file.type.startsWith('video/')) {
+                    if (file.size > 500 * 1024 * 1024) { // 500MB limit for videos
+                        toastr.error(`Video ${file.name} exceeds the 500MB size limit and will not be added.`);
+                        continue;
+                    }
+                    videoCount++;
+                } else if (file.type.startsWith('image/')) {
+                    if (file.size > 5 * 1024 * 1024) { // 5MB limit for images
+                        toastr.error(`Image ${file.name} exceeds the 5MB size limit and will not be added.`);
+                        continue;
+                    }
+                    imageCount++;
+                }
+            }
+
+            if (videoCount > 1 || (videoCount === 1 && imageCount > 0)) {
+                toastr.error("You can upload only one video or multiple images at a time.");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Function to show preview of uploaded images/videos
+        function showPreview() {
+            const uploadedImagesContainer = document.getElementById('uploadedImages');
+            uploadedImagesContainer.innerHTML = ''; // Clear any existing previews
+
+            images.forEach((file, index) => {
+                const fileReader = new FileReader();
+                fileReader.onload = function(e) {
+                    const fileURL = e.target.result;
+
+                    const container = document.createElement('div');
+                    container.classList.add('preview-wrapper');
+                    container.style.position = 'relative';
+
+                    let mediaElement;
+                    if (file.type.startsWith('image/')) {
+                        mediaElement = document.createElement('img');
+                        mediaElement.src = fileURL;
+                    } else if (file.type.startsWith('video/')) {
+                        mediaElement = document.createElement('video');
+                        mediaElement.src = fileURL;
+                        mediaElement.controls = false;
+                    }
+                    mediaElement.style.width = '100px';
+                    mediaElement.style.height = '100px';
+                    mediaElement.style.objectFit = 'cover';
+                    mediaElement.style.borderRadius = '5px';
+                    mediaElement.style.border = '2px solid #ddd';
+                    mediaElement.style.padding = '5px';
+
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.classList.add('remove-btn');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.addEventListener('click', () => {
+                        images.splice(index, 1); // Remove the file from the images array
+                        showPreview(); // Refresh the preview
+                    });
+
+                    container.appendChild(mediaElement);
+                    container.appendChild(removeBtn);
+                    uploadedImagesContainer.appendChild(container);
+                };
+                fileReader.readAsDataURL(file);
             });
         }
     </script>
@@ -987,7 +950,8 @@
     </section>
 
     <!-- Pixels Images Modal -->
-    <div class="modal fade" id="imagesModal" tabindex="-1" aria-labelledby="imagesModalLabel" aria-hidden="true">
+    <div class="modal fade" id="imagesModal" data-bs-backdrop="static" tabindex="-1"
+        aria-labelledby="imagesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header flex-column">
@@ -1014,7 +978,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="imagesModalDoneBtn" disabled>Done</button>
+                    <button type="button" class="btn btn-success" id="imagesModalDoneBtn" disabled><i
+                            class="fas fa-check"></i> Done</button>
                 </div>
             </div>
         </div>
@@ -1027,7 +992,8 @@
 
     <!-- Schedule Modal -->
     @can('scheduled_post')
-        <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="scheduleModal" data-bs-backdrop="static" tabindex="-1"
+            aria-labelledby="scheduleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">

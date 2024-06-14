@@ -307,6 +307,10 @@
         $("#postForm").submit(function(e) {
             e.preventDefault();
 
+            const mediatype = images[0].type === 'video/mp4' ? 'video' : 'image'
+
+            $("#mediaType").val(mediatype);
+
             let formData = new FormData(this);
 
             // Append each file in the images array to the FormData
@@ -349,6 +353,8 @@
                 });
             }
         });
+
+        
         // Draft Form
         $('#postForm button[name="draft"]').click(function(e) {
             e.preventDefault();

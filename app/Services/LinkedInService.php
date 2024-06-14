@@ -57,6 +57,7 @@ class LinkedInService
      */
 
 
+
     /**
      * Login Auth
      */
@@ -85,6 +86,8 @@ class LinkedInService
         $url = 'https://www.linkedin.com/oauth/v2/authorization?' . http_build_query($param);
         return $url;
     }
+
+
 
     /**
      * Community Management Auth
@@ -225,6 +228,7 @@ class LinkedInService
     }
 
 
+
     public function getOrganizationDetails($organizationId)
     {
         try {
@@ -259,6 +263,7 @@ class LinkedInService
             ];
         }
     }
+
 
 
     /**
@@ -322,13 +327,46 @@ class LinkedInService
     /**
      * Image
      */
-    public function postImage($organization_id, $imagePath, $title, $user_id = null)
+    public function postImage($organization_id, $images, $title, $user_id = null)
+    {
+        try {
+            $this->init($user_id);
+            $this->setOrganizationUrn($organization_id);
+
+            $assetsIds = [];
+            foreach (explode(',', $images) as $index => $image) {
+                $imagePath = env('APP_URL') . '/' . $image;
+
+                // Step 1
+                $step1 = $this->postImage1($organization_id, $images, $title, $user_id);
+                return $step1;
+                $upload_url = $step1['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
+                $asset_id = $step1['value']['asset'];
+
+                // Step 2
+                $step2 = $this->postImage2($upload_url, $imagePath, $asset_id, $title);
+
+                // Step 3
+                $step = $this->postImage3($asset_id, $title);
+
+                $assetsIds[] = $asset_id;
+            }
+
+            // Step 4
+            $publish = $this->postImage4($assetsIds, $title);
+            return $publish;
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function postImage1($organization_id, $images, $title, $user_id = null)
     {
         try {
             $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
-
-            $this->init($user_id);
-            $this->setOrganizationUrn($organization_id);
 
             $params = [
                 'registerUploadRequest' => [
@@ -361,13 +399,9 @@ class LinkedInService
             if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
 
             $data = json_decode($response, true);
-            $upload_url = $data['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
-            $asset_id = $data['value']['asset'];
-
-            return $this->postImage2($upload_url, $imagePath, $asset_id, $title);
+            return $data;
         } catch (Exception $e) {
             return [
-                'status' => 500,
                 'error' => $e->getMessage(),
             ];
         }
@@ -392,7 +426,7 @@ class LinkedInService
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
-            return $this->postImage3($asset_id, $title);
+            return $response;
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -417,7 +451,7 @@ class LinkedInService
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
-            return $this->postImage4($asset_id, $title);
+            return $response;
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -426,10 +460,22 @@ class LinkedInService
         }
     }
 
-    public function postImage4($asset_id, $title)
+    public function postImage4($asset_ids, $title)
     {
         try {
             $url = 'https://api.linkedin.com/v2/ugcPosts';
+
+            $media = [];
+            foreach ($asset_ids as $asset_id) {
+                $media[] = [
+                    'status' => 'READY',
+                    'media' => $asset_id,
+                    'title' => [
+                        'text' => $title,
+                    ],
+                ];
+            }
+
             $params = [
                 'author' => "urn:li:organization:" . $this->organizationUrn,
                 'lifecycleState' => 'PUBLISHED',
@@ -439,15 +485,7 @@ class LinkedInService
                             'text' => $title,
                         ],
                         'shareMediaCategory' => 'IMAGE',
-                        'media' => [
-                            [
-                                'status' => 'READY',
-                                'media' => $asset_id,
-                                'title' => [
-                                    'text' => $title,
-                                ],
-                            ],
-                        ],
+                        'media' => $media,
                     ],
                 ],
                 'visibility' => [
@@ -473,6 +511,7 @@ class LinkedInService
 
             if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
 
+            return $data;
             return ['status' => 200];
         } catch (Exception $e) {
             return [
@@ -481,6 +520,7 @@ class LinkedInService
             ];
         }
     }
+
 
     /**
      * Video

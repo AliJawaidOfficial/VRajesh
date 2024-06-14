@@ -147,22 +147,62 @@ class FacebookService
     /**
      * Image
      */
-    public function postImage($page_id, $page_access_token, $imagePath, $title, $user_id = null)
+    public function postImages($page_id, $page_access_token, $images, $title, $user_id = null)
     {
         try {
             $this->pageId = $page_id;
             $this->pageAccessToken = $page_access_token;
 
+            $this->setAccessToken($user_id);
+
+            $attachedMedia = [];
+
+            foreach (explode(',', $images) as $index => $image) {
+
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, "$this->baseUrl/$this->version/$this->pageId/photos");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_POST, 1);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, [
+                    "access_token" => $this->pageAccessToken,
+                    "source" => new CURLFile($image),
+                    "published" => false,
+                ]);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Content-Type: multipart/form-data',
+                ]);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                if ($httpCode != 200) throw new Exception($response);
+
+                $data = json_decode($response, true);
+                $attachedMedia["attached_media[$index]"] = json_encode(["media_fbid" => $data['id']]);
+            }
+
+            return $this->postImages2($attachedMedia, $title);
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function postImages2($attachedMedia, $title)
+    {
+        try {
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, "$this->baseUrl/$this->version/$this->pageId/photos");
+            curl_setopt($ch, CURLOPT_URL, "$this->baseUrl/$this->version/$this->pageId/feed");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, [
+            curl_setopt($ch, CURLOPT_POSTFIELDS, array_merge([
                 "access_token" => $this->pageAccessToken,
                 "message" => $title,
-                "source" => new CURLFile($imagePath),
                 "published" => true,
-            ]);
+            ], $attachedMedia));
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: multipart/form-data',
             ]);
@@ -170,21 +210,31 @@ class FacebookService
             $response = curl_exec($ch);
             curl_close($ch);
 
-            return $response;
+            return [
+                'status' => 200,
+                'data' => $response
+            ];
         } catch (Exception $e) {
-            return $e->getMessage();
+            return [
+                'status' => 500,
+                'error' => $e->getMessage()
+            ];
         }
     }
+
 
 
     /**
      * Video
      */
-    public function postVideo($page_id, $page_access_token, $videoSize, $videoPath, $title, $user_id = null)
+    public function postVideo($page_id, $page_access_token, $videoSizes, $video, $title, $user_id = null)
     {
         try {
             $this->pageId = $page_id;
             $this->pageAccessToken = $page_access_token;
+
+            $videoPath = env('APP_URL') . '/' . explode(',', $video)[0];
+            $videoSize = $videoSizes[0];
 
             // Step 1
             $response = $this->postVideo1($videoSize);
@@ -217,7 +267,6 @@ class FacebookService
             'file_size' => $fileSize,
         ];
 
-        // Initialize cURL session
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -242,20 +291,13 @@ class FacebookService
             'video_file_chunk' => new CURLFile($file),
         ];
 
-        // Initialize cURL session
         $ch = curl_init();
-
-        // Set cURL options
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false,);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // Execute cURL request
         $response = curl_exec($ch);
-
-        // Close cURL session
         curl_close($ch);
 
         return $response;
@@ -273,20 +315,13 @@ class FacebookService
             'published' => 'true',
         ];
 
-        // Initialize cURL session
         $ch = curl_init();
-
-        // Set cURL options
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false,);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        // Execute cURL request
         $response = curl_exec($ch);
-
-        // Close cURL session
         curl_close($ch);
 
         return $response;

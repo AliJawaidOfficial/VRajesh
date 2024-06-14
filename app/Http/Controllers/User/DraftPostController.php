@@ -69,13 +69,12 @@ class DraftPostController extends Controller
         try {
             if (!Auth::guard('web')->user()->can('draft_post')) abort(403); 
 
-            DB::beginTransaction();
-
             $validator = Validator::make(
                 $request->all(),
                 [
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
+                    'media_type' => 'nullable|required_if:media,1|in:image,video',
                     'media' => 'nullable|required_if:on_instagram,1|max:524288',
                     'on_facebook' => 'nullable|boolean',
                     'facebook_page' => 'nullable|required_if:on_facebook,1',
@@ -105,8 +104,25 @@ class DraftPostController extends Controller
                     'schedule_date.after_or_equal' => 'Schedule date should be a future date.',
 
                     'schedule_time.after_or_equal' => 'Schedule time should be a future time.',
+
+                    'media_type.in' => 'Invalid Request',
+                    'media_type.required_if' => 'Invalid Request',
                 ]
             );
+
+            $validator->after(function ($validator) use ($request) {
+                if ($request->has('media') && $request->media_type == 'image') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['jpg', 'jpeg', 'png', 'gif'])) $validator->errors()->add('media', 'Media should be jpg, jpeg and png');
+                    }
+                }
+
+                if ($request->has('media') && $request->media_type == 'video') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['mp4', 'mpeg', 'avi'])) $validator->errors()->add('media', 'Media should be mp4, mpeg and avi');
+                    }
+                }
+            });
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
@@ -118,21 +134,24 @@ class DraftPostController extends Controller
             $data->description = str_replace('\n', "\n", $request->description);
             $data->draft = 1;
 
-            $mediaType = null;
-            $media_type = null;
+            $errors = [];
 
-            if ($request->hasFile('media')) {
-                $media = $request->file('media');
-                $mediaName = time() . '.' . $media->getClientOriginalExtension();
-                $mediaType = $media->getMimeType();
-                $media->move(public_path('posts'), $mediaName);
-                $onlyMediaPath = 'posts/' . $mediaName;
+            if ($request->media) {
+                $mediaPaths = [];
+                $mediaSizes = [];
 
-                if (str_starts_with($mediaType, 'image/')) $media_type = 'image';
-                if (str_starts_with($mediaType, 'video/')) $media_type = 'video';
+                foreach ($request->media as $media) {
+                    $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
+                    $mediaSize = $media->getSize();
+                    $media->move(public_path('posts'), $mediaName);
+                    $mediaPath = 'posts/' . $mediaName;
 
-                $data->media = $onlyMediaPath;
-                $data->media_type = $media_type;
+                    $mediaPaths[] = $mediaPath;
+                    $mediaSizes[] = $mediaSize;
+                }
+
+                $data->media = implode(',', $mediaPaths);
+                $data->media_type = $request->media_type;
             }
 
             // On Facebook
@@ -181,14 +200,11 @@ class DraftPostController extends Controller
 
             $data->save();
 
-            DB::commit();
-
             return response()->json([
                 'status' => 200,
                 'message' => 'Post saved as draft successfully'
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
             return response()->json([
                 'status' => 500,
                 'error' => $e->getMessage()
@@ -196,20 +212,17 @@ class DraftPostController extends Controller
         }
     }
 
-
     public function storeAsDraft(Request $request)
     {
         try {
             if (!Auth::guard('web')->user()->can('draft_post')) abort(403); 
 
-            DB::beginTransaction();
-
             $validator = Validator::make(
                 $request->all(),
                 [
-                    'post_id' => 'required|exists:posts,id',
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
+                    'media_type' => 'nullable|required_if:media,1|in:image,video',
                     'media' => 'nullable|required_if:on_instagram,1|max:524288',
                     'on_facebook' => 'nullable|boolean',
                     'facebook_page' => 'nullable|required_if:on_facebook,1',
@@ -221,9 +234,6 @@ class DraftPostController extends Controller
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
                 [
-                    'post_id.required' => 'Invalid request.',
-                    'post_id.exists' => 'Invalid request.',
-
                     'title.required' => 'Title is required',
 
                     'description.required' => 'Description is required',
@@ -242,8 +252,25 @@ class DraftPostController extends Controller
                     'schedule_date.after_or_equal' => 'Schedule date should be a future date.',
 
                     'schedule_time.after_or_equal' => 'Schedule time should be a future time.',
+
+                    'media_type.in' => 'Invalid Request',
+                    'media_type.required_if' => 'Invalid Request',
                 ]
             );
+
+            $validator->after(function ($validator) use ($request) {
+                if ($request->has('media') && $request->media_type == 'image') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['jpg', 'jpeg', 'png', 'gif'])) $validator->errors()->add('media', 'Media should be jpg, jpeg and png');
+                    }
+                }
+
+                if ($request->has('media') && $request->media_type == 'video') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['mp4', 'mpeg', 'avi'])) $validator->errors()->add('media', 'Media should be mp4, mpeg and avi');
+                    }
+                }
+            });
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
@@ -251,36 +278,45 @@ class DraftPostController extends Controller
 
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
+            $data->post_id = $request->post_id;
             $data->title = $request->title;
             $data->description = str_replace('\n', "\n", $request->description);
             $data->draft = 1;
 
-            $mediaType = null;
-            $media_type = null;
 
-            if ($request->hasFile('media')) {
-                $media = $request->file('media');
-                $mediaName = time() . '.' . $media->getClientOriginalExtension();
-                $mediaType = $media->getMimeType();
-                $mediaSize = $media->getSize();
-                $media->move(public_path('posts'), $mediaName);
-                $onlyMediaPath = 'posts/' . $mediaName;
-                $mediaPath = public_path('posts') . '/' . $mediaName;
+            $errors = [];
+            $mediaPaths = [];
+            $mediaSizes = [];
 
-                if (str_starts_with($mediaType, 'image/')) $media_type = 'image';
-                if (str_starts_with($mediaType, 'video/')) $media_type = 'video';
+            if ($request->media) {
+                foreach ($request->media as $media) {
+                    $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
+                    $mediaSize = $media->getSize();
+                    $media->move(public_path('posts'), $mediaName);
+                    $mediaPath = 'posts/' . $mediaName;
 
-                $data->media = $onlyMediaPath;
-                $data->media_type = $media_type;
+                    $mediaPaths[] = $mediaPath;
+                    $mediaSizes[] = $mediaSize;
+                }
+
+                $data->media = implode(',', $mediaPaths);
+                $data->media_type = $request->media_type;
             } else {
                 $oldPost = Post::where('id', $request->post_id)->first();
 
                 if ($oldPost->media != null) {
-                    $mediaName = time() . '.' . pathinfo($oldPost->media, PATHINFO_EXTENSION);
-                    copy(public_path($oldPost->media), public_path('posts') . '/' . $mediaName);
-                    $onlyMediaPath = 'posts/' . $mediaName;
+                    foreach (explode(',', $oldPost->media) as $media) {
 
-                    $data->media = $onlyMediaPath;
+                        $mediaName = time() . '.' . pathinfo($oldPost->media, PATHINFO_EXTENSION);
+                        $mediaPath = 'posts/' . $mediaName;
+                        copy(public_path($oldPost->media), public_path('posts') . '/' . $mediaName);
+                        $mediaSize = filesize(public_path($mediaPath));
+
+                        $mediaPaths[] = $mediaPath;
+                        $mediaSizes[] = $mediaSize;
+                    }
+
+                    $data->media = implode(',', $mediaPaths);
                     $data->media_type = $oldPost->media_type;
                 }
             }
@@ -338,7 +374,6 @@ class DraftPostController extends Controller
             ]);
         }
     }
-    
 
     public function update(Request $request)
     {

@@ -118,6 +118,8 @@ Route::name('user.')
                     Route::get('/details/{id}', 'show')->name('show');
 
                     Route::get('/create', 'create')->name('create');
+                    Route::get('/{id}/{action}', 'edit')->name('edit');
+
                     Route::post('/create', 'store')->name('store');
                     Route::post('/create/new', 'newStore')->name('new.store');
                     Route::post('/{id}/delete', 'destroy')->name('destroy');

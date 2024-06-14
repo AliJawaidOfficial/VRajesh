@@ -104,6 +104,8 @@ class InstagramService
         }
     }
 
+
+
     /**
      * Post
      * Text
@@ -114,34 +116,39 @@ class InstagramService
     /**
      * Image
      */
-    public function postImage($ig_user_id, $imagePath, $title, $user_id = null)
+    public function postImage($ig_user_id, $images, $text, $user_id = null)
     {
         try {
             $this->init($ig_user_id, $user_id);
 
             $url = "$this->baseUrl/$this->version/$ig_user_id/media";
 
-            $params = [
-                'image_url' => $imagePath,
-                'caption' => $title,
-            ];
+            $errors = [];
+            $creationIds = [];
+            foreach (explode(',', $images) as $image) {
+                $params = [
+                    'image_url' => env('APP_URL') . '/' . $image,
+                    'caption' => $text,
+                ];
 
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $this->accessToken]);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            $response = curl_exec($ch);
-            curl_close($ch);
-            $data = json_decode($response, true);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $this->accessToken]);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                $response = curl_exec($ch);
+                curl_close($ch);
+                $data = json_decode($response, true);
 
-            if (isset($data['error'])) throw new Exception($data['error']['message']);
+                if (isset($data['error'])) $errors[] = $data['error']['message'];
+                if (isset($data['id'])) $creationIds[] = $data['id'];
+            }
 
-            $creation_id = $data['id'];
+            // return [$errors, $creationIds];
 
-            return $this->postImage2($creation_id);
+            if (!empty($creationIds)) return $this->postImage2($creationIds, $text);
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -150,13 +157,15 @@ class InstagramService
         }
     }
 
-    public function postImage2($creation_id)
+    public function postImage2($creationIds, $text)
     {
         try {
-            $url = "$this->baseUrl/$this->version/$this->igUserId/media_publish";
+            $url = "$this->baseUrl/$this->version/$this->igUserId/media";
 
             $params = [
-                'creation_id' => $creation_id,
+                'children' => implode(',', $creationIds),
+                'media_type' => 'CAROUSEL',
+                'caption' => $text,
             ];
 
             $ch = curl_init();
@@ -169,11 +178,44 @@ class InstagramService
             $response = curl_exec($ch);
             curl_close($ch);
 
+            $data = json_decode($response, true);
+            if (isset($data['error'])) throw new Exception($data['error']['message']);
+
+            $this->postImage3($data['id']);
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function postImage3($creationId)
+    {
+        try {
+            $url = "$this->baseUrl/$this->version/$this->igUserId/media_publish";
+
+            $params = [
+                'creation_id' => $creationId,
+                'access_token' => $this->accessToken,
+            ];
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $this->accessToken]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $response = curl_exec($ch);
+            curl_close($ch);
+
+            $data = json_decode($response, true);
             if (isset($data['error'])) throw new Exception($data['error']['message']);
 
             return [
                 'status' => 200,
-                'data' => json_decode($response, true),
+                'data' => $data,
             ];
         } catch (Exception $e) {
             return [

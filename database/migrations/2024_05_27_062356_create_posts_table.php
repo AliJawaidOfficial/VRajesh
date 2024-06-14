@@ -13,10 +13,13 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
+
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('post_id')->nullable();
+
             $table->string('title');
             $table->text('description')->nullable();
-            $table->string('media')->nullable();
+            $table->text('media')->nullable();
             $table->string('media_type')->nullable();
 
             $table->boolean('on_facebook')->default(0);
@@ -35,6 +38,7 @@ return new class extends Migration
             $table->dateTime('scheduled_at')->nullable();
             $table->boolean('draft')->default(0);
             $table->boolean('posted')->default(0);
+
             $table->timestamps();
         });
     }

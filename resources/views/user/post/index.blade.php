@@ -210,24 +210,26 @@
                         let html = '';
                         let asset = `{{ asset('') }}`;
                         let mediaType = response.data.media_type;
-                        let mediaContent = response.data.media;
+                        let mediaContent = response.data.media.split(',');
 
                         html += `
                             <div class="media-preview w-50">
+                                <div class="d-flex flex-column w-100">
                         `;
 
                         if (mediaType == 'image') {
-                            html +=
-                                `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
+                            $.each(mediaContent, function (indexInArray, image) { 
+                                html += `<img src="${asset}${image}" class="img-fluid w-100 rounded mb-1" />`;  
+                            });
                         } else if (mediaType == 'video') {
                             html += `<video controls class="w-100 rounded mb-1">
-                                <source src="${asset}${mediaContent}" type="video/mp4">
-                                Your browser does not support the video tag.
-                              </video>`;
+                                <source src="${asset}${mediaContent}" type="video/mp4">Your browser does not support the video tag.</video>`;
                         } else {
                             html += `<p class="text-center text-muted my-auto">No image/video published</p>`;
                         }
+
                         html += `
+                                </div>
                             </div>
                             <div class="post-details d-flex flex-column align-items-stretch w-50">
                                 <h4 class="modal-post-title">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
@@ -341,7 +343,10 @@
             });
         }
         // Function to transfer post data to the modal for editing, scheduling or reposting
-        async function transferPostData(modalId) {
+        async function transferPostData(action) {
+            let id = $("#postDetailId").val();
+            window.location.href = `{{ route('user.post.index') }}/${id}/${action}`;
+
             const title = $('#modalPostTitle').text();
             const description = $('#modalPostDescription').html().replace(/<br>/g, '\n');
 
@@ -655,6 +660,7 @@
                         <th class="text-center">S.No</th>
                         <th class="text-left">Title</th>
                         <th class="text-nowrap">Platforms</th>
+                        <th class="text-left">Repost</th>
                         <th class="text-nowrap">Published Date</th>
                     </tr>
                 </thead>
@@ -668,9 +674,7 @@
                         <tr onclick="showPostDetail({{ $post->id }})">
                             <td class="text-center">
                                 {{ ($dataSet->currentPage() - 1) * $dataSet->perPage() + $loop->iteration }}</td>
-                            <td>
-                                <p class="post-title mb-0">{{ $post->title }}</p>
-                            </td>
+                            <td>{{ $post->title }}</td>
                             <td>
                                 <div class="d-flex gap-2">
                                     @if ($post->on_facebook)
@@ -700,6 +704,9 @@
                                 </div>
                             </td>
                             <td>
+                                <span class="badge p-1 rounded-circle bg-primary">{{ $post->post_count }}</span>
+                            </td>
+                            <td>
                                 <p class="post-date mb-0">{{ standardDateTimeFormat($post->created_at) }}</p>
                             </td>
                         </tr>
@@ -722,18 +729,18 @@
                         <div>
                             <button type="button" class="btn btn-custom" onclick="deletePost()"><i class="fas fa-trash d-inline-block me-1"></i> Delete</button>
                             @can('draft_post')
-                                <button type="button" class="btn btn-custom"
-                                    onclick="transferPostData('draftPostModal')"><i class="fas fa-folder d-inline-block me-1"></i> Draft</button>
+                                <a type="button" class="btn btn-custom"
+                                    onclick="transferPostData('draft')"><i class="fas fa-folder d-inline-block me-1"></i> Draft</a>
                             @endcan
                         </div>
                         <div>
                             @can('scheduled_post')
                                 <button type="button" class="btn btn-custom"
-                                    onclick="transferPostData('schedulePostModal')"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
+                                    onclick="transferPostData('schedule')"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                             @endcan
                             @can('re_post')
                                 <button type="button" class="btn btn-custom"
-                                    onclick="transferPostData('repostModal')"><i class="fas fa-share-square d-inline-block me-1"></i> Repost</button>
+                                    onclick="transferPostData('repost')"><i class="fas fa-share-square d-inline-block me-1"></i> Repost</button>
                             @endcan
                         </div>
                     </div>
@@ -742,7 +749,7 @@
         </div>
 
         {{-- Draft Post Modal --}}
-        @can('draft_post')
+        @can('draft_post')  
             <div class="modal fade" id="draftPostModal" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered">
                     <div class="modal-content">

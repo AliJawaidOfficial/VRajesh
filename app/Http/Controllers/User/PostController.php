@@ -110,6 +110,11 @@ class PostController extends Controller
         if ($request->has('month') && $request->month != '') $dataSet = $dataSet->whereYear('created_at', '=', Carbon::parse($request->month)->year)
             ->whereMonth('created_at', '=', Carbon::parse($request->month)->month);
 
+        $dataSet = $dataSet->select(
+            'posts.*',
+            DB::raw('(SELECT COUNT(*) FROM `posts` AS `post_2` WHERE `posts`.`id`=`post_2`.`post_id`) AS `post_count`'),
+        );
+
         $dataSet = $dataSet->paginate(10);
 
         return view('user.post.index', compact('dataSet', 'postMonths'));
@@ -145,18 +150,26 @@ class PostController extends Controller
     }
 
     /**
+     * Post Create
+     */
+    public function edit(String $id, String $action)
+    {
+        $post = Post::where('user_id', Auth::guard('web')->user()->id)->where('id', $id)->first();
+        return view('user.post.edit', compact('post', 'action'));
+    }
+
+    /**
      * Post Store
      */
     public function store(Request $request)
     {
         try {
-            DB::beginTransaction();
-
             $validator = Validator::make(
                 $request->all(),
                 [
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
+                    'media_type' => 'nullable|required_if:media,1|in:image,video',
                     'media' => 'nullable|required_if:on_instagram,1|max:524288',
                     'on_facebook' => 'nullable|boolean',
                     'facebook_page' => 'nullable|required_if:on_facebook,1',
@@ -186,8 +199,25 @@ class PostController extends Controller
                     'schedule_date.after_or_equal' => 'Schedule date should be a future date.',
 
                     'schedule_time.after_or_equal' => 'Schedule time should be a future time.',
+
+                    'media_type.in' => 'Invalid Request',
+                    'media_type.required_if' => 'Invalid Request',
                 ]
             );
+
+            $validator->after(function ($validator) use ($request) {
+                if ($request->has('media') && $request->media_type == 'image') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['jpg', 'jpeg', 'png', 'gif'])) $validator->errors()->add('media', 'Media should be jpg, jpeg and png');
+                    }
+                }
+
+                if ($request->has('media') && $request->media_type == 'video') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['mp4', 'mpeg', 'avi'])) $validator->errors()->add('media', 'Media should be mp4, mpeg and avi');
+                    }
+                }
+            });
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
@@ -198,24 +228,24 @@ class PostController extends Controller
             $data->title = $request->title;
             $data->description = str_replace('\n', "\n", $request->description);
 
-            $mediaType = null;
-            $media_type = null;
-
             $errors = [];
-            if ($request->hasFile('media')) {
-                $media = $request->file('media');
-                $mediaName = time() . '.' . $media->getClientOriginalExtension();
-                $mediaType = $media->getMimeType();
-                $mediaSize = $media->getSize();
-                $media->move(public_path('posts'), $mediaName);
-                $onlyMediaPath = 'posts/' . $mediaName;
-                $mediaPath = public_path('posts') . '/' . $mediaName;
 
-                if (str_starts_with($mediaType, 'image/')) $media_type = 'image';
-                if (str_starts_with($mediaType, 'video/')) $media_type = 'video';
+            if ($request->media) {
+                $mediaPaths = [];
+                $mediaSizes = [];
 
-                $data->media = $onlyMediaPath;
-                $data->media_type = $media_type;
+                foreach ($request->media as $media) {
+                    $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
+                    $mediaSize = $media->getSize();
+                    $media->move(public_path('posts'), $mediaName);
+                    $mediaPath = 'posts/' . $mediaName;
+
+                    $mediaPaths[] = $mediaPath;
+                    $mediaSizes[] = $mediaSize;
+                }
+
+                $data->media = implode(',', $mediaPaths);
+                $data->media_type = $request->media_type;
             }
 
             // On Facebook
@@ -261,21 +291,48 @@ class PostController extends Controller
                 $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
                 $data->scheduled_at = $request->schedule_date . ' ' . $time;
             } else {
-                $assets = env('APP_URL') . '/';
-
                 // On Instagram
                 if ($request->has('on_instagram')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->instagramService->postImage($data->instagram_account_id, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->instagramService->postVideo($data->instagram_account_id, $assets . $data->media, $mediaSize, $request->description);
+                    if ($data->media != null) {
+
+                        if ($data->media_type == 'image')
+                            $posted = $this->instagramService->postImage(
+                                $data->instagram_account_id,
+                                $data->media,
+                                $request->description
+                            );
+
+                        if ($data->media_type == 'vidoe')
+                            $posted = $this->instagramService->postVideo(
+                                $data->instagram_account_id,
+                                explode(',', $data->media)[0],
+                                $mediaSizes,
+                                $request->description
+                            );
+
+                        return $posted;
                     }
                 }
 
                 // On Facebook
                 if ($request->has('on_facebook')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->facebookService->postImage($data->facebook_page_id, $data->facebook_page_access_token, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->facebookService->postVideo($data->facebook_page_id, $data->facebook_page_access_token, $mediaSize, $assets . $data->media, $request->description);
+                    if ($data->media != null) {
+                        if ($data->media_type == 'image')
+                            $posted = $this->facebookService->postImages(
+                                $data->facebook_page_id,
+                                $data->facebook_page_access_token,
+                                $data->media,
+                                $request->description
+                            );
+
+                        if ($data->media_type == 'video')
+                            $posted = $this->facebookService->postVideo(
+                                $data->facebook_page_id,
+                                $data->facebook_page_access_token,
+                                $mediaSizes[0],
+                                explode(',', $data->media)[0],
+                                $request->description
+                            );
                     } else {
                         $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
                     }
@@ -283,11 +340,22 @@ class PostController extends Controller
 
                 // On Linkedin
                 if ($request->has('on_linkedin')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $post = $this->linkedinService->postImage($data->linkedin_company_id, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $post = $this->linkedinService->postVideo($data->linkedin_company_id, $assets . $data->media, $request->description);
+                    if ($data->media != null) {
+                        if ($data->media_type == 'image')
+                            $posted = $this->linkedinService->postImage(
+                                $data->linkedin_company_id,
+                                $data->media,
+                                $request->description
+                            );
+
+                        if ($data->media_type == 'video')
+                            $posted = $this->linkedinService->postVideo(
+                                $data->linkedin_company_id,
+                                explode(',', $data->media)[0],
+                                $request->description
+                            );
                     } else {
-                        $post = $this->linkedinService->postText($data->linkedin_company_id, $request->description);
+                        $posted = $this->linkedinService->postText($data->linkedin_company_id, $request->description);
                     }
                     if (isset($post['status']) && $post['status'] != 200) $errors[] = $post['message'];
                 }
@@ -296,8 +364,6 @@ class PostController extends Controller
             }
 
             $data->save();
-
-            DB::commit();
 
             if ($request->schedule_date != null && $request->schedule_time != null) return response()->json([
                 'status' => 200,
@@ -309,7 +375,6 @@ class PostController extends Controller
                 'message' => 'Post published successfully'
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
             return response()->json([
                 'status' => 500,
                 'error' => $e->getMessage()
@@ -332,7 +397,8 @@ class PostController extends Controller
                     'post_id' => 'required|exists:posts,id',
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
-                    'media' => 'nullable|required_if:on_instagram,1|max:524288',
+                    'media' => 'nullable|required_if:on_instagram,1|array',
+                    'media.*' => 'nullable|max:5000|mimes:jpg,jpeg,png,mp4,webm',
                     'on_facebook' => 'nullable|boolean',
                     'facebook_page' => 'nullable|required_if:on_facebook,1',
                     'on_instagram' => 'nullable|boolean',
@@ -371,39 +437,44 @@ class PostController extends Controller
 
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
+            $data->post_id = $request->post_id;
             $data->title = $request->title;
             $data->description = str_replace('\n', "\n", $request->description);
 
-            $mediaType = null;
-            $media_type = null;
+            $errors = [];
+            $mediaPaths = [];
+            $mediaSizes = [];
 
-            if ($request->hasFile('media')) {
-                $media = $request->file('media');
-                $mediaName = time() . '.' . $media->getClientOriginalExtension();
-                $mediaType = $media->getMimeType();
-                $mediaSize = $media->getSize();
-                $media->move(public_path('posts'), $mediaName);
-                $onlyMediaPath = 'posts/' . $mediaName;
-                $mediaPath = public_path('posts') . '/' . $mediaName;
+            if ($request->media) {
+                foreach ($request->media as $media) {
+                    $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
+                    $mediaSize = $media->getSize();
+                    $media->move(public_path('posts'), $mediaName);
+                    $mediaPath = 'posts/' . $mediaName;
 
-                if (str_starts_with($mediaType, 'image/')) $media_type = 'image';
-                if (str_starts_with($mediaType, 'video/')) $media_type = 'video';
+                    $mediaPaths[] = $mediaPath;
+                    $mediaSizes[] = $mediaSize;
+                }
 
-                $data->media = $onlyMediaPath;
-                $data->media_type = $media_type;
+                $data->media = implode(',', $mediaPaths);
+                $data->media_type = $request->media_type;
             } else {
                 $oldPost = Post::where('id', $request->post_id)->first();
 
                 if ($oldPost->media != null) {
-                    $mediaName = time() . '.' . pathinfo($oldPost->media, PATHINFO_EXTENSION);
-                    $onlyMediaPath = 'posts/' . $mediaName;
-                    copy(public_path($oldPost->media), public_path('posts') . '/' . $mediaName);
+                    foreach (explode(',', $oldPost->media) as $media) {
 
-                    $mediaSize = filesize(public_path($onlyMediaPath));
+                        $mediaName = time() . '.' . pathinfo($oldPost->media, PATHINFO_EXTENSION);
+                        $mediaPath = 'posts/' . $mediaName;
+                        copy(public_path($oldPost->media), public_path('posts') . '/' . $mediaName);
+                        $mediaSize = filesize(public_path($mediaPath));
 
-                    $media_type = $oldPost->media_type;
-                    $data->media = $onlyMediaPath;
-                    $data->media_type = $media_type;
+                        $mediaPaths[] = $mediaPath;
+                        $mediaSizes[] = $mediaSize;
+                    }
+
+                    $data->media = implode(',', $mediaPaths);
+                    $data->media_type = $oldPost->media_type;
                 }
             }
 

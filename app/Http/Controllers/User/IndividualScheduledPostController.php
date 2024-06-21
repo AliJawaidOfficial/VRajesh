@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Auth;
 use Exception;
 use App\Models\Post;
 
-class ScheduledPostController extends Controller
+class IndividualScheduledPostController extends Controller
 {
-    protected $view = 'user.post.scheduled';
-    protected $route = 'user.post.scheduled';
+    protected $view = 'user.individual-post.scheduled';
+    protected $route = 'user.individual-post.scheduled';
 
 
     public function index()
@@ -30,9 +30,9 @@ class ScheduledPostController extends Controller
             $user = Auth::guard('web')->user();
             $data = Post::where('user_id', $user->id)->whereNotNull('scheduled_at')
                 ->where(function ($q) {
-                    $q->where('on_linkedin', 1)->whereNotNull('linkedin_company_id');
-                    $q->orWhere('on_facebook', 1)->whereNotNull('facebook_page_id');
-                    $q->orWhere('on_instagram', 1)->whereNotNull('instagram_account_id');
+                    $q->where('on_linkedin', 1)->whereNull('linkedin_company_id');
+                    $q->orWhere('on_facebook', 1)->whereNull('facebook_page_id');
+                    $q->orWhere('on_instagram', 1)->whereNull('instagram_account_id');
                 })
                 ->where('scheduled_at', '>=', $request->start)
                 ->where('scheduled_at', '<=', $request->end)

@@ -16,10 +16,10 @@ use App\Services\LinkedInService;
 use App\Models\Post;
 use App\Models\User;
 
-class DraftPostController extends Controller
+class IndividualDraftPostController extends Controller
 {
-    protected $view = 'user.post.draft';
-    protected $route = 'user.post.draft';
+    protected $view = 'user.individual-post.draft';
+    protected $route = 'user.individual-post.draft';
 
     protected $linkedinService;
     protected $facebookService;
@@ -43,9 +43,9 @@ class DraftPostController extends Controller
 
         $postMonths = Post::where('user_id', $user->id)
             ->where(function ($q) {
-                $q->where('on_linkedin', 1)->whereNotNull('linkedin_company_id');
-                $q->orWhere('on_facebook', 1)->whereNotNull('facebook_page_id');
-                $q->orWhere('on_instagram', 1)->whereNotNull('instagram_account_id');
+                $q->where('on_linkedin', 1)->whereNull('linkedin_company_id');
+                $q->orWhere('on_facebook', 1)->whereNull('facebook_page_id');
+                $q->orWhere('on_instagram', 1)->whereNull('instagram_account_id');
             })
             ->where('posted', 0)
             ->where('draft', 1)
@@ -57,6 +57,11 @@ class DraftPostController extends Controller
             ->keys();
 
         $dataSet = Post::where('user_id', $user->id)
+            ->where(function ($q) {
+                $q->where('on_linkedin', 1)->whereNull('linkedin_company_id');
+                $q->orWhere('on_facebook', 1)->whereNull('facebook_page_id');
+                $q->orWhere('on_instagram', 1)->whereNull('instagram_account_id');
+            })
             ->where('posted', 0)
             ->where('draft', 1)
             ->orderBy('created_at', 'DESC');
@@ -82,11 +87,8 @@ class DraftPostController extends Controller
                     'media_type' => 'nullable|required_if:media,1|in:image,video',
                     'media' => 'nullable|required_if:on_instagram,1|max:524288',
                     'on_facebook' => 'nullable|boolean',
-                    'facebook_page' => 'nullable|required_if:on_facebook,1',
                     'on_instagram' => 'nullable|boolean',
-                    'instagram_account' => 'nullable|required_if:on_instagram,1',
                     'on_linkedin' => 'nullable|boolean',
-                    'linkedin_organization' => 'nullable|required_if:on_linkedin,1',
                     'schedule_date' => 'nullable|date|after_or_equal:today',
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
@@ -136,7 +138,7 @@ class DraftPostController extends Controller
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
             $data->title = $request->title;
-            $data->description = str_replace('\n', "\n", $request->description);
+            $data->description = $request->title . '\n' . str_replace('\n', '\n', $request->description);
             $data->draft = 1;
 
             $errors = [];
@@ -160,48 +162,13 @@ class DraftPostController extends Controller
             }
 
             // On Facebook
-            if ($request->has('on_facebook')) {
-                $facebook_page = explode(' - ', $request->facebook_page);
-                $facebook_page_id = $facebook_page[0];
-                $facebook_page_access_token = $facebook_page[1];
-                $facebook_page_name = $facebook_page[2];
-
-                $long_facebook_access_token = $this->facebookService->tokenTime($facebook_page_access_token);
-
-                $data->on_facebook = 1;
-                $data->facebook_page_id = $facebook_page_id;
-                $data->facebook_page_access_token = $long_facebook_access_token;
-                $data->facebook_page_name = $facebook_page_name;
-            }
+            if ($request->has('on_facebook')) $data->on_facebook = 1;
 
             // On Instagram
-            if ($request->has('on_instagram')) {
-                $instagram_account = explode(' - ', $request->instagram_account);
-                $instagram_account_id = $instagram_account[0];
-                $instagram_account_name = $instagram_account[1];
-
-                $data->on_instagram = 1;
-                $data->instagram_account_id = $instagram_account_id;
-                $data->instagram_account_name = $instagram_account_name;
-            }
+            if ($request->has('on_instagram')) $data->on_instagram = 1;
 
             // On Linkedin
-            if ($request->has('on_linkedin')) {
-                $linkedin_organization = explode(' - ', $request->linkedin_organization);
-                $linkedin_organization_id = $linkedin_organization[0];
-                $linkedin_organization_name = $linkedin_organization[1];
-
-                $data->on_linkedin = 1;
-                $data->linkedin_company_id = $linkedin_organization_id;
-                $data->linkedin_company_name = $linkedin_organization_name;
-            }
-
-            if ($request->schedule_date != null && $request->schedule_time != null) {
-                $ip = $request->ip();
-                $countryAndTimezone = getCountryAndTimezone($ip);
-                $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
-                $data->scheduled_at = $request->schedule_date . ' ' . $time;
-            }
+            if ($request->has('on_linkedin')) $data->on_linkedin = 1;
 
             $data->save();
 
@@ -228,13 +195,10 @@ class DraftPostController extends Controller
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
                     'media_type' => 'nullable|required_if:media,1|in:image,video',
-                    'media' => 'nullable|required_if:on_instagram,1|max:524288',
+                    'media' => 'nullable|max:524288',
                     'on_facebook' => 'nullable|boolean',
-                    'facebook_page' => 'nullable|required_if:on_facebook,1',
                     'on_instagram' => 'nullable|boolean',
-                    'instagram_account' => 'nullable|required_if:on_instagram,1',
                     'on_linkedin' => 'nullable|boolean',
-                    'linkedin_organization' => 'nullable|required_if:on_linkedin,1',
                     'schedule_date' => 'nullable|date|after_or_equal:today',
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
@@ -326,42 +290,8 @@ class DraftPostController extends Controller
                 }
             }
 
-            // On Facebook
-            if ($request->has('on_facebook')) {
-                $facebook_page = explode(' - ', $request->facebook_page);
-                $facebook_page_id = $facebook_page[0];
-                $facebook_page_access_token = $facebook_page[1];
-                $facebook_page_name = $facebook_page[2];
-
-                $long_facebook_access_token = $this->facebookService->tokenTime($facebook_page_access_token);
-
-                $data->on_facebook = 1;
-                $data->facebook_page_id = $facebook_page_id;
-                $data->facebook_page_access_token = $long_facebook_access_token;
-                $data->facebook_page_name = $facebook_page_name;
-            }
-
-            // On Instagram
-            if ($request->has('on_instagram')) {
-                $instagram_account = explode(' - ', $request->instagram_account);
-                $instagram_account_id = $instagram_account[0];
-                $instagram_account_name = $instagram_account[1];
-
-                $data->on_instagram = 1;
-                $data->instagram_account_id = $instagram_account_id;
-                $data->instagram_account_name = $instagram_account_name;
-            }
-
             // On Linkedin
-            if ($request->has('on_linkedin')) {
-                $linkedin_organization = explode(' - ', $request->linkedin_organization);
-                $linkedin_organization_id = $linkedin_organization[0];
-                $linkedin_organization_name = $linkedin_organization[1];
-
-                $data->on_linkedin = 1;
-                $data->linkedin_company_id = $linkedin_organization_id;
-                $data->linkedin_company_name = $linkedin_organization_name;
-            }
+            if ($request->has('on_linkedin')) $data->on_linkedin = 1;
 
             $data->save();
 

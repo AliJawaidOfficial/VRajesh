@@ -498,7 +498,7 @@
                         </div>
                         <div class="modal-footer">
                             <div>
-                                <button type="submit" class="btn btn-custom" id="scheduleSaveBtn">Schedule</button>
+                                <button type="submit" class="btn btn-custom" id="scheduleSaveBtn"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                             </div>
                         </div>
                     </form>
@@ -627,6 +627,7 @@
             });
 
             calendar.render();
+
             function addMonthYearSelects() {
                 var headerToolbar = document.querySelector('.fc-toolbar-chunk:last-child');
                 
@@ -667,7 +668,7 @@
 
             function fetchEvents(start, end) {
                 const apiUrl =
-                    `{{ route('user.post.scheduled.all') }}?start=${start.toISOString()}&end=${end.toISOString()}`;
+                    `{{ route('user.individual-post.scheduled.all') }}?start=${start.toISOString()}&end=${end.toISOString()}`;
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(data => {
@@ -692,7 +693,7 @@
             }
 
             function fetchEventDetails(eventId) {
-                const apiUrl = `{{ route('user.post.index') }}/details/${eventId}`;
+                const apiUrl = `{{ route('user.individual-post.index') }}/details/show/${eventId}`;
                 fetch(apiUrl)
                     .then(response => response.json())
                     .then(response => {
@@ -702,25 +703,36 @@
                             let mediaType = response.data.media_type;
                             let mediaContent = response.data.media;
 
-                            html += `<div class="media-preview w-50">`;
+                            html += `
+                            <div class="media-preview w-50">
+                                <div class="d-flex flex-wrap justify-content-start align-items-start w-100 overflow-auto">
+                        `;
 
+                        if (mediaContent != null) {
+                            mediaContent = mediaContent.split(',');
                             if (mediaType == 'image') {
-                                html +=
-                                    `<img src="${asset}${mediaContent}" class="img-fluid w-100 rounded mb-1" />`;
+                                $.each(mediaContent, function(index, image) {
+                                    html +=
+                                        `<img src="${asset}${image}" class="img-fluid rounded mb-1" style="width: 100px; height: 100px;" />`;
+                                });
                             } else if (mediaType == 'video') {
-                                html += `<video controls class="w-100 rounded mb-1">
-                                            <source src="${asset}${mediaContent}" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                         </video>`;
-                            } else {
-                                html +=
-                                    `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                                $.each(mediaContent, function(index, video) {
+                                    html +=
+                                        `<video controls class="w-100 rounded mb-1">
+                                        <source src="${asset}${video}" type="video/mp4">Your browser does not support the video tag.</video>`;
+                                });
                             }
+                        } else {
+                            html += `<p class="text-center text-muted my-auto">No image/video published</p>`;
+                        }
 
-                            html += `</div>
+
+                        html += `
+                                </div>
+                            </div>
                                      <div class="post-details d-flex flex-column align-items-stretch w-50">
                                         <h4 class="modal-post-title">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
-                                        <p class="modal-post-date mb-1"><strong>Created on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.created_at)}</span></p>
+                                        <p class="modal-post-date mb-1"><strong>Scheduled on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.scheduled_at)}</span></p>
                                         <div class="modal-post-description flex-grow-1 d-flex align-items-stretch flex-column"
                                             style="max-height: 200px; overflow-y: auto;">
                                             <p class="mb-0" style="position:sticky; top:0;background-color:#fff;padding: 10px 0px 5px;"><strong>Description:</strong></p> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
@@ -738,21 +750,21 @@
                                                 id="facebook-post-detail" ${(response.data.on_facebook) ? 'checked' : ''}>
                                         `;
                             if (response.data.on_facebook) html +=
-                                `<i class="fab fa-facebook m-0"></i><span class="m-0 ms-2">${response.data.facebook_page_name}</span>`;
+                                `<i class="fab fa-facebook m-0"></i>`;
                             html += `</div>
                                         <div class="d-flex gap-2 align-items-center">
                                             <input type="checkbox" style="pointer-events: none; display: none"
                                                 id="instagram-post-detail" ${(response.data.on_instagram) ? 'checked' : ''}>
                                         `;
                             if (response.data.on_instagram) html +=
-                                `<i class="fab fa-instagram"></i><span class="m-0 ms-2">${response.data.instagram_account_name}</span>`;
+                                `<i class="fab fa-instagram"></i>`;
                             html += `</div>
                                         <div class="d-flex gap-2 align-items-center">
                                             <input type="checkbox" style="pointer-events: none; display: none"
                                                 id="linkedin-post-detail" ${(response.data.on_linkedin) ? 'checked' : ''}>
                                         `;
                             if (response.data.on_linkedin) html +=
-                                `<i class="fab fa-linkedin"></i><span class="m-0 ms-2">${response.data.linkedin_company_name}</span>`;
+                                `<i class="fab fa-linkedin"></i>`;
                             html += `</div>
                                     </div>
                                 </div>
@@ -781,20 +793,22 @@
             function addScheduleButtons() {
                 var calendarCells = document.querySelectorAll('.fc-daygrid-day');
                 var now = new Date();
+                now.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0); // Reset time part to midnight
 
                 calendarCells.forEach(function(cell) {
                     var cellDate = new Date(cell.getAttribute('data-date'));
+                    cellDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0); // Reset time part to midnight
 
                     if (cellDate >= now) {
                         var button = document.createElement('button');
                         button.innerHTML = '<i class="fas fa-plus"></i>';
                         button.className = 'schedule-button';
                         button.addEventListener('click', function() {
-                            $("#schedulePostForm").trigger("reset");
-                            $("#schedulePostModal").modal("show");
-                            $("#postDate").val(cellDate.toISOString().split('T')[0]);
+                            let date = cellDate.toISOString().split('T')[0];
+                            window.location.href = `{{ route('user.individual-post.create') }}?schedule_date=${date}`;
                         });
-
+                    
+                        console.log(cellDate >= now);
                         cell.appendChild(button);
                     }
                 });
@@ -805,122 +819,7 @@
                     $("#schedulePostModal").modal("hide");
                 });
             });
-
-            $("#schedulePostForm").submit(function(e) {
-                e.preventDefault();
-                $.ajax({
-                    type: "POST",
-                    url: `{{ route('user.post.store') }}`,
-                    data: new FormData(this),
-                    processData: false,
-                    contentType: false,
-                    beforeSend: function() {
-                        $("#scheduleSaveBtn").attr('disabled', 'true');
-                    },
-                    success: function(response) {
-                        if (response.status == 200) {
-                            $("#schedulePostModal").modal('hide');
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Post scheduled successfully',
-                                showConfirmButton: false,
-                                timer: 700
-                            }).then(() => {
-                                location.reload();
-                            })
-                        } else {
-                            toastr.error(response.error);
-                        }
-
-                        $("#scheduleSaveBtn").removeAttr('disabled');
-                    }
-                });
-            });
         });
-
-        function getFacebookPages(element) {
-            if (element.checked) {
-                $("#facebookSelectSection").fadeIn();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.facebook.pages') }}",
-                    beforeSend: function() {
-                        $("#facebookPagesSelect").html(`<option value="">Loading...</option>`);
-                    },
-                    success: function(response) {
-                        html = `<option value="">Select</option>`;
-
-                        if (response.length > 0) {
-                            response.forEach((page) => {
-                                html +=
-                                    `<option value="${page.id} - ${page.access_token} - ${page.name}">${page.name}</option>`;
-                            })
-                        } else {
-                            html = `<option value="">No Page Found</option>`;
-                        }
-                        $("#facebookPagesSelect").html(html);
-                    }
-                });
-            } else {
-                $("#facebookSelectSection").fadeOut();
-            }
-        }
-
-        function getInstagramAccounts(element) {
-            if (element.checked) {
-                $("#instagramSelectSection").fadeIn();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.instagram.accounts') }}",
-                    beforeSend: function() {
-                        $("#instagramAccountSelect").html(`<option value="">Loading...</option>`);
-                    },
-                    success: function(response) {
-                        html = `<option value="">Select</option>`;
-
-                        if (response.length > 0) {
-                            response.forEach((account) => {
-                                html +=
-                                    `<option value="${account.ig_business_account} - ${account.name}">${account.name}</option>`;
-                            })
-                        } else {
-                            html = `<option value="">No Account Found</option>`;
-                        }
-                        $("#instagramAccountSelect").html(html);
-                    }
-                });
-            } else {
-                $("#instagramSelectSection").fadeOut();
-            }
-        }
-
-        function getLinkedInOrganizations(element) {
-            if (element.checked) {
-                $("#linkedinSelectSection").fadeIn();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.linkedin.organizations') }}",
-                    beforeSend: function() {
-                        $("#linkedinOrganizationsSelect").html(`<option value="">Loading...</option>`);
-                    },
-                    success: function(response) {
-                        html = `<option value="">Select</option>`;
-
-                        if (response.length > 0) {
-                            response.forEach((account) => {
-                                html +=
-                                    `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`;
-                            })
-                        } else {
-                            html = `<option value="">No Account Found</option>`;
-                        }
-                        $("#linkedinOrganizationsSelect").html(html);
-                    }
-                });
-            } else {
-                $("#linkedinSelectSection").fadeOut();
-            }
-        }
 
         function deletePost() {
             $("#postDetail").modal("hide");
@@ -944,7 +843,7 @@
                 if (result.isConfirmed) {
                     $.ajax({
                         type: "POST",
-                        url: `{{ route('user.post.index') }}/${postId}/delete`,
+                        url: `{{ route('user.individual-post.index') }}/${postId}/delete`,
                         data: {
                             _token: "{{ csrf_token() }}",
                             post_id: postId

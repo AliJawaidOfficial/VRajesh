@@ -111,6 +111,11 @@
                     <a href="{{ route('user.register') }}">Register now</a>
                 </p>
             </div>
+
+            <div class="d-flex justify-content-center gap-2 mt-3">
+                <small class=""><a href="{{ route('privacy-policy') }}" class="link text-muted">Privacy Policy</a></small>
+                <small class=""><a href="{{ route('terms-and-conditions') }}" class="link text-muted">Terms & Conditions</a></small>
+            </div>
         </div>
     </div>
     <!-- /Content -->

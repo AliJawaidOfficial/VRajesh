@@ -10,11 +10,9 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
-class IndivisualPostController extends Controller
+class IndividualPostController extends Controller
 {
     protected $linkedinService;
 
@@ -32,9 +30,9 @@ class IndivisualPostController extends Controller
 
         $postMonths = Post::where('user_id', $user->id)
             ->where(function ($q) {
-                $q->where('on_linkedin', 1)->where('linkedin_company_id', null);
-                $q->orWhere('on_facebook', 1)->where('facebook_page_id', null);
-                $q->orWhere('on_instagram', 1)->where('instagram_account_id', null);
+                $q->where('on_linkedin', 1)->whereNull('linkedin_company_id');
+                $q->orWhere('on_facebook', 1)->whereNull('facebook_page_id');
+                $q->orWhere('on_instagram', 1)->whereNull('instagram_account_id');
             })
             ->where('posted', 1)
             ->where('draft', 0)
@@ -47,9 +45,9 @@ class IndivisualPostController extends Controller
 
         $dataSet = Post::where('user_id', $user->id)
             ->where(function ($q) {
-                $q->where('on_linkedin', 1)->where('linkedin_company_id', null);
-                $q->orWhere('on_facebook', 1)->where('facebook_page_id', null);
-                $q->orWhere('on_instagram', 1)->where('instagram_account_id', null);
+                $q->where('on_linkedin', 1)->whereNull('linkedin_company_id');
+                $q->orWhere('on_facebook', 1)->whereNull('facebook_page_id');
+                $q->orWhere('on_instagram', 1)->whereNull('instagram_account_id');
             })
             ->where('posted', 1)
             ->where('draft', 0)
@@ -57,6 +55,11 @@ class IndivisualPostController extends Controller
 
         if ($request->has('month') && $request->month != '') $dataSet = $dataSet->whereYear('created_at', '=', Carbon::parse($request->month)->year)
             ->whereMonth('created_at', '=', Carbon::parse($request->month)->month);
+
+        $dataSet = $dataSet->select(
+            'posts.*',
+            DB::raw('(SELECT COUNT(*) FROM `posts` AS `post_2` WHERE `posts`.`post_id`=`post_2`.`id`) + 1 AS `post_count`'),
+        );
 
         $dataSet = $dataSet->paginate(10);
 
@@ -87,9 +90,10 @@ class IndivisualPostController extends Controller
     /**
      * Post Create
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('user.individual-post.create');
+        $schedule_date = $request->has('schedule_date') ? $request->schedule_date : null;
+        return view('user.individual-post.create', compact('schedule_date'));
     }
 
     /**
@@ -105,10 +109,7 @@ class IndivisualPostController extends Controller
                 [
                     'title' => 'required',
                     'description' => 'nullable|required_without:media',
-                    'media' => 'nullable|required_if:on_instagram,1',
-                    'on_facebook' => 'nullable|boolean',
-                    'on_instagram' => 'nullable|boolean',
-                    'on_linkedin' => 'nullable|boolean',
+                    'media' => 'nullable',
                     'schedule_date' => 'nullable|date|after_or_equal:today',
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
@@ -127,55 +128,65 @@ class IndivisualPostController extends Controller
                 ]
             );
 
-            if ($validator->fails()) throw new Exception($validator->errors()->first());
+            $validator->after(function ($validator) use ($request) {
+                if ($request->has('media') && $request->media_type == 'image') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['jpg', 'jpeg', 'png', 'gif'])) $validator->errors()->add('media', 'Media should be jpg, jpeg and png');
+                    }
+                }
 
-            if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
+                if ($request->has('media') && $request->media_type == 'video') {
+                    foreach ($request->media as $media) {
+                        if (!in_array($media->extension(), ['mp4', 'mpeg', 'avi'])) $validator->errors()->add('media', 'Media should be mp4, mpeg and avi');
+                    }
+                }
+            });
+
+            if ($validator->fails()) throw new Exception($validator->errors()->first());
 
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
             $data->title = $request->title;
-            $data->description = str_replace('\n', "\n", $request->description);
+            $data->description = $request->description;
 
-            $mediaType = null;
-            $media_type = null;
+            if ($request->media) {
+                $mediaPaths = [];
+                $mediaSizes = [];
 
-            $errors = [];
-            if ($request->hasFile('media')) {
-                $media = $request->file('media');
-                $mediaName = time() . '.' . $media->getClientOriginalExtension();
-                $mediaType = $media->getMimeType();
-                $mediaSize = $media->getSize();
-                $media->move(public_path('posts'), $mediaName);
-                $onlyMediaPath = 'posts/' . $mediaName;
-                $mediaPath = public_path('posts') . '/' . $mediaName;
+                foreach ($request->media as $media) {
+                    $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
+                    $mediaSize = $media->getSize();
+                    $media->move(public_path('posts'), $mediaName);
+                    $mediaPath = 'posts/' . $mediaName;
 
-                if (str_starts_with($mediaType, 'image/')) $media_type = 'image';
-                if (str_starts_with($mediaType, 'video/')) $media_type = 'video';
+                    $mediaPaths[] = $mediaPath;
+                    $mediaSizes[] = $mediaSize;
+                }
 
-                $data->media = $onlyMediaPath;
-                $data->media_type = $media_type;
+                $data->media = implode(',', $mediaPaths);
+                $data->media_type = $request->media_type;
             }
+
+            $data->on_linkedin = 1;
 
             if ($request->schedule_date != null && $request->schedule_time != null) {
                 $ip = $request->ip();
                 $countryAndTimezone = getCountryAndTimezone($ip);
                 $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
                 $data->scheduled_at = $request->schedule_date . ' ' . $time;
-                if ($request->has('on_linkedin')) $data->on_linkedin = 1;
             } else {
-                $assets = env('APP_URL') . '/';
-
-                // On Linkedin
-                if ($request->has('on_linkedin')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $post = $this->linkedinService->individualPostImage($assets . $data->media, $request->description);
-                        if ($media_type == 'video') $post = $this->linkedinService->individualPostVideo($assets . $data->media, $request->description);
-                    } else {
-                        $post = $this->linkedinService->individualPostText($request->description);
-                    }
-                    $data->on_linkedin = 1;
+                if ($request->hasFile('media')) {
+                    if ($data->media_type == 'image') $posted = $this->linkedinService->individualPostImage(
+                        $data->media,
+                        $request->description
+                    );
+                    if ($data->media_type == 'video') $posted = $this->linkedinService->individualPostVideo(
+                        $data->media,
+                        $request->description
+                    );
+                } else {
+                    $posted = $this->linkedinService->individualPostText($request->description);
                 }
-
                 $data->posted = 1;
             }
 
@@ -200,7 +211,6 @@ class IndivisualPostController extends Controller
             ]);
         }
     }
-
 
     /**
      * Create new from old
@@ -247,77 +257,46 @@ class IndivisualPostController extends Controller
 
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
+            $data->post_id = $request->post_id;
             $data->title = $request->title;
             $data->description = str_replace('\n', "\n", $request->description);
+            $data->on_linkedin = 1;
 
-            $mediaType = null;
-            $media_type = null;
+            $errors = [];
+            $mediaPaths = [];
+            $mediaSizes = [];
 
-            if ($request->hasFile('media')) {
-                $media = $request->file('media');
-                $mediaName = time() . '.' . $media->getClientOriginalExtension();
-                $mediaType = $media->getMimeType();
-                $mediaSize = $media->getSize();
-                $media->move(public_path('posts'), $mediaName);
-                $onlyMediaPath = 'posts/' . $mediaName;
-                $mediaPath = public_path('posts') . '/' . $mediaName;
+            if ($request->media) {
+                foreach ($request->media as $media) {
+                    $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
+                    $mediaSize = $media->getSize();
+                    $media->move(public_path('posts'), $mediaName);
+                    $mediaPath = 'posts/' . $mediaName;
 
-                if (str_starts_with($mediaType, 'image/')) $media_type = 'image';
-                if (str_starts_with($mediaType, 'video/')) $media_type = 'video';
+                    $mediaPaths[] = $mediaPath;
+                    $mediaSizes[] = $mediaSize;
+                }
 
-                $data->media = $onlyMediaPath;
-                $data->media_type = $media_type;
+                $data->media = implode(',', $mediaPaths);
+                $data->media_type = $request->media_type;
             } else {
                 $oldPost = Post::where('id', $request->post_id)->first();
 
                 if ($oldPost->media != null) {
-                    $mediaName = time() . '.' . pathinfo($oldPost->media, PATHINFO_EXTENSION);
-                    $onlyMediaPath = 'posts/' . $mediaName;
-                    copy(public_path($oldPost->media), public_path('posts') . '/' . $mediaName);
+                    foreach (explode(',', $oldPost->media) as $media) {
 
-                    $mediaSize = filesize(public_path($onlyMediaPath));
+                        $mediaName = time() . '.' . pathinfo($oldPost->media, PATHINFO_EXTENSION);
+                        $mediaPath = 'posts/' . $mediaName;
+                        copy(public_path($oldPost->media), public_path('posts') . '/' . $mediaName);
+                        $mediaSize = filesize(public_path($mediaPath));
 
-                    $media_type = $oldPost->media_type;
-                    $data->media = $onlyMediaPath;
-                    $data->media_type = $media_type;
+                        $mediaPaths[] = $mediaPath;
+                        $mediaSizes[] = $mediaSize;
+                    }
+
+                    $data->media = implode(',', $mediaPaths);
+                    $data->media_type = $oldPost->media_type;
                 }
-            }
-
-            // On Facebook
-            if ($request->has('on_facebook')) {
-                $facebook_page = explode(' - ', $request->facebook_page);
-                $facebook_page_id = $facebook_page[0];
-                $facebook_page_access_token = $facebook_page[1];
-                $facebook_page_name = $facebook_page[2];
-
-                $long_facebook_access_token = $this->facebookService->tokenTime($facebook_page_access_token);
-
-                $data->on_facebook = 1;
-                $data->facebook_page_id = $facebook_page_id;
-                $data->facebook_page_access_token = $long_facebook_access_token;
-                $data->facebook_page_name = $facebook_page_name;
-            }
-
-            // On Instagram
-            if ($request->has('on_instagram')) {
-                $instagram_account = explode(' - ', $request->instagram_account);
-                $instagram_account_id = $instagram_account[0];
-                $instagram_account_name = $instagram_account[1];
-
-                $data->on_instagram = 1;
-                $data->instagram_account_id = $instagram_account_id;
-                $data->instagram_account_name = $instagram_account_name;
-            }
-
-            // On Linkedin
-            if ($request->has('on_linkedin')) {
-                $linkedin_organization = explode(' - ', $request->linkedin_organization);
-                $linkedin_organization_id = $linkedin_organization[0];
-                $linkedin_organization_name = $linkedin_organization[1];
-
-                $data->on_linkedin = 1;
-                $data->linkedin_company_id = $linkedin_organization_id;
-                $data->linkedin_company_name = $linkedin_organization_name;
             }
 
             if ($request->schedule_date != null && $request->schedule_time != null) {
@@ -326,36 +305,18 @@ class IndivisualPostController extends Controller
                 $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
                 $data->scheduled_at = $request->schedule_date . ' ' . $time;
             } else {
-                $assets = env('APP_URL') . '/';
-
-                // On Instagram
-                if ($request->has('on_instagram')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->instagramService->postImage($data->instagram_account_id, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->instagramService->postVideo($data->instagram_account_id, $assets . $data->media, $mediaSize, $request->description);
-                    }
+                if ($request->hasFile('media')) {
+                    if ($data->media_type == 'image') $posted = $this->linkedinService->individualPostImage(
+                        $data->media,
+                        $request->description
+                    );
+                    if ($data->media_type == 'video') $posted = $this->linkedinService->individualPostVideo(
+                        $data->media,
+                        $request->description
+                    );
+                } else {
+                    $posted = $this->linkedinService->individualPostText($request->description);
                 }
-
-                // On Facebook
-                if ($request->has('on_facebook')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->facebookService->postImage($data->facebook_page_id, $data->facebook_page_access_token, $assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->facebookService->postVideo($data->facebook_page_id, $data->facebook_page_access_token, $mediaSize, $assets . $data->media, $request->description);
-                    } else {
-                        $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
-                    }
-                }
-
-                // On Linkedin
-                if ($request->has('on_linkedin')) {
-                    if ($request->hasFile('media')) {
-                        if ($media_type == 'image') $this->linkedinService->individualPostImage($assets . $data->media, $request->description);
-                        if ($media_type == 'video') $this->linkedinService->individualPostVideo($assets . $data->media, $request->description);
-                    } else {
-                        $this->linkedinService->individualPostText($request->description);
-                    }
-                }
-
                 $data->posted = 1;
             }
 
@@ -381,6 +342,18 @@ class IndivisualPostController extends Controller
         }
     }
 
+    /**
+     * Post Edit
+     */
+    public function edit(String $id, String $action)
+    {
+        $post = Post::where('user_id', Auth::guard('web')->user()->id)->where('id', $id)->first();
+        return view('user.individual-post.edit', compact('post', 'action'));
+    }
+
+    /**
+     * Post Delete
+     */
     public function destroy(Request $request)
     {
         try {

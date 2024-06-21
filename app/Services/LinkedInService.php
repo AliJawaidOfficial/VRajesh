@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LinkedInService
 {
@@ -695,7 +696,13 @@ class LinkedInService
 
 
     /**
-     * Indivisual Text Post
+     * =================================================================================================
+     * Indivisual Post
+     * =================================================================================================
+     */
+
+    /**
+     * Text
      */
     public function individualPostText($text, $user_id = null)
     {
@@ -732,10 +739,11 @@ class LinkedInService
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
             $response = curl_exec($ch);
-            if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
             $data = json_decode($response, true);
+
+            if (isset($data['errors'])) throw new Exception('LinkedIn API Error: ' . json_encode($data['errors']));
 
             return $data;
         } catch (Exception $e) {
@@ -744,14 +752,46 @@ class LinkedInService
     }
 
     /**
-     * Indivisual Image Post
+     * Image
      */
-    public function individualPostImage($imagePath, $title, $user_id = null)
+    public function individualPostImage($images, $title, $user_id = null)
+    {
+        try {
+            $this->init($user_id);
+
+            $assetsIds = [];
+            foreach (explode(',', $images) as $index => $image) {
+                $imagePath = env('APP_URL') . '/' . $image;
+
+                // Step 1
+                $step1 = $this->individualPostImage1();
+                $upload_url = $step1['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
+                $asset_id = $step1['value']['asset'];
+
+                // Step 2
+                $step2 = $this->individualPostImage2($upload_url, $imagePath);
+
+                // Step 3
+                $step = $this->individualPostImage3($asset_id);
+
+                $assetsIds[] = $asset_id;
+            }
+
+            // Step 4
+            $publish = $this->individualPostImage4($assetsIds, $title);
+            return $publish;
+        } catch (Exception $e) {
+            return [
+                'status' => 500,
+                'error' => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function individualPostImage1()
     {
         try {
             $url = 'https://api.linkedin.com/v2/assets?action=registerUpload';
-
-            $this->init($user_id);
 
             $params = [
                 'registerUploadRequest' => [
@@ -781,20 +821,18 @@ class LinkedInService
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
-            $data = json_decode($response, true);
-            $upload_url = $data['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
-            $asset_id = $data['value']['asset'];
+            if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
 
-            return $this->individualPostImage2($upload_url, $imagePath, $asset_id, $title);
+            $data = json_decode($response, true);
+            return $data;
         } catch (Exception $e) {
             return [
-                'status' => 500,
                 'error' => $e->getMessage(),
             ];
         }
     }
 
-    public function individualPostImage2($upload_url, $imagePath, $asset_id, $title)
+    public function individualPostImage2($upload_url, $imagePath)
     {
         try {
             $image = file_get_contents($imagePath);
@@ -813,7 +851,7 @@ class LinkedInService
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
-            return $this->individualPostImage3($asset_id, $title);
+            return $response;
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -822,7 +860,7 @@ class LinkedInService
         }
     }
 
-    public function individualPostImage3($asset_id, $title)
+    public function individualPostImage3($asset_id)
     {
         try {
             $url = "https://api.linkedin.com/v2/assets/{$asset_id}/action=completeUpload";
@@ -838,7 +876,7 @@ class LinkedInService
             if ($response === false) throw new Exception(curl_error($ch));
             curl_close($ch);
 
-            return $this->individualPostImage4($asset_id, $title);
+            return $response;
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -847,10 +885,22 @@ class LinkedInService
         }
     }
 
-    public function individualPostImage4($asset_id, $title)
+    public function individualPostImage4($asset_ids, $title)
     {
         try {
             $url = 'https://api.linkedin.com/v2/ugcPosts';
+
+            $media = [];
+            foreach ($asset_ids as $asset_id) {
+                $media[] = [
+                    'status' => 'READY',
+                    'media' => $asset_id,
+                    'title' => [
+                        'text' => $title,
+                    ],
+                ];
+            }
+
             $params = [
                 'author' => "urn:li:person:" . $this->personUrn,
                 'lifecycleState' => 'PUBLISHED',
@@ -860,15 +910,7 @@ class LinkedInService
                             'text' => $title,
                         ],
                         'shareMediaCategory' => 'IMAGE',
-                        'media' => [
-                            [
-                                'status' => 'READY',
-                                'media' => $asset_id,
-                                'title' => [
-                                    'text' => $title,
-                                ],
-                            ],
-                        ],
+                        'media' => $media,
                     ],
                 ],
                 'visibility' => [
@@ -894,6 +936,7 @@ class LinkedInService
 
             if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
 
+            return $data;
             return ['status' => 200];
         } catch (Exception $e) {
             return [
@@ -903,8 +946,10 @@ class LinkedInService
         }
     }
 
+
+
     /**
-     * Indivisual Video Post
+     * Video
      */
     public function individualPostVideo($video, $title, $user_id = null)
     {
@@ -942,6 +987,8 @@ class LinkedInService
             curl_close($ch);
 
             $data = json_decode($response, true);
+
+            if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
 
             $upload_url = $data['value']['uploadMechanism']['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest']['uploadUrl'];
             $asset_id = $data['value']['asset'];
@@ -1061,6 +1108,7 @@ class LinkedInService
 
             if (isset($data['serviceErrorCode'])) throw new Exception($data['message']);
 
+            return $data;
             return ['status' => 200];
         } catch (Exception $e) {
             return [
@@ -1069,7 +1117,6 @@ class LinkedInService
             ];
         }
     }
-
 
 
     /**

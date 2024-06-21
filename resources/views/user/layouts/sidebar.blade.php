@@ -1,11 +1,11 @@
 @php
     $sideBarList = [
-        [
-            'name' => 'Dashboard',
-            'url' => route('user.dashboard'),
-            'active_url' => 'user.dashboard',
-            'icon' => asset('assets/images/icons/home.png'),
-        ],
+        // [
+        //     'name' => 'Dashboard',
+        //     'url' => route('user.dashboard'),
+        //     'active_url' => 'user.dashboard',
+        //     'icon' => asset('assets/images/icons/home.png'),
+        // ],
         [
             'name' => 'Connect Accounts',
             'url' => route('user.connect'),
@@ -67,14 +67,14 @@
         ],
         [
             'name' => 'Linkedin Self',
-            'active_url' => 'user.individual.post.*',
+            'active_url' => 'user.individual-post.*',
             'icon' => asset('assets/images/icons/arrow-right.png'),
             'permissions' => ['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post', 'immediate_post'],
             'submenu' => [
                 [
                     'name' => 'Create',
-                    'url' => route('user.individual.post.create'),
-                    'active_url' => 'user.individual.post.create',
+                    'url' => route('user.individual-post.create'),
+                    'active_url' => 'user.individual-post.create',
                     'permissions' => [
                         'linkedin_text_post',
                         'linkedin_image_post',
@@ -84,9 +84,21 @@
                 ],
                 [
                     'name' => 'Published',
-                    'url' => route('user.individual.post.index'),
-                    'active_url' => 'user.individual.post.index',
+                    'url' => route('user.individual-post.index'),
+                    'active_url' => 'user.individual-post.index',
                     'permissions' => ['immediate_post'],
+                ],
+                [
+                    'name' => 'Draft',
+                    'url' => route('user.individual-post.draft'),
+                    'active_url' => 'user.individual-post.draft',
+                    'permissions' => ['draft_post'],
+                ],
+                [
+                    'name' => 'Scheduled',
+                    'url' => route('user.individual-post.scheduled'),
+                    'active_url' => 'user.individual-post.scheduled',
+                    'permissions' => ['scheduled_post'],
                 ],
             ],
         ],

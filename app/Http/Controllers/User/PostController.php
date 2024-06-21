@@ -113,7 +113,7 @@ class PostController extends Controller
 
         $dataSet = $dataSet->select(
             'posts.*',
-            DB::raw('(SELECT COUNT(*) FROM `posts` AS `post_2` WHERE `posts`.`id`=`post_2`.`post_id`) AS `post_count`'),
+            DB::raw('(SELECT COUNT(*) FROM `posts` AS `post_2` WHERE `posts`.`post_id`=`post_2`.`id`) + 1 AS `post_count`'),
         );
 
         $dataSet = $dataSet->paginate(10);
@@ -152,7 +152,7 @@ class PostController extends Controller
     }
 
     /**
-     * Post Create
+     * Post Edit
      */
     public function edit(String $id, String $action)
     {
@@ -437,6 +437,10 @@ class PostController extends Controller
             $data->post_id = $request->post_id;
             $data->title = $request->title;
             $data->description = str_replace('\n', "\n", $request->description);
+
+            $errors = [];
+            $mediaPaths = [];
+            $mediaSizes = [];
 
             $errors = [];
             $mediaPaths = [];

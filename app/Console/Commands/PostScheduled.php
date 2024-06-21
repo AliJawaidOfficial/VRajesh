@@ -25,7 +25,7 @@ class PostScheduled extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Post all scheduled posts';
 
 
     /**
@@ -60,7 +60,6 @@ class PostScheduled extends Command
      */
     public function processLinkedinPost($post)
     {
-        Log::info("linkedin entry");
         $organizationId = $post->linkedin_company_id;
         $description = $post->description;
         $user_id = $post->user_id;
@@ -68,17 +67,21 @@ class PostScheduled extends Command
         $media_type = $post->media_type;
 
         $service = new LinkedInService();
-        if ($media == null) {
-            $posted = $service->postText($organizationId, $description, $user_id);
+
+        if ($organizationId != null) {
+            if ($media == null) {
+                $posted = $service->postText($organizationId, $description, $user_id);
+            } else {
+                if ($media_type == 'image') $posted = $service->postImage($organizationId, $media, $description, $user_id);
+                if ($media_type == 'video') $posted = $service->postVideo($organizationId, $media, $description, $user_id);
+            }
         } else {
-            if ($media_type == 'image') {
-                $posted = $service->postImage($organizationId, $media, $description, $user_id);
-                Log::info($posted);
-            } 
-            if ($media_type == 'video') {
-                $posted = $service->postVideo($organizationId, $media, $description, $user_id);
-                Log::info($posted);
-            } 
+            if ($media == null) {
+                $posted = $service->individualPostText($description, $user_id);
+            } else {
+                if ($media_type == 'image') $posted = $service->individualPostImage($media, $description, $user_id);
+                if ($media_type == 'video') $posted = $service->individualPostVideo($media, $description, $user_id);
+            }
         }
         Log::info($posted);
     }

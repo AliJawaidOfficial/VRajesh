@@ -13,9 +13,20 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\AuthController;
 use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\User\ConnectController;
+
 use App\Http\Controllers\User\PostController;
+use App\Http\Controllers\User\DraftPostController;
+use App\Http\Controllers\User\ScheduledPostController;
+
+use App\Http\Controllers\User\IndividualPostController;
+use App\Http\Controllers\User\IndividualDraftPostController;
+use App\Http\Controllers\User\IndividualScheduledPostController;
+
+use App\Http\Controllers\User\LinkedIn\SalesNavigatorController;
+use App\Http\Controllers\User\PixelsController;
 
 use App\Http\Controllers\User\LinkedIn\PipelineController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -27,17 +38,20 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PackageController as AdminPackageController;
-use App\Http\Controllers\User\DraftPostController;
-use App\Http\Controllers\User\IndivisualPostController;
-use App\Http\Controllers\User\LinkedIn\SalesNavigatorController;
-use App\Http\Controllers\User\PixelsController;
-use App\Http\Controllers\User\ScheduledPostController;
+use App\Http\Controllers\User\PrivacyPolicyController;
+use App\Http\Controllers\User\TermsConditionController;
 
 /*
 |--------------------------------------------------------------------------
 | User Routes
 |--------------------------------------------------------------------------
 */
+
+// Privacy Policy
+Route::get('/privacy-policy', [PrivacyPolicyController::class, 'index'])->name('privacy-policy');
+
+// Terms & Conditions
+Route::get('/terms-and-conditions', [TermsConditionController::class, 'index'])->name('terms-and-conditions');
 
 // Jobs
 Route::get('/scheduled/post/job', [ScheduledPostController::class, 'job'])->name('post.index');
@@ -146,23 +160,51 @@ Route::name('user.')
                             Route::get('/response', 'all')->name('.all');
                         });
 
-                        
                     Route::get('/{id}/{action}', 'edit')->name('edit');
                 });
 
 
             /**
-             * Indivisual Post
+             * Individual Post
              */
             Route::prefix('/linkedin-self')
-                ->controller(IndivisualPostController::class)
-                ->name('individual.post.')
+                ->controller(IndividualPostController::class)
+                ->name('individual-post.')
                 ->group(function () {
                     Route::get('/', 'index')->name('index');
-                    Route::get('/details/{id}', 'show')->name('show');
+                    Route::get('/details/show/{id}', 'show')->name('show');
                     Route::get('/create', 'create')->name('create');
                     Route::post('/create', 'store')->name('store');
+                    
+                    Route::post('/create/new', 'newStore')->name('new.store');
                     Route::post('/{id}/delete', 'destroy')->name('destroy');
+
+                    /**
+                     * Draft Post
+                     */
+                    Route::prefix('/draft')
+                        ->controller(IndividualDraftPostController::class)
+                        ->name('draft')
+                        ->group(function () {
+                            Route::get('/', 'index');
+                            Route::post('/', 'store')->name('.store');
+                            Route::post('/new', 'storeAsDraft')->name('.store.new');
+                            Route::post('/update', 'update')->name('.update');
+                        });
+
+                    /**
+                     * Scheduled Post
+                     */
+                    Route::prefix('/scheduled')
+                        ->controller(IndividualScheduledPostController::class)
+                        ->name('scheduled')
+                        ->group(function () {
+                            Route::get('/', 'index');
+                            Route::get('/response', 'all')->name('.all');
+                        });
+
+
+                    Route::get('/{id}/{action}', 'edit')->name('edit');
                 });
 
 
@@ -200,8 +242,6 @@ Route::name('user.')
                 });
         });
     });
-
-
 
 
 

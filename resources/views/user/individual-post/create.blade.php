@@ -30,82 +30,6 @@
             flex: 1;
         }
 
-        /* Instagram Post Preview */
-        .instagram-post {
-            max-width: 600px;
-            margin: 20px auto;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #fff;
-        }
-
-        .instagram-post .post-header,
-        .instagram-post .post-footer {
-            padding: 15px;
-        }
-
-        .instagram-post .post-header {
-            display: flex;
-            align-items: center;
-        }
-
-        .instagram-post .post-header img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .instagram-post .post-header .username {
-            font-weight: bold;
-        }
-
-        .instagram-post .post-image {
-            width: 100%;
-            height: auto;
-        }
-
-        .instagram-post .post-footer .actions {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .instagram-post .post-footer .actions span {
-            font-size: 24px;
-            margin-right: 15px;
-            cursor: pointer;
-        }
-
-        .instagram-post .post-footer .likes,
-        .instagram-post .post-footer .caption,
-        .instagram-post .post-footer .comments,
-        .instagram-post .post-footer .add-comment {
-            margin-bottom: 10px;
-        }
-
-        .instagram-post .post-footer .likes {
-            font-weight: bold;
-        }
-
-        .instagram-post .post-footer .add-comment input {
-            width: 100%;
-            border: none;
-            border-top: 1px solid #ddd;
-            padding: 10px 0;
-        }
-
-        .post-media img,
-        .post-media video {
-            width: 100%;
-            display: none;
-        }
-
-        .post-media img.active,
-        .post-media video.active {
-            display: block;
-        }
-
         .form-control:focus {
             box-shadow: none;
             outline: none;
@@ -127,34 +51,15 @@
             font-size: 20px
         }
 
-        .post-description .username {
-            font-weight: bold;
-            margin-right: 5px;
-        }
-
-        .remove-media-btn {
-            background: rgba(0, 0, 0);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
         .form-check-input {
             width: 17px;
             height: 17px;
             margin-right: 5px;
             cursor: pointer;
-
         }
 
         .btn-custom {
-            width: 140px;
+            width: 145px;
             font-weight: bold;
             color: #fff;
             background-image: linear-gradient(90deg, #ff6600 0%, #d89e33 100%) !important;
@@ -164,18 +69,6 @@
         .btn-custom:hover {
             background-image: linear-gradient(90deg, #d67f45 0%, #d89e33 100%) !important;
             color: #fff;
-        }
-
-        .linkedin-post-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 15px;
-            border-top: 1px solid #ddd;
-        }
-
-        .linkedin-post-footer>div img {
-            width: 25px;
         }
 
         /* Platform Checkbox Styles */
@@ -203,7 +96,6 @@
         .platform-checkbox i {
             vertical-align: middle;
         }
-
 
         #loadingModal {
             display: none;
@@ -240,6 +132,158 @@
                 transform: translate(-50%, -50%) rotate(360deg);
             }
         }
+
+        #imagesModal .input-group {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: white;
+        }
+
+        #images * {
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            /* Chrome, Safari, Edge */
+            -moz-user-select: none;
+            /* Firefox */
+            -ms-user-select: none;
+            /* Internet Explorer/Edge */
+            user-select: none;
+            /* Non-prefixed version, supported by most browsers */
+        }
+
+        .selectable-image {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .selected-container {
+            outline: 2px solid #007bff;
+            position: relative;
+            z-index: 10;
+        }
+
+        .selected-container::after {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 0.8em 1.2em;
+            border-radius: 50%;
+        }
+
+        .btn-pxel {
+            width: 30px;
+            height: 30px;
+            padding: 0px
+        }
+
+        .preview-wrapper {
+            position: relative;
+            top: 0%;
+            width: fit-content;
+            height: fit-content;
+            margin: 0 auto;
+        }
+
+        #uploadedImages {
+            flex-grow: 1;
+            overflow-y: auto;
+            align-items: flex-start;
+            align-content: flex-start;
+            gap: 20px;
+        }
+
+        .uploaded-images-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 200px);
+        }
+
+        .uploaded-images-container img,
+        .uploaded-images-container video {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+            padding: 5px;
+            position: relative;
+        }
+
+        .uploaded-images-container .remove-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .uploaded-images-container .remove-btn:hover {
+            background: red;
+        }
+    </style>
+
+    <!-- Include Font Awesome for additional icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Include Emoji Picker Element library -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .editor-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .editor {
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 200px;
+            overflow-y: auto;
+        }
+
+        .toolbar button {
+            margin-right: 5px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 @endsection
 
@@ -255,90 +299,14 @@
             document.getElementById("loadingModal").style.display = "none";
         }
 
-        document.querySelectorAll('.toggle-post').forEach((toggleBtn) => {
-            toggleBtn.addEventListener('click', (e) => {
-                const target = document.getElementById(e.target.dataset.bsToggle);
-                if (e.target.checked) {
-                    target.style.display = "block";
-                } else {
-                    target.style.display = "none";
-                }
-            });
-        });
-
         function updateDescription(description) {
             const formattedDescription = description.replace(/\n/g, '<br>');
-            document.querySelectorAll(".post-description").forEach((postDescription) => {
-                const isInstagram = postDescription.closest('#instagram-post');
-                if (isInstagram) {
-                    const usernameSpan = postDescription.querySelector('.username');
-                    const username = usernameSpan ? usernameSpan.textContent : 'karuneshtalwar';
-                    postDescription.innerHTML = `<span class="username">${username}</span> ${formattedDescription}`;
-                } else {
-                    postDescription.innerHTML = formattedDescription;
-                }
-            });
         }
 
-        document.getElementById("postDescription").addEventListener("keyup", function(e) {
-            const description = e.target.value.trim() ? e.target.value : "This is a default post description";
-            updateDescription(description);
-        });
-
-        if (document.getElementById('mediaInput')) {
-            document.getElementById('mediaInput').addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const url = e.target.result;
-                        const isImage = file.type.startsWith('image/');
-
-                        if (isImage) {
-                            document.querySelectorAll('.post-media img').forEach(img => {
-                                img.src = url;
-                                img.classList.add('active');
-                                img.style.display = 'block';
-                            });
-                            document.querySelectorAll('.post-media video').forEach(video => {
-                                video.classList.remove('active');
-                                video.style.display = 'none';
-                            });
-                        } else {
-                            document.querySelectorAll('.post-media video').forEach(video => {
-                                video.src = url;
-                                video.classList.add('active');
-                                video.style.display = 'block';
-                            });
-                            document.querySelectorAll('.post-media img').forEach(img => {
-                                img.classList.remove('active');
-                                img.style.display = 'none';
-                            });
-                        }
-
-                        // Show remove button
-                        document.querySelectorAll('.remove-media-btn').forEach(btn => {
-                            btn.style.display = 'flex';
-                        });
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        document.querySelectorAll('.remove-media-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.post-media img, .post-media video').forEach(media => {
-                    media.src = '';
-                    media.classList.remove('active');
-                    media.style.display = 'none';
-                });
-                document.querySelectorAll('.remove-media-btn').forEach(btn => {
-                    btn.style.display = 'none';
-                });
-                document.getElementById('mediaInput').value = '';
-            });
-        });
+        // document.getElementById("postDescription").addEventListener("keyup", function(e) {
+        //     const description = e.target.value.trim() ? e.target.value : "This is a default post description";
+        //     updateDescription(description);
+        // });
 
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'Enter') {
@@ -348,69 +316,67 @@
             }
         });
 
-        document.getElementById("postDescription").addEventListener("keydown", function(e) {
-            if (e.ctrlKey && e.key === "Enter") {
-                e.preventDefault(); // Prevent default behavior
-                const cursorPosition = e.target.selectionStart;
-                const textBefore = e.target.value.substring(0, cursorPosition);
-                const textAfter = e.target.value.substring(cursorPosition);
-                e.target.value = textBefore + "\n" + textAfter;
+        // document.getElementById("postDescription").addEventListener("keydown", function(e) {
+        //     if (e.ctrlKey && e.key === "Enter") {
+        //         e.preventDefault(); // Prevent default behavior
+        //         const cursorPosition = e.target.selectionStart;
+        //         const textBefore = e.target.value.substring(0, cursorPosition);
+        //         const textAfter = e.target.value.substring(cursorPosition);
+        //         e.target.value = textBefore + "\n" + textAfter;
 
-                // Update the preview
-                const description = e.target.value.trim() ? e.target.value : "This is a default post description";
-                updateDescription(description);
+        //         // Update the preview
+        //         const description = e.target.value.trim() ? e.target.value : "This is a default post description";
+        //         updateDescription(description);
 
-                // Move the cursor to the new line
-                e.target.selectionEnd = cursorPosition + 1;
-            }
-        });
-
-        // Set default description on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const defaultDescription = "This is a default post description";
-            document.querySelectorAll(".post-description").forEach((postDescription) => {
-                const isInstagram = postDescription.closest('#instagram-post');
-                if (isInstagram) {
-                    postDescription.innerHTML =
-                        `<span class="username">karuneshtalwar</span> ${defaultDescription.replace(/\n/g, '<br>')}`;
-                } else {
-                    postDescription.innerHTML = defaultDescription.replace(/\n/g, '<br>');
-                }
-            });
-        });
-
-        // Schedule Form
-        // $("#scheduleForm").submit(function(e) {
-        //     e.preventDefault();
-        //     if ($(this).valid()) {
-        //         $("#post_schedule_date").val($("#scheduleDate").val());
-        //         $("#post_schedule_time").val($("#scheduleTime").val());
-        //         $("#scheduleModal").modal("hide");
-        //         $("#scheduleModal").css("display", "none");
-        //         $("#postForm").submit();
-        //         $("#exampleModal").modal("hide");
-        //         $("#exampleModal").css("display", "none");
+        //         // Move the cursor to the new line
+        //         e.target.selectionEnd = cursorPosition + 1;
         //     }
         // });
+
+        // Schedule Form
+        $("#scheduleForm").submit(function(e) {
+            e.preventDefault();
+            if ($(this).valid()) {
+                $("#post_schedule_date").val($("#scheduleDate").val());
+                $("#post_schedule_time").val($("#scheduleTime").val());
+                $("#scheduleModal").modal("hide");
+                $("#scheduleModal").css("display", "none");
+                $("#postForm").submit();
+                $("#exampleModal").modal("hide");
+                $("#exampleModal").css("display", "none");
+            }
+        });
 
         // Post Form
         $("#postForm").submit(function(e) {
             e.preventDefault();
+
+            if (images[0] != undefined) {
+                const mediatype = images[0]?.type === 'video/mp4' ? 'video' : 'image'
+                $("#mediaType").val(mediatype);
+            }
+
+            let formData = new FormData(this);
+
+            // Append each file in the images array to the FormData
+            images.forEach((file, index) => {
+                formData.append('media[]', file);
+            });
+
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('user.individual.post.store') }}",
-                    data: new FormData(this),
+                    url: "{{ route('user.individual-post.store') }}",
+                    data: formData,
                     processData: false,
                     contentType: false,
                     beforeSend: function() {
-                        showLoadingModal()
+                        showLoadingModal();
                     },
                     success: function(response) {
-
                         $("#post_schedule_date").val("");
                         $("#post_schedule_time").val("");
-                        hideLoadingModal()
+                        hideLoadingModal();
 
                         $("#scheduleModal").removeClass("show");
                         $("#scheduleModal").css("display", "none");
@@ -422,7 +388,13 @@
                                 showConfirmButton: false,
                                 timer: 700
                             }).then(() => {
-                                // location.reload();
+                                @if ($schedule_date != '')
+                                    window.location.href =
+                                        "{{ route('user.individual-post.scheduled') }}";
+                                @else
+                                    window.location.href =
+                                        "{{ route('user.individual-post.index') }}";
+                                @endif
                             });
                         } else {
                             toastr.error(response.error);
@@ -432,40 +404,454 @@
             }
         });
 
-        // Draft Form
-        // $('#postForm button[name="draft"]').click(function(e) {
-        //     e.preventDefault();
-        //     let form = $('#postForm')[0];
-        //     if ($(this).valid()) {
-        //         $.ajax({
-        //             type: "POST",
-        //             url: "{{ route('user.post.draft.store') }}",
-        //             data: new FormData(form),
-        //             processData: false,
-        //             contentType: false,
-        //             beforeSend: function() {
-        //                 showLoadingModal()
-        //             },
-        //             success: function(response) {
-        //                 if (response.status == 200) {
-        //                     hideLoadingModal()
-        //                     Swal.fire({
-        //                         icon: 'success',
-        //                         title: "Post saved as draft",
-        //                         showConfirmButton: false,
-        //                         timer: 1500
-        //                     }).then(() => {
-        //                         location.reload();
-        //                     });
-        //                 } else {
-        //                     toastr.error(response.error);
 
-        //                     hideLoadingModal()
-        //                 }
-        //             }
-        //         });
-        //     }
-        // });
+        // Draft Form
+        $('#postForm button[name="draft"]').click(function(e) {
+            e.preventDefault();
+
+            if (images[0] != undefined) {
+                const mediatype = images[0]?.type === 'video/mp4' ? 'video' : 'image'
+                $("#mediaType").val(mediatype);
+            }
+
+            let form = $('#postForm')[0];
+            let formData = new FormData(form);
+
+            // Append each file in the images array to the FormData
+            images.forEach((file, index) => {
+                formData.append('media[]', file);
+            });
+
+            if ($(this).valid()) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('user.individual-post.draft.store') }}",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        showLoadingModal()
+                    },
+                    success: function(response) {
+                        if (response.status == 200) {
+                            hideLoadingModal()
+                            Swal.fire({
+                                icon: 'success',
+                                title: "Post saved as draft",
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                window.location.href =
+                                    "{{ route('user.individual-post.draft') }}";
+                            });
+                        } else {
+                            toastr.error(response.error);
+
+                            hideLoadingModal()
+                        }
+                    }
+                });
+            }
+        });
+
+        // Pixel API Functionality
+        var currentPage = 1;
+        var perPage = 12;
+        var isLoading = false;
+        var imagesLoaded = 0;
+        var totalImages = 0;
+        var selectedImages = [];
+        var images = [];
+
+        // Function to load more images
+        function loadMoreImages() {
+            if (!isLoading) {
+                currentPage++;
+                getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+            }
+        }
+
+        // Function to fetch images from the server
+        function getPixels(type, q, page = 1, per_page = 12) {
+            const mediaInput = document.getElementById('mediaInput');
+            console.log("mediaInput", mediaInput.files);
+            console.log("images", images);
+
+            if (q.length == 0) {
+                q = 'green';
+            }
+
+            $.ajax({
+                type: "GET",
+                url: `{{ env('APP_URL') }}/pixels/photos/${q}?page=${page}&per_page=${per_page}&q=${q}`,
+                beforeSend: function() {
+                    isLoading = true;
+                    $("#loading-indicator").show();
+                    $("#load-more-btn").hide();
+                },
+                success: function(response) {
+                    if (response.status == 200) {
+                        var html = '';
+                        totalImages += response.data.photos.length;
+                        $.each(response.data.photos, function(indexInArray, photo) {
+                            html += `<div class="col-lg-4 p-0">
+                        <img src="${photo.src.landscape}" class="img-fluid selectable-image" data-image-id="${photo.id}" data-src="${photo.src.landscape}" />
+                    </div>`;
+                        });
+                        $("#images").append(html);
+
+                    } else {
+                        toastr.error(response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    toastr.error("An error occurred while fetching images.");
+                },
+                complete: function() {
+                    isLoading = false;
+                    $("#loading-indicator").hide();
+                    $("#load-more-btn").show();
+                }
+            });
+        }
+
+        // Initial load of images when modal is shown
+        $("#imagesModal").on('show.bs.modal', function() {
+            currentPage = 1;
+            totalImages = 0;
+            imagesLoaded = 0;
+            $("#images").html("");
+            getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+        });
+
+        // Attach click event handler to the "Load More" button
+        $("#load-more-btn").click(loadMoreImages);
+
+        // Attach click event handler to the search button
+        $("#searchButton").click(function() {
+            currentPage = 1;
+            totalImages = 0;
+            imagesLoaded = 0;
+            $("#images").html("");
+            getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+        });
+
+        // Event delegation for image selection
+        $(document).on('click', '.selectable-image', function() {
+            var imageId = $(this).data('image-id');
+            var imageUrl = $(this).data('src');
+
+            // Toggle selection on the clicked image
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+                $(this).closest('div').removeClass('selected-container');
+                selectedImages = selectedImages.filter(img => img.id !== imageId);
+            } else {
+                $(this).addClass('selected');
+                $(this).closest('div').addClass('selected-container');
+                selectedImages.push({
+                    id: imageId,
+                    src: imageUrl
+                });
+            }
+
+            $("#imagesModalDoneBtn").prop("disabled", selectedImages.length ===
+                0); // Enable Done button when images are selected
+        });
+
+        // Function to update input files after selecting images from modal
+        function updateInputFiles() {
+            const fetchPromises = selectedImages.map(image => {
+                const cleanImageUrl = image.src.split('?')[0];
+                return fetch(cleanImageUrl)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const fileName = cleanImageUrl.split('/').pop();
+                        const file = new File([blob], fileName, {
+                            type: blob.type
+                        });
+                        if (!validateFiles(images)) {
+                            return;
+                        }
+                        images.push(file);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching image:', error);
+                    });
+            });
+
+            // Wait for all fetch operations to complete
+            Promise.all(fetchPromises).then(() => {
+
+                showPreview()
+                $('#imagesModal .btn-close').click(); // Close the modal
+            });
+
+            selectedImages.length = 0;
+
+            // Reset modal done button
+            $("#imagesModalDoneBtn").prop("disabled", true);
+            $("#imagesModalDoneBtn").html('<i class="fas fa-check"></i> Done');
+
+        }
+
+        // Event listener for the modal's done button click event
+        $(document).on('click', '#imagesModalDoneBtn', function() {
+            // Handle Done button click
+            $("#imagesModalDoneBtn").prop("disabled", true); // Disable Done button
+            // add loader in the done button
+            $("#imagesModalDoneBtn").html(
+                '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
+            )
+
+            if (selectedImages.length > 0) {
+                updateInputFiles();
+            } else {
+                $('#imagesModal .btn-close').click(); // Close the modal if no images are selected
+            }
+        });
+
+        // Function to validate file selection
+        document.getElementById('mediaInput').addEventListener('change', function() {
+            const mediaInput = this;
+            const newFiles = Array.from(this.files);
+
+            if (!validateFiles(newFiles)) {
+                // Clear the input field by replacing it with a new input element
+                const newInput = document.createElement('input');
+                newInput.type = 'file';
+                newInput.name = 'media[]';
+                newInput.multiple = true;
+                newInput.accept = 'video/*, image/*';
+                newInput.id = 'mediaInput';
+                newInput.className = 'd-block w-100 form-control d-none';
+
+                // Add the event listener to the new input element
+                newInput.addEventListener('change', arguments.callee);
+
+                // Replace the old input element with the new one
+                mediaInput.parentNode.replaceChild(newInput, mediaInput);
+                return;
+            }
+
+            newFiles.forEach(file => {
+                images.push(file);
+            });
+
+            // Clear the input field by replacing it with a new input element
+            const newInput = document.createElement('input');
+            newInput.type = 'file';
+            newInput.name = 'media[]';
+            newInput.multiple = true;
+            newInput.accept = 'video/*, image/*';
+            newInput.id = 'mediaInput';
+            newInput.className = 'd-block w-100 form-control d-none';
+
+            // Add the event listener to the new input element
+            newInput.addEventListener('change', arguments.callee);
+
+            // Replace the old input element with the new one
+            mediaInput.parentNode.replaceChild(newInput, mediaInput);
+
+            showPreview()
+        });
+
+        // Function to validate file selection
+        function validateFiles(files) {
+            let videoCount = 0;
+            let imageCount = 0;
+
+            for (let file of files) {
+                if (file.type.startsWith('video/')) {
+                    if (file.size > 500 * 1024 * 1024) { // 500MB limit for videos
+                        toastr.error(`Video ${file.name} exceeds the 500MB size limit and will not be added.`);
+                        continue;
+                    }
+                    videoCount++;
+                } else if (file.type.startsWith('image/')) {
+                    if (file.size > 5 * 1024 * 1024) { // 5MB limit for images
+                        toastr.error(`Image ${file.name} exceeds the 5MB size limit and will not be added.`);
+                        continue;
+                    }
+                    imageCount++;
+                }
+            }
+
+            for (let file of images) {
+                if (file.type.startsWith('video/')) {
+                    if (file.size > 500 * 1024 * 1024) { // 500MB limit for videos
+                        toastr.error(`Video ${file.name} exceeds the 500MB size limit and will not be added.`);
+                        continue;
+                    }
+                    videoCount++;
+                } else if (file.type.startsWith('image/')) {
+                    if (file.size > 5 * 1024 * 1024) { // 5MB limit for images
+                        toastr.error(`Image ${file.name} exceeds the 5MB size limit and will not be added.`);
+                        continue;
+                    }
+                    imageCount++;
+                }
+            }
+
+            if (videoCount > 1 || (videoCount === 1 && imageCount > 0)) {
+                toastr.error("You can upload only one video or multiple images at a time.");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Function to show preview of uploaded images/videos
+        function showPreview() {
+            const uploadedImagesContainer = document.getElementById('uploadedImages');
+            uploadedImagesContainer.innerHTML = '';
+
+            images.forEach((file, index) => {
+                const fileReader = new FileReader();
+                fileReader.onload = function(e) {
+                    const fileURL = e.target.result;
+
+                    const container = document.createElement('div');
+                    container.classList.add('preview-wrapper');
+                    container.style.position = 'relative';
+
+                    let mediaElement;
+                    if (file.type.startsWith('image/')) {
+                        mediaElement = document.createElement('img');
+                        mediaElement.src = fileURL;
+                    } else if (file.type.startsWith('video/')) {
+                        mediaElement = document.createElement('video');
+                        mediaElement.src = fileURL;
+                        mediaElement.controls = false;
+                    }
+                    mediaElement.style.width = '100px';
+                    mediaElement.style.height = '100px';
+                    mediaElement.style.objectFit = 'cover';
+                    mediaElement.style.borderRadius = '5px';
+                    mediaElement.style.border = '2px solid #ddd';
+                    mediaElement.style.padding = '5px';
+
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.classList.add('remove-btn');
+                    removeBtn.innerHTML = '&times;';
+                    removeBtn.addEventListener('click', () => {
+                        images.splice(index, 1);
+                        showPreview();
+                    });
+
+                    container.appendChild(mediaElement);
+                    container.appendChild(removeBtn);
+                    uploadedImagesContainer.appendChild(container);
+                };
+                fileReader.readAsDataURL(file);
+            });
+        }
+    </script>
+
+
+    <script>
+        let stateStack = [];
+        let isUndoing = false;
+
+        const button = document.querySelector('#emoji-button');
+        const picker = document.querySelector('#emoji-picker');
+
+        button.addEventListener('click', () => {
+            picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+        });
+
+        picker.addEventListener('emoji-click', event => {
+            const emoji = event.detail.unicode;
+            insertAtCursor(emoji);
+            picker.style.display = 'none';
+        });
+
+        function insertAtCursor(text) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            textarea.setRangeText(text, start, end, 'end');
+        }
+
+        const upperDiffBold = "𝗔".codePointAt(0) - "A".codePointAt(0);
+        const lowerDiffBold = "𝗮".codePointAt(0) - "a".codePointAt(0);
+
+        const upperDiffItalic = "𝘈".codePointAt(0) - "A".codePointAt(0);
+        const lowerDiffItalic = "𝘢".codePointAt(0) - "a".codePointAt(0);
+
+        const upperDiffBoldItalic = "𝘼".codePointAt(0) - "A".codePointAt(0);
+        const lowerDiffBoldItalic = "𝙖".codePointAt(0) - "a".codePointAt(0);
+
+        const isUpper = (n) => n >= 65 && n < 91;
+        const isLower = (n) => n >= 97 && n < 123;
+
+        const transformChar = (char, upperDiff, lowerDiff) => {
+            const n = char.charCodeAt(0);
+            if (isUpper(n)) return String.fromCodePoint(n + upperDiff);
+            if (isLower(n)) return String.fromCodePoint(n + lowerDiff);
+            return char;
+        };
+
+        const transformWord = (word, upperDiff, lowerDiff) => [...word].map(char => transformChar(char, upperDiff,
+            lowerDiff)).join('');
+
+        const bolderize = (text) => transformWord(text, upperDiffBold, lowerDiffBold);
+        const italicize = (text) => transformWord(text, upperDiffItalic, lowerDiffItalic);
+        const boldItalicize = (text) => transformWord(text, upperDiffBoldItalic, lowerDiffBoldItalic);
+        const underline = (text) => text.split('').map(char => char + '\u0332').join('');
+
+        function applyFormatting(type) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            let selectedText = textarea.value.slice(start, end);
+
+            let formattedText = selectedText;
+            switch (type) {
+                case 'bold':
+                    formattedText = bolderize(selectedText);
+                    break;
+                case 'italic':
+                    formattedText = italicize(selectedText);
+                    break;
+                case 'underline':
+                    formattedText = underline(selectedText);
+                    break;
+                default:
+                    break;
+            }
+
+            textarea.setRangeText(formattedText, start, end, 'end');
+        }
+
+        function insertList(type) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.slice(start, end);
+
+            let listItems = selectedText.split('\n').map(item => item.trim());
+            let formattedList = "";
+
+            if (type === 'unordered') {
+                formattedList = listItems.map(item => '• ' + item).join('\n');
+            } else if (type === 'ordered') {
+                formattedList = listItems.map((item, index) => `${index + 1}. ${item}`).join('\n');
+            }
+
+            textarea.setRangeText(formattedList, start, end, 'end');
+        }
+
+        function undoChange() {
+            if (stateStack.length > 1) {
+                isUndoing = true;
+                stateStack.pop();
+                const lastState = stateStack[stateStack.length - 1];
+                document.getElementById('content').value = lastState;
+            }
+        }
     </script>
 @endsection
 
@@ -476,68 +862,84 @@
             <div class="col-md-8">
                 <form id="postForm" class="p-4 bg-white rounded-6" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <input type="date" name="schedule_date" id="post_schedule_date" class="d-none" />
+                    <input type="date" name="schedule_date" id="post_schedule_date" value="{{ $schedule_date }}"
+                        class="d-none" />
                     <input type="time" name="schedule_time" id="post_schedule_time" class="d-none" />
+                    <input type="hidden" name="media_type" id="mediaType" />
+                    <input type="hidden" name="on_linkedin" value="1">
 
                     <div class="d-flex flex-column flex-grow-1">
                         <div class="mb-3">
                             <input class="input-tag-title d-block h-100 w-100 form-control" name="title"
                                 placeholder="Enter your title here" />
                         </div>
-                        <div class="textarea-wrapper my-1">
+                        {{-- <div class="textarea-wrapper my-1">
                             <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
                                 placeholder="Enter your post description"></textarea>
+                        </div> --}}
+
+
+                        <div class="editor-container">
+                            <div class="toolbar">
+                                <button type="button" id="bold-btn" onclick="applyFormatting('bold')"><i
+                                        class="fas fa-bold"></i></button>
+                                <button type="button" id="italic-btn" onclick="applyFormatting('italic')"><i
+                                        class="fas fa-italic"></i></button>
+                                <button type="button" id="underline-btn" onclick="applyFormatting('underline')"><i
+                                        class="fas fa-underline"></i></button>
+                                <button type="button" id="unordered-list-btn" onclick="insertList('unordered')"><i
+                                        class="fas fa-list-ul"></i></button>
+                                <button type="button" id="ordered-list-btn" onclick="insertList('ordered')"><i
+                                        class="fas fa-list-ol"></i></button>
+                                <button type="button" id="undo-btn" onclick="undoChange()"><i class="fas fa-undo"></i></button>
+                                <div style="position: relative;">
+                                    <button type="button" id="emoji-button">😊</button>
+                                    <emoji-picker id="emoji-picker"
+                                        style="position: absolute; display: none; top: 100%;"></emoji-picker>
+                                </div>
+                            </div>
+                            <textarea id="content" name="description" style="width: 100%;" placeholder="Enter text here..."
+                                onkeydown="detectLineChange(event)"></textarea>
                         </div>
 
                         <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <p class="mb-0">Check to share on:</p>
-
-                                @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
-                                    @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                        <label class="d-inline-block platform-checkbox">
-                                            <input type="checkbox" name="on_linkedin"
-                                                onchange="getLinkedInOrganizations(this)" value="1"
-                                                data-bs-toggle="linkedin-post" class="form-check-input toggle-post" />
-                                            -
-                                            <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
-                                                    style="font-size: 17px"></i></span>
-                                        </label>
-                                    @endif
-                                @endif
-                            </div>
-
-                            @if (Auth::guard('web')->user()->canAny([
-                                        'linkedin_image_post',
-                                        'linkedin_video_post',
-                                    ]))
+                            @if (Auth::guard('web')->user()->canAny(['linkedin_image_post', 'linkedin_video_post']))
                                 <div class="d-flex align-items-center">
-                                    <label for="mediaInput" class="btn btn-transparent text-primary"><i
+                                    <button type="button" class="btn btn-transparent btn-pxel" data-bs-toggle="modal"
+                                        data-bs-target="#imagesModal">
+                                        <img src="{{ asset('assets/images/pixel-logo.png') }}" class="w-100"
+                                            alt="" />
+                                    </button>
+                                    <label for="mediaInput" class="btn btn-transparent text-dark"><i
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>
-                                    <input class="d-block w-100 form-control d-none" type="file" name="media"
+                                    <input class="d-block w-100 form-control d-none" type="file" name="media[]" multiple
                                         accept="video/*, image/*" id="mediaInput" />
-                                    <button type="button" class="remove-media-btn" style="display: none;">&times;</button>
                                 </div>
                             @endif
                         </div>
-
                     </div>
 
                     <div class="d-flex align-items-center justify-content-between mt-1 gap-4">
-
                         <div>
-                            {{-- @can('draft_post')
-                                <button type="button" name="draft" class="btn btn-custom"><i class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
-                            @endcan --}}
+                            @can('draft_post')
+                                @if ($schedule_date == null)
+                                    <button type="button" name="draft" class="btn btn-custom"><i
+                                            class="fas fa-folder d-inline-block me-1"></i> Save as Draft</button>
+                                @endif
+                            @endcan
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
-                            {{-- @can('scheduled_post')
+                            @can('scheduled_post')
                                 <button type="button" class="btn btn-custom" data-bs-toggle="modal"
-                                    data-bs-target="#scheduleModal"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
-                            @endcan --}}
+                                    data-bs-target="#scheduleModal"><i class="fas fa-calendar-alt d-inline-block me-1"></i>
+                                    Schedule</button>
+                            @endcan
                             @can('immediate_post')
-                                <button type="submit" name="post" class="btn btn-custom"><i class="fas fa-share-square d-inline-block me-1"></i> Post</button>
+                                @if ($schedule_date == null)
+                                    <button type="submit" name="post" class="btn btn-custom"><i
+                                            class="fas fa-share-square d-inline-block me-1"></i> Post</button>
+                                @endif
                             @endcan
                         </div>
                     </div>
@@ -545,86 +947,61 @@
             </div>
 
             <div class="col-md-4">
-                <div class="w-100 bg-white p-4 rounded-6 overflow-scroll d-flex flex-column gap-1" id="postPreview">
-                    {{-- LinkedIn Post Preview --}}
-                    <div class="card rounded" style="display: none" id="linkedin-post">
-                        <div
-                            class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between pt-2">
-                            <div class="d-flex align-items-center">
-                                <img src="{{ Auth::guard('web')->user()->linkedin_avatar }}" alt="Profile Picture"
-                                    class="rounded-circle" style="max-width: 50px">
-                                <div class="ms-2">
-                                    <h6 class="mb-0">{{ Auth::guard('web')->user()->linkedin_name }}</h6>
-                                    {{-- <small class="text-muted line-clap" style="-webkit-line-clamp: 1;">HR Professional | Head Hunter | Technical & Non Technical Recruiter | International...</small> --}}
-                                    <div><small class="text-muted">25m · Edited</small></div>
-                                </div>
-                            </div>
-                            <div style="width: fit-content">
-                                <img src="{{ asset('assets/images/icons/three-dot-icons.png') }}" style="min-width: 20px"
-                                    width="20px" alt="">
-                            </div>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="px-4 mb-3 post-description"></div>
-                            <div class="post-media">
-                                <img src="#" alt="Post Image" style="display: none" class="img-fluid"
-                                    id="postImage">
-                                <video controls class="w-100" style="display: none" id="postVideo">
-                                    <source src="" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                            </div>
-                        </div>
-                        <div class="card-footer d-flex justify-content-between">
-                            <div>
-                                <span>&#128077;&#128514;&#128546;</span>
-                                <span class="like-count">21</span>
-                            </div>
-                            <div>1 Repost</div>
-                        </div>
-                        <div class="linkedin-post-footer">
-
-                            <div class="">
-                                <img
-                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAA10lEQVR4nO2UrwrCUBSHP1DEbrL5CiaTD6DFImgSDAafQlbE6Eus+ARWq2VdTDoQuwZRvDI44eK/3bkdWPDAYXfb7/d9S4OcTh/wgYIGvAdcAQOMNOEGmGvBT3IdZwXvWvAJsJFzPWv4DKgAd+AMFNPCOxbck2dtuV+l/3bYP8GRs4nZqNeyQXEFe5YO+Wh3vwpc5qX3CWTyKGhIJ9QS+NKZagiqwAW4ATUNgSf5hSvIJBCUgIPkmxqCgWSDdy+zEKwlO/wmSLtHoJxEsJV1gYfyI/wPieYBtbOZBWuxK9EAAAAASUVORK5CYII=">
-                                like
-                            </div>
-
-                            <div class="">
-                                <img
-                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAADCklEQVR4nO2Zy29NURSHP7T1KAlK4jXy+gMoOmBAQlASERETjwEDaaJmjYaYlMYIKTERvZp0RBOphBkRA2aUjqoGQq4WbSQqVZPKTtaVlZVze88+9j1Hk/sle3Jz1mOfs/dav70vVKhQIQQzgQagFegB+oFR4LeMUfntPnAO2CI2mbMKaAc+AZOe4yNwGViZReJ1wC1gIkHidvwCbgKL00r+CPAtIpE8cBs4CmyQSVbLWAJsBI7JM/kI+6/A4XImXiVv3QZ+AuwFZnn4cs82Ak8j/N2QWEGZCzw0gQaAnQF87wbeGd+9EjMIVRHJdwLzQgUAaoGuiEkE+RJ22ZynfFwwsTpCbNi0ki82iUMkpM5Umxzp0aXifgEW/evSGZB1mha1ZmN3JOmwukntIn32mGa3wse4XRm7Wp0Vz1Qel3yajNY2ruFkxT6Vx4e4ArDByIPgXdGDKmBI5bM5jlGrMnC6pRhOSY4HEHPjJZZHp3q2Jc4EepSBE2ZRzAB+BEh+UobzVYzj6rl7cSbQrwycqixGW8Av0DZFnHr17Js4ExhRBq6ZZc1SI7lLout/Ddkz2/SDkuhlMYdpOIHPymAZ03AJ9SkDdwwMXUZLlU3LJt9NrJXgyTKV0anKpuWEbxltVgZ3ylBGS5VNS863ka1XBiNyq5CllBhW+bieEIu3yugA2bE/iZhznFWGL8mO5yoPn2XHAuC7MnZ3mWnTaPaN14HGMagcbCNd5gPvVfzrvg7WmpKXtqToVvGHkxzqm8wFU5pcNGX3YBInvcqBm0xWyV9L4qTGdNk1pLPmu03yDzwvjP+yXTlxdzNRuOa2NVB1ajQbtpB84svdK+aqu8Bq4LQ411/ohTS7as8O65qUrvO64iR68wVeKWdX5VZsIIbGGZED+ClRscvlPFEjf3DUizDLGXkwKWMo6Ya1/IwpygZNs0s6xuWtLyQQj4sEGpPq1CR9otCxm412ijuctmmTLxUU5/CRJPxa9sSOGM1sHXAGuCt2eXm7E7K8+kTPt8gh5b/4m7VCBaY5fwDlENrwg3MbPQAAAABJRU5ErkJggg==">
-                                Comment
-                            </div>
-
-                            <div class="">
-                                <img
-                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAqElEQVR4nO2UQQqDMBBF38obKO1desBcqi1UChVd1UVP4DksgQQ0NZMMzTIPBgTHPCckHyoFeAJrRi2AAZrYQh0wubLPnj5T4MvEFp83TXMgyeGymWRHC7wP/uQDnNHhv90xCOOOJQRXQXArIVA1JKiCJHWLDrkLx9xegb+P6SQIXiUErRA1p7B5cS9tcGnocsPSKKO5DySjq2gSN07iJ1kT9VBOWuGHLwJ0i8pnPs77AAAAAElFTkSuQmCC">
-                                Repost
-                            </div>
-
-                            <div class="">
-                                <img
-                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAABMUlEQVR4nO3UzypFURTH8Y90BwZKKQM8gDKRl2BoYsyMmRE3KblznoIXkIxkZGJigiFFYSYKUVxHp/bN6Xb+3XvPRPnWGuy1d7/fOWvttfnnlyns4AaHKmIMqzhHlIjbXkQHMI8DfLYJt2K7U9F+zGAXrymC3/hIrONylWISW6GuUUa8Yz+YxOvLItFRrOAsR7QV91jCWyIX9ySVWRyhWUI4wimmcZfINUPjU3kqKRyFXgwFk2Q+/sBMNksIN1FHXzBp318oqn8jR/wFc+FcPWU/7sNgkUGWyXW4Ua1efaWc2SsjnmZygpGQn8Bzxh/Gc9IRi1hHLayHcZUh/hCGsWtqOM7pT/zI9cRGwe0q/TRksZwjfqEiGhkGa1UZpJnEgzeuYhpln4Ze2MRjN3f/7/EDz12xqRgiakMAAAAASUVORK5CYII=">
-                                Send
-                            </div>
-
-                        </div>
+                <div class="uploaded-images-container p-4 bg-white rounded-6 overflow-scroll"
+                    style="height: calc(100vh - (0px + 73px + 40px));">
+                    <h5>Uploaded Images</h5>
+                    <div class="row" id="uploadedImages">
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Loading Modal -->
-    <section class="main-content-wrapper d-flex flex-column">
-        <div id="loadingModal">
-            <div id="loadingSpinner"></div>
+    <!-- Pixels Images Modal -->
+    <div class="modal fade" id="imagesModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="imagesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+            <div class="modal-content">
+                <div class="modal-header flex-column">
+                    <div class="d-flex align-items-center w-100 justify-content-between">
+                        <h5 class="modal-title" id="imagesModalLabel">Images</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="input-group mt-2">
+                        <input type="text" class="form-control border-dark" id="imagesModalSearchInput"
+                            placeholder="Search...">
+                        <button class="btn btn-dark px-5" id="searchButton"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row m-1" id="images"></div>
+                    <div class="text-center mt-3">
+                        <button id="load-more-btn" class="btn btn-dark rounded-circle p-3"><i
+                                class="fas fa-undo"></i></button>
+                    </div>
+                    <div id="loading-indicator" class="text-center mt-3" style="display: none;">
+                        <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="imagesModalDoneBtn" disabled><i
+                            class="fas fa-check"></i> Done</button>
+                </div>
+            </div>
         </div>
-    </section>
+    </div>
+
+    {{-- ... (Rest of your Blade content) ... --}}
+    <div id="loadingModal">
+        <div id="loadingSpinner"></div>
+    </div>
 
     <!-- Schedule Modal -->
-    {{-- @can('scheduled_post')
-        <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
+    @can('scheduled_post')
+        <div class="modal fade" id="scheduleModal" data-bs-backdrop="static" tabindex="-1"
+            aria-labelledby="scheduleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -637,17 +1014,18 @@
                             <div class="mb-3">
                                 <label for="scheduleDate" class="form-label">Date</label>
                                 <input type="date" min="{{ date('Y-m-d') }}" class="form-control" id="scheduleDate"
-                                    name="schedule_date" required>
+                                    name="schedule_date" value="{{ $schedule_date }}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="scheduleTime" class="form-label">Time</label>
                                 <input type="time" class="form-control" id="scheduleTime" name="schedule_time" required>
                             </div>
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
+                            <button type="submit" class="btn btn-primary"><i
+                                    class="fas fa-calendar-alt d-inline-block me-1"></i> Schedule</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-    @endcan --}}
+    @endcan
 @endsection

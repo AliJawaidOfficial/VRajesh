@@ -321,7 +321,7 @@
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('user.post.new.store') }}",
+                    url: "{{ route('user.individual-post.new.store') }}",
                     data: formData,
                     processData: false,
                     contentType: false,
@@ -343,7 +343,7 @@
                                 showConfirmButton: false,
                                 timer: 700
                             }).then(() => {
-                                window.location.href = "{{ route('user.post.index') }}";
+                                window.location.href = "{{ route('user.individual-post.index') }}";
                             });
                         } else {
                             toastr.error(response.error);
@@ -369,7 +369,7 @@
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('user.post.draft.update') }}",
+                    url: "{{ route('user.individual-post.draft.update') }}",
                     data: formData,
                     processData: false,
                     contentType: false,
@@ -385,7 +385,7 @@
                                 showConfirmButton: false,
                                 timer: 1500
                             }).then(() => {
-                                window.location.href = "{{ route('user.post.draft') }}";
+                                window.location.href = "{{ route('user.individual-post.draft') }}";
                             });
                         } else {
                             toastr.error(response.error);
@@ -413,7 +413,7 @@
             if ($(this).valid()) {
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('user.post.draft.store.new') }}",
+                    url: "{{ route('user.individual-post.draft.store.new') }}",
                     data: formData,
                     processData: false,
                     contentType: false,
@@ -429,7 +429,7 @@
                                 showConfirmButton: false,
                                 timer: 1500
                             }).then(() => {
-                                window.location.href = "{{ route('user.post.draft') }}";
+                                window.location.href = "{{ route('user.individual-post.draft') }}";
                             });
                         } else {
                             toastr.error(response.error);
@@ -439,120 +439,6 @@
                     }
                 });
             }
-        });
-
-        // Facbook Pages
-        function getFacebookPages(element) {
-            if (element.checked) {
-                $("#facebookSelectSection").fadeIn();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.facebook.pages') }}",
-                    beforeSend: function() {
-                        $("#facebookPagesSelect").html(`<option value="">Loading...</option>`);
-                    },
-                    success: function(response) {
-                        html = `<option value="">Select</option>`;
-
-                        if (response.length > 0) {
-                            response.forEach((page) => {
-                                html +=
-                                    `<option value="${page.id} - ${page.access_token} - ${page.name}"
-                                    ${page.id == @json($post->facebook_page_id) ? 'selected' : ''}
-                                    >
-                                        ${page.name}
-                                    </option>`
-                            })
-                        } else {
-                            html = `<option value="">No Page Found</option>`;
-                        }
-                        $("#facebookPagesSelect").html(html);
-                    }
-                });
-            } else {
-                $("#facebookSelectSection").fadeOut();
-            }
-        }
-
-        // Instagram Accounts
-        function getInstagramAccounts(element) {
-            if (element.checked) {
-                $("#instagramSelectSection").fadeIn();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.instagram.accounts') }}",
-                    beforeSend: function() {
-                        $("#instagramAccountSelect").html(`<option value="">Loading...</option>`);
-                    },
-                    success: function(response) {
-                        html = `<option value="">Select</option>`;
-
-                        if (response.length > 0) {
-                            response.forEach((account) => {
-                                html += `
-                                    <option value="${account.ig_business_account} - ${account.name}"
-                                    ${account.ig_business_account == @json($post->instagram_account_id) ? 'selected' : ''}>
-                                    ${account.name}
-                                    </option>
-                                `
-                            })
-                        } else {
-                            html = `<option value="">No Account Found</option>`;
-                        }
-                        $("#instagramAccountSelect").html(html);
-                    }
-                });
-            } else {
-                $("#instagramSelectSection").fadeOut();
-            }
-        }
-
-        // LinkedIn Organizations
-        function getLinkedInOrganizations(element) {
-            if (element.checked) {
-                $("#linkedinSelectSection").fadeIn();
-                $.ajax({
-                    type: "GET",
-                    url: "{{ route('user.linkedin.organizations') }}",
-                    beforeSend: function() {
-                        $("#linkedinOrganizationsSelect").html(`<option value="">Loading...</option>`);
-                    },
-                    success: function(response) {
-                        html = `<option value="">Select</option>`;
-
-                        if (response.length > 0) {
-                            response.forEach((account) => {
-                                html += `
-                                    <option value="${account.id} - ${account.name}"
-                                    ${account.id == @json($post->linkedin_organization_id) ? 'selected' : ''}
-                                    >
-                                    ${account.name} (${account.vanity_name})
-                                    </option>
-                                `
-                            })
-                        } else {
-                            html = `<option value="">No Account Found</option>`;
-                        }
-                        $("#linkedinOrganizationsSelect").html(html);
-                    }
-                });
-            } else {
-                $("#linkedinSelectSection").fadeOut();
-            }
-        }
-
-        $(document).ready(function() {
-            @if ($post->on_facebook == 1)
-                $("#onFacebookCheckbox").click();
-            @endif
-
-            @if ($post->on_instagram == 1)
-                $("#onInstagramCheckbox").click();
-            @endif
-
-            @if ($post->linked_in == 1)
-                $("#onLinkedInCheckbox").click();
-            @endif
         });
 
         // Pixel API Functionality
@@ -902,6 +788,7 @@
                     <input type="date" name="schedule_date" id="post_schedule_date" class="d-none" />
                     <input type="time" name="schedule_time" id="post_schedule_time" class="d-none" />
                     <input type="hidden" name="post_id" value="{{ $post->id }}">
+                    <input type="hidden" name="on_linkedin" value="1" />
 
                     <div class="d-flex flex-column flex-grow-1">
                         <div class="mb-3">
@@ -910,53 +797,11 @@
                         </div>
                         <div class="textarea-wrapper my-1">
                             <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
-                                placeholder="Enter your post description">{{ $post->description }}</textarea>
+                                placeholder="Enter your post description">{!! str_replace('/n', '<br/>', $post->description) !!}</textarea>
                         </div>
 
                         <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <p class="mb-0">Check to share on:</p>
-
-                                @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
-                                    @if (Auth::guard('web')->user()->meta_access_token != null)
-                                        <label class="d-inline-block platform-checkbox">
-                                            <input type="checkbox" id="onFacebookCheckbox" name="on_facebook"
-                                                onchange="getFacebookPages(this)" value="1"
-                                                data-bs-toggle="facebook-post" class="form-check-input toggle-post" />
-                                            -
-                                            <span class="d-inline-block ms-1"><i class="fab fa-facebook-f"
-                                                    style="font-size: 17px"></i></span>
-                                        </label>
-                                    @endif
-                                @endif
-
-                                @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
-                                    @if (Auth::guard('web')->user()->meta_access_token != null)
-                                        <label class="d-inline-block platform-checkbox">
-                                            <input type="checkbox" id="onInstagramCheckbox" name="on_instagram"
-                                                onchange="getInstagramAccounts(this)" value="1"
-                                                data-bs-toggle="instagram-post" class="form-check-input toggle-post" />
-                                            -
-                                            <span class="d-inline-block ms-1"><i class="fab fa-instagram"
-                                                    style="font-size: 17px"></i></span>
-                                        </label>
-                                    @endif
-                                @endif
-
-                                @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
-                                    @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                        <label class="d-inline-block platform-checkbox">
-                                            <input type="checkbox" id="onLinkedInCheckbox" name="on_linkedin"
-                                                onchange="getLinkedInOrganizations(this)" value="1"
-                                                data-bs-toggle="linkedin-post" class="form-check-input toggle-post" />
-                                            -
-                                            <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
-                                                    style="font-size: 17px"></i></span>
-                                        </label>
-                                    @endif
-                                @endif
-                            </div>
-
+                            <div class="m-0"></div>
                             @if (Auth::guard('web')->user()->canAny([
                                         'meta_facebook_image_post',
                                         'meta_facebook_video_post',
@@ -977,65 +822,6 @@
                                         accept="video/*, image/*" id="mediaInput" />
                                     <input type="hidden" name="media_type" value="image" id="mediaType" />
                                 </div>
-                            @endif
-                        </div>
-
-                        <div class="row">
-                            {{-- Facebook Pages --}}
-                            @if (Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post']))
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="col-md-4">
-                                        <div class="mb-2" style="display: none;" id="facebookSelectSection">
-                                            <div class="d-flex flex-column gap-2">
-                                                <p class="mb-0">Facebook Pages:</p>
-                                                <div class="d-flex flex-column gap-1 w-100">
-                                                    <select name="facebook_page" id="facebookPagesSelect"
-                                                        class="form-select w-100">
-                                                        <option value="">Select</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endif
-
-                            {{-- Instagram Account --}}
-                            @if (Auth::guard('web')->user()->canAny(['meta_instagram_image_post', 'meta_instagram_video_post']))
-                                @if (Auth::guard('web')->user()->meta_access_token != null)
-                                    <div class="col-md-4">
-                                        <div class="mb-2" style="display: none;" id="instagramSelectSection">
-                                            <div class="d-flex flex-column gap-2">
-                                                <p class="mb-0">Instagram Account:</p>
-                                                <div class="d-flex flex-column gap-1 w-100">
-                                                    <select name="instagram_account" id="instagramAccountSelect"
-                                                        class="form-select w-100">
-                                                        <option value="">Select</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-                            @endif
-
-                            {{-- LinkedIn Account --}}
-                            @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
-                                @if (Auth::guard('web')->user()->linkedin_access_token != null)
-                                    <div class="col-md-4">
-                                        <div class="mb-2" style="display: none;" id="linkedinSelectSection">
-                                            <div class="d-flex flex-column gap-2">
-                                                <p class="mb-0">LinkedIn Organizations:</p>
-                                                <div class="d-flex flex-column gap-1 w-100">
-                                                    <select name="linkedin_organization" id="linkedinOrganizationsSelect"
-                                                        class="form-select w-100">
-                                                        <option value="">Select</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
                             @endif
                         </div>
                     </div>

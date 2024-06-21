@@ -255,16 +255,28 @@
         }
 
         .editor-container {
-            border: 1px solid #ccc;
-            padding: 10px;
-            max-width: 600px;
-            margin: auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-container  textarea {
+            flex: 1;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            resize: none;
+            background-color: #f5f5f5;
+            outline: none;
         }
 
         .toolbar {
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
+            justify-content: flex-start;
+            gap: 20px;
+            background-color: #f5f5f5; 
+            padding: 10px;
+            width: fit-content
         }
 
         .editor {
@@ -276,6 +288,12 @@
 
         .toolbar button {
             margin-right: 5px;
+            padding: 5px 10px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
         }
 
         textarea {
@@ -751,7 +769,7 @@
 
 
     <script>
-        let stateStack = [];
+         let stateStack = [];
         let isUndoing = false;
 
         const button = document.querySelector('#emoji-button');
@@ -773,6 +791,7 @@
             const end = textarea.selectionEnd;
 
             textarea.setRangeText(text, start, end, 'end');
+            one_way();
         }
 
         const upperDiffBold = "𝗔".codePointAt(0) - "A".codePointAt(0);
@@ -794,8 +813,7 @@
             return char;
         };
 
-        const transformWord = (word, upperDiff, lowerDiff) => [...word].map(char => transformChar(char, upperDiff,
-            lowerDiff)).join('');
+        const transformWord = (word, upperDiff, lowerDiff) => [...word].map(char => transformChar(char, upperDiff, lowerDiff)).join('');
 
         const bolderize = (text) => transformWord(text, upperDiffBold, lowerDiffBold);
         const italicize = (text) => transformWord(text, upperDiffItalic, lowerDiffItalic);
@@ -824,6 +842,7 @@
             }
 
             textarea.setRangeText(formattedText, start, end, 'end');
+            one_way();
         }
 
         function insertList(type) {
@@ -844,12 +863,28 @@
             textarea.setRangeText(formattedList, start, end, 'end');
         }
 
+        function one_way() {
+            if (!isUndoing) {
+                const input = document.getElementById('content').value;
+                stateStack.push(input);
+            }
+            isUndoing = false;
+            const input = document.getElementById('content').value;
+        }
+
         function undoChange() {
             if (stateStack.length > 1) {
                 isUndoing = true;
                 stateStack.pop();
                 const lastState = stateStack[stateStack.length - 1];
                 document.getElementById('content').value = lastState;
+                one_way();
+            }
+        }
+
+        function detectLineChange(event) {
+            if (event.key === 'Enter') {
+                one_way();
             }
         }
     </script>
@@ -898,8 +933,7 @@
                                         style="position: absolute; display: none; top: 100%;"></emoji-picker>
                                 </div>
                             </div>
-                            <textarea id="content" name="description" style="width: 100%;" placeholder="Enter text here..."
-                                onkeydown="detectLineChange(event)"></textarea>
+                            <textarea id="content" name="description" style="width: 100%;" oninput="one_way()" onkeydown="detectLineChange(event)" placeholder="Enter text here..."></textarea>
                         </div>
 
                         <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">

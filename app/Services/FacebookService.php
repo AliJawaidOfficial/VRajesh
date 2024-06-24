@@ -9,6 +9,7 @@ use Exception;
 use CURLFile;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class FacebookService
 {
@@ -140,6 +141,7 @@ class FacebookService
 
             return;
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return $e->getMessage();
         }
     }
@@ -176,7 +178,7 @@ class FacebookService
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
 
-                if ($httpCode != 200) throw new Exception($response);
+                if ($httpCode != 200) Log::error($response['error']);
 
                 $data = json_decode($response, true);
                 $attachedMedia["attached_media[$index]"] = json_encode(["media_fbid" => $data['id']]);
@@ -184,6 +186,7 @@ class FacebookService
 
             return $this->postImages2($attachedMedia, $title);
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return [
                 'status' => 500,
                 'error' => $e->getMessage()
@@ -215,6 +218,7 @@ class FacebookService
                 'data' => $response
             ];
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return [
                 'status' => 500,
                 'error' => $e->getMessage()
@@ -252,6 +256,7 @@ class FacebookService
 
             return $step3response;
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return $e->getMessage();
         }
     }

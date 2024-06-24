@@ -6,6 +6,7 @@ use App\Models\User;
 use CURLFile;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class InstagramService
 {
@@ -106,6 +107,8 @@ class InstagramService
 
 
 
+
+
     /**
      * Post
      * Text
@@ -174,6 +177,7 @@ class InstagramService
             }
 
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return [
                 'status' => 500,
                 'error' => $e->getMessage(),
@@ -290,6 +294,7 @@ class InstagramService
 
             return $this->postVideo2($uri, $containerId, $media, $mediaSize);
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return [
                 'status' => 500,
                 'error' => $e->getMessage(),
@@ -311,7 +316,7 @@ class InstagramService
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents($media));
+            curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents(public_path($media)));
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

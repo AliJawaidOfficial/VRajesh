@@ -388,6 +388,7 @@
                         <th class="text-nowrap">Platforms</th>
                         <th class="text-left">Used</th>
                         <th class="text-nowrap">Published Date</th>
+                        <th class="text-nowrap">Scheduled Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -428,6 +429,15 @@
                             </td>
                             <td>
                                 <p class="post-date mb-0">{{ standardDateTimeFormat($post->created_at) }}</p>
+                            </td>
+                            <td>
+                                <p class="post-date mb-0">
+                                    @if ($post->scheduled_at != null)
+                                        {{ standardDateTimeFormat($post->scheduled_at) }}
+                                    @else
+                                        -
+                                    @endif
+                                </p>
                             </td>
                         </tr>
                     @endforeach

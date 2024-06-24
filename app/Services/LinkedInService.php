@@ -321,6 +321,7 @@ class LinkedInService
 
             return $data;
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return $e->getMessage();
         }
     }
@@ -514,6 +515,7 @@ class LinkedInService
             return $data;
             return ['status' => 200];
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return [
                 'status' => 500,
                 'error' => $e->getMessage(),
@@ -581,7 +583,7 @@ class LinkedInService
     public function postVideo2($upload_url, $video_path, $asset_id, $title)
     {
         try {
-            $video = file_get_contents($video_path);
+            $video = file_get_contents(public_path($video_path));
 
             $ch = curl_init($upload_url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -686,6 +688,7 @@ class LinkedInService
             return $data;
             return ['status' => 200];
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return [
                 'status' => 500,
                 'error' => $e->getMessage(),
@@ -747,6 +750,7 @@ class LinkedInService
 
             return $data;
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return $e->getMessage();
         }
     }
@@ -781,6 +785,7 @@ class LinkedInService
             $publish = $this->individualPostImage4($assetsIds, $title);
             return $publish;
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return [
                 'status' => 500,
                 'error' => $e->getMessage(),
@@ -996,6 +1001,7 @@ class LinkedInService
             $postVideo2 = $this->individualPostVideo2($upload_url, $video, $asset_id, $title);
             return $postVideo2;
         } catch (Exception $e) {
+            Log::error($e->getMessage());
             return [
                 'status' => 500,
                 'error' => $e->getMessage(),
@@ -1006,7 +1012,7 @@ class LinkedInService
     public function individualPostVideo2($upload_url, $video_path, $asset_id, $title)
     {
         try {
-            $video = file_get_contents($video_path);
+            $video = file_get_contents(public_path($video_path));
 
             $ch = curl_init($upload_url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

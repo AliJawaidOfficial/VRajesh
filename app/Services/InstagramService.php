@@ -125,10 +125,35 @@ class InstagramService
 
             $errors = [];
             $creationIds = [];
-            foreach (explode(',', $images) as $image) {
+            $images = explode(',', $images);
+
+            if (count($images) > 1) {
+                foreach ($images as $image) {
+                    $params = [
+                        'image_url' => env('APP_URL') . '/' . $image,
+                        'caption' => $text,
+                    ];
+
+                    $ch = curl_init();
+                    curl_setopt($ch, CURLOPT_URL, $url);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $this->accessToken]);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                    $response = curl_exec($ch);
+                    curl_close($ch);
+                    $data = json_decode($response, true);
+    
+                    if (isset($data['error'])) $errors[] = $data['error']['message'];
+                    if (isset($data['id'])) $creationIds[] = $data['id'];
+                }
+                if (!empty($creationIds)) return $this->postImageCarousel2($creationIds, $text);
+            } else {
                 $params = [
-                    'image_url' => env('APP_URL') . '/' . $image,
+                    'image_url' => env('APP_URL') . '/' . $images[0],
                     'caption' => $text,
+                    'access_token' => $this->accessToken
                 ];
 
                 $ch = curl_init();
@@ -142,11 +167,12 @@ class InstagramService
                 curl_close($ch);
                 $data = json_decode($response, true);
 
-                if (isset($data['error'])) $errors[] = $data['error']['message'];
-                if (isset($data['id'])) $creationIds[] = $data['id'];
+                if (isset($data['error'])) throw new Exception($data['error']['message']);
+                
+                $publish = $this->postImagePublish($data['id']);
+                return $publish;
             }
 
-            if (!empty($creationIds)) return $this->postImage2($creationIds, $text);
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -155,7 +181,7 @@ class InstagramService
         }
     }
 
-    public function postImage2($creationIds, $text)
+    public function postImageCarousel2($creationIds, $text)
     {
         try {
             $url = "$this->baseUrl/$this->version/$this->igUserId/media";
@@ -179,7 +205,7 @@ class InstagramService
             $data = json_decode($response, true);
             if (isset($data['error'])) throw new Exception($data['error']['message']);
 
-            return $this->postImage3($data['id']);
+            return $this->postImagePublish($data['id']);
         } catch (Exception $e) {
             return [
                 'status' => 500,
@@ -188,7 +214,7 @@ class InstagramService
         }
     }
 
-    public function postImage3($creationId)
+    public function postImagePublish($creationId)
     {
         try {
             $url = "$this->baseUrl/$this->version/$this->igUserId/media_publish";

@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
 class IndividualPostController extends Controller
@@ -26,6 +27,11 @@ class IndividualPostController extends Controller
      */
     public function index(Request $request)
     {
+        if (Auth::guard('web')->user()->linkedin_access_token == null) {
+            Session::flash('error', ['text' => 'Please connect your Linkedin account.']);
+            return redirect()->route('user.connect');
+        }
+
         $user = Auth::guard('web')->user();
 
         $postMonths = Post::where('user_id', $user->id)
@@ -58,7 +64,7 @@ class IndividualPostController extends Controller
 
         $dataSet = $dataSet->select(
             'posts.*',
-            DB::raw('(SELECT COUNT(*) FROM `posts` AS `post_2` WHERE `posts`.`post_id`=`post_2`.`id`) + 1 AS `post_count`'),
+            DB::raw('(SELECT COUNT(*) FROM `posts` AS `post_2` WHERE `post_2`.`post_id`=`posts`.`id`) + 1 AS `post_count`'),
         );
 
         $dataSet = $dataSet->paginate(10);
@@ -92,6 +98,13 @@ class IndividualPostController extends Controller
      */
     public function create(Request $request)
     {
+        if (!Auth::guard('web')->user()->canAny(['linkedin_self_text_post', 'linkedin_self_image_post', 'linkedin_self_video_post'])) abort(403);
+
+        if (Auth::guard('web')->user()->linkedin_access_token == null) {
+            Session::flash('error', ['text' => 'Please connect your Linkedin account.']);
+            return redirect()->route('user.connect');
+        }
+
         $schedule_date = $request->has('schedule_date') ? $request->schedule_date : null;
         return view('user.individual-post.create', compact('schedule_date'));
     }
@@ -149,9 +162,12 @@ class IndividualPostController extends Controller
             $data->title = $request->title;
             $data->description = $request->description;
 
+            $mediaPaths = [];
+            $mediaSizes = [];
+
             if ($request->media) {
-                $mediaPaths = [];
-                $mediaSizes = [];
+                if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('linkedin_self_image_post')) throw new Exception('You do not have permission to post image.');
+                if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('linkedin_self_video_post')) throw new Exception('You do not have permission to post video.');
 
                 foreach ($request->media as $media) {
                     $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
@@ -267,6 +283,9 @@ class IndividualPostController extends Controller
             $mediaSizes = [];
 
             if ($request->media) {
+                if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('linkedin_self_image_post')) throw new Exception('You do not have permission to post image.');
+                if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('linkedin_self_video_post')) throw new Exception('You do not have permission to post video.');
+
                 foreach ($request->media as $media) {
                     $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
                     $mediaSize = $media->getSize();
@@ -281,6 +300,9 @@ class IndividualPostController extends Controller
                 $data->media_type = $request->media_type;
             } else {
                 $oldPost = Post::where('id', $request->post_id)->first();
+
+                if ($oldPost->media_type == 'image' && !Auth::guard('web')->user()->can('linkedin_self_image_post')) throw new Exception('You do not have permission to post image.');
+                if ($oldPost->media_type == 'video' && !Auth::guard('web')->user()->can('linkedin_self_video_post')) throw new Exception('You do not have permission to post video.');
 
                 if ($oldPost->media != null) {
                     foreach (explode(',', $oldPost->media) as $media) {
@@ -347,6 +369,11 @@ class IndividualPostController extends Controller
      */
     public function edit(String $id, String $action)
     {
+        if (Auth::guard('web')->user()->linkedin_access_token == null) {
+            Session::flash('error', ['text' => 'Please connect your Linkedin account.']);
+            return redirect()->route('user.connect');
+        }
+
         $post = Post::where('user_id', Auth::guard('web')->user()->id)->where('id', $id)->first();
         return view('user.individual-post.edit', compact('post', 'action'));
     }

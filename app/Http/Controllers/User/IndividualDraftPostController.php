@@ -41,6 +41,11 @@ class IndividualDraftPostController extends Controller
 
         if (!Auth::guard('web')->user()->can('draft_post')) abort(403);
 
+        if (Auth::guard('web')->user()->linkedin_access_token == null) {
+            Session::flash('error', ['text' => 'Please connect your Linkedin account.']);
+            return redirect()->route('user.connect');
+        }
+
         $postMonths = Post::where('user_id', $user->id)
             ->where(function ($q) {
                 $q->where('on_linkedin', 1)->whereNull('linkedin_company_id');

@@ -593,7 +593,7 @@
                         <th class="text-center">S.No</th>
                         <th class="text-left">Title</th>
                         <th class="text-nowrap">Platforms</th>
-                        <th class="text-left">Repost</th>
+                        <th class="text-left">Used</th>
                         <th class="text-nowrap">Published Date</th>
                     </tr>
                 </thead>

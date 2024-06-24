@@ -31,39 +31,40 @@ class ConnectController extends Controller
 
     public function index()
     {
+        $user = Auth::guard('web')->user();
         $platforms = [
             [
                 'image' => 'assets/images/icons/icons-facebook.png',
                 'text' => 'Connect With Facebook',
-                'is_connected' => (Auth::guard('web')->user()->meta_access_token != null) ? 1 : 0,
+                'is_connected' => ($user->meta_access_token != null) ? 1 : 0,
                 'connect_route' => 'user.connect.facebook',
                 'disconnect_route' => 'user.connect.facebook.disconnect',
                 'permission' => 'connect_facebook',
-                'user_avatar' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->meta_avatar : null,
-                'user_name' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->meta_name : null,
-                'user_email' => (Auth::guard('web')->user()->meta_access_token != null) ? Auth::guard('web')->user()->meta_email : null,
+                'user_avatar' => ($user->meta_access_token != null) ? $user->meta_avatar : null,
+                'user_name' => ($user->meta_access_token != null) ? $user->meta_name : null,
+                'user_email' => ($user->meta_access_token != null) ? $user->meta_email : null,
             ],
             [
                 'image' => 'assets/images/icons/icons-linkedin.png',
                 'text' => 'Connect With LinkedIn',
-                'is_connected' => (Auth::guard('web')->user()->linkedin_access_token != null) ? 1 : 0,
+                'is_connected' => ($user->linkedin_access_token != null && $user->linkedin_community_access_token != null) ? 1 : 0,
                 'connect_route' => 'user.connect.linkedin',
                 'disconnect_route' => 'user.connect.linkedin.disconnect',
                 'permission' => 'connect_linkedin',
-                'user_avatar' => (Auth::guard('web')->user()->linkedin_access_token != null) ? Auth::guard('web')->user()->linkedin_avatar : null,
-                'user_name' => (Auth::guard('web')->user()->linkedin_access_token != null) ? Auth::guard('web')->user()->linkedin_name : null,
-                'user_email' => (Auth::guard('web')->user()->linkedin_access_token != null) ? Auth::guard('web')->user()->linkedin_email : null,
+                'user_avatar' => ($user->linkedin_access_token != null) ? $user->linkedin_avatar : null,
+                'user_name' => ($user->linkedin_access_token != null) ? $user->linkedin_name : null,
+                'user_email' => ($user->linkedin_access_token != null) ? $user->linkedin_email : null,
             ],
             [
                 'image' => 'assets/images/icons/icons-google.png',
                 'text' => 'Connect With Google',
-                'is_connected' => (Auth::guard('web')->user()->google_access_token != null) ? 1 : 0,
+                'is_connected' => ($user->google_access_token != null) ? 1 : 0,
                 'connect_route' => 'user.connect.google',
                 'disconnect_route' => 'user.connect.google.disconnect',
                 'permission' => 'connect_google',
-                'user_avatar' => (Auth::guard('web')->user()->google_access_token != null) ? Auth::guard('web')->user()->google_avatar : null,
-                'user_name' => (Auth::guard('web')->user()->google_access_token != null) ? Auth::guard('web')->user()->google_name : null,
-                'user_email' => (Auth::guard('web')->user()->google_access_token != null) ? Auth::guard('web')->user()->google_email : null,
+                'user_avatar' => ($user->google_access_token != null) ? $user->google_avatar : null,
+                'user_name' => ($user->google_access_token != null) ? $user->google_name : null,
+                'user_email' => ($user->google_access_token != null) ? $user->google_email : null,
             ]
         ];
         return view('user.connect.index', compact('platforms'));

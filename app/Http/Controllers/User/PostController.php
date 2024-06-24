@@ -113,7 +113,7 @@ class PostController extends Controller
 
         $dataSet = $dataSet->select(
             'posts.*',
-            DB::raw('(SELECT COUNT(*) FROM `posts` AS `post_2` WHERE `posts`.`post_id`=`post_2`.`id`) + 1 AS `post_count`'),
+            DB::raw('(SELECT COUNT(*) FROM `posts` AS `post_2` WHERE `post_2`.`post_id`=`posts`.`id`) + 1 AS `post_count`'),
         );
 
         $dataSet = $dataSet->paginate(10);
@@ -147,6 +147,7 @@ class PostController extends Controller
      */
     public function create(Request $request)
     {
+        if (!Auth::guard('web')->user()->canAny(['meta_facebook_text_post', 'meta_facebook_image_post', 'meta_facebook_video_post', 'meta_instagram_image_post', 'meta_instagram_video_post', 'linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post'])) abort(403);
         $schedule_date = $request->has('schedule_date') ? $request->schedule_date : null;
         return view('user.post.create', compact('schedule_date'));
     }
@@ -231,10 +232,24 @@ class PostController extends Controller
             $data->description = str_replace('\n', "\n", $request->description);
 
             $errors = [];
+            $mediaPaths = [];
+            $mediaSizes = [];
 
             if ($request->media) {
-                $mediaPaths = [];
-                $mediaSizes = [];
+                if ($request->has('on_linkedin')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('linkedin_image_post')) throw new Exception('You do not have permission to post image on Linkedin.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('linkedin_video_post')) throw new Exception('You do not have permission to post video on Linkedin.');
+                }
+
+                if ($request->has('on_instagram')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_instagram_image_post')) throw new Exception('You do not have permission to post image on Instagram.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_instagram_video_post')) throw new Exception('You do not have permission to post video on Instagram.');
+                }
+
+                if ($request->has('on_facebook')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_facebook_image_post')) throw new Exception('You do not have permission to post image on Facebook.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_facebook_video_post')) throw new Exception('You do not have permission to post video on Facebook.');
+                }
 
                 foreach ($request->media as $media) {
                     $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
@@ -447,6 +462,21 @@ class PostController extends Controller
             $mediaSizes = [];
 
             if ($request->media) {
+                if ($request->has('on_linkedin')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('linkedin_image_post')) throw new Exception('You do not have permission to post image on Linkedin.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('linkedin_video_post')) throw new Exception('You do not have permission to post video on Linkedin.');
+                }
+
+                if ($request->has('on_instagram')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_instagram_image_post')) throw new Exception('You do not have permission to post image on Instagram.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_instagram_video_post')) throw new Exception('You do not have permission to post video on Instagram.');
+                }
+
+                if ($request->has('on_facebook')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_facebook_image_post')) throw new Exception('You do not have permission to post image on Facebook.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_facebook_video_post')) throw new Exception('You do not have permission to post video on Facebook.');
+                }
+
                 foreach ($request->media as $media) {
                     $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
                     $mediaSize = $media->getSize();
@@ -461,6 +491,21 @@ class PostController extends Controller
                 $data->media_type = $request->media_type;
             } else {
                 $oldPost = Post::where('id', $request->post_id)->first();
+
+                if ($oldPost->on_linkedin == 1) {
+                    if ($oldPost->media_type == 'image' && !Auth::guard('web')->user()->can('linkedin_image_post')) throw new Exception('You do not have permission to post image on Linkedin.');
+                    if ($oldPost->media_type == 'video' && !Auth::guard('web')->user()->can('linkedin_video_post')) throw new Exception('You do not have permission to post video on Linkedin.');
+                }
+
+                if ($oldPost->on_instagram == 1) {
+                    if ($oldPost->media_type == 'image' && !Auth::guard('web')->user()->can('meta_instagram_image_post')) throw new Exception('You do not have permission to post image on Instagram.');
+                    if ($oldPost->media_type == 'video' && !Auth::guard('web')->user()->can('meta_instagram_video_post')) throw new Exception('You do not have permission to post video on Instagram.');
+                }
+
+                if ($oldPost->on_facebook == 1) {
+                    if ($oldPost->media_type == 'image' && !Auth::guard('web')->user()->can('meta_facebook_image_post')) throw new Exception('You do not have permission to post image on Facebook.');
+                    if ($oldPost->media_type == 'video' && !Auth::guard('web')->user()->can('meta_facebook_video_post')) throw new Exception('You do not have permission to post video on Facebook.');
+                }
 
                 if ($oldPost->media != null) {
                     foreach (explode(',', $oldPost->media) as $media) {

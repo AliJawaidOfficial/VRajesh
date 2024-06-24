@@ -58,6 +58,18 @@ class PackageController extends Controller
             'name' => 'linkedin_video_post',
             'title' => 'Video Post - LinkedIn'
         ],
+        [
+            'name' => 'linkedin_self_text_post',
+            'title' => 'Text Post - LinkedIn Self'
+        ],
+        [
+            'name' => 'linkedin_self_image_post',
+            'title' => 'Image Post - LinkedIn Self'
+        ],
+        [
+            'name' => 'linkedin_self_video_post',
+            'title' => 'Video Post - LinkedIn Self'
+        ],
     ];
     protected $googlePermissions = [
         [

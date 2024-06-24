@@ -59,6 +59,18 @@ class PermissionsSeeder extends Seeder
                 'guard_name' => 'web'
             ],
             [
+                'name' => 'linkedin_self_text_post',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'linkedin_self_image_post',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'linkedin_self_video_post',
+                'guard_name' => 'web'
+            ],
+            [
                 'name' => 'immediate_post',
                 'guard_name' => 'web'
             ],

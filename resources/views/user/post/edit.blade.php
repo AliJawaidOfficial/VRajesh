@@ -241,6 +241,64 @@
             background: red;
         }
     </style>
+    <!-- Include Emoji Picker Element library -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .editor-container {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-container textarea {
+            flex: 1;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            resize: none;
+            background-color: #f5f5f5;
+            outline: none;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-start;
+            gap: 20px;
+            background-color: #f5f5f5;
+            padding: 10px;
+            width: fit-content
+        }
+
+        .editor {
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 200px;
+            overflow-y: auto;
+        }
+
+        .toolbar button {
+            margin-right: 5px;
+            padding: 5px 10px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
 @endsection
 
 {{-- Scripts --}}
@@ -259,33 +317,12 @@
             const formattedDescription = description.replace(/\n/g, '<br>');
         }
 
-        document.getElementById("postDescription").addEventListener("keyup", function(e) {
-            const description = e.target.value.trim() ? e.target.value : "This is a default post description";
-            updateDescription(description);
-        });
 
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'Enter') {
                 document.querySelectorAll('.like-count').forEach((likeCount) => {
                     likeCount.textContent = parseInt(likeCount.textContent) + 1;
                 });
-            }
-        });
-
-        document.getElementById("postDescription").addEventListener("keydown", function(e) {
-            if (e.ctrlKey && e.key === "Enter") {
-                e.preventDefault(); // Prevent default behavior
-                const cursorPosition = e.target.selectionStart;
-                const textBefore = e.target.value.substring(0, cursorPosition);
-                const textAfter = e.target.value.substring(cursorPosition);
-                e.target.value = textBefore + "\n" + textAfter;
-
-                // Update the preview
-                const description = e.target.value.trim() ? e.target.value : "This is a default post description";
-                updateDescription(description);
-
-                // Move the cursor to the new line
-                e.target.selectionEnd = cursorPosition + 1;
             }
         });
 
@@ -361,7 +398,7 @@
             $("#mediaType").val(mediatype);
             let form = $('#postForm')[0];
             let formData = new FormData(form);
-            
+
             images.forEach((file, index) => {
                 formData.append('media[]', file);
             });
@@ -397,7 +434,7 @@
             }
         });
 
-    // Save as Draft
+        // Save as Draft
         $('#postForm button[name="save_as_draft"]').click(function(e) {
             e.preventDefault();
 
@@ -890,6 +927,127 @@
             });
         }
     </script>
+    <script>
+        let stateStack = [];
+        let isUndoing = false;
+
+        const button = document.querySelector('#emoji-button');
+        const picker = document.querySelector('#emoji-picker');
+
+        button.addEventListener('click', () => {
+            picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+        });
+
+        picker.addEventListener('emoji-click', event => {
+            const emoji = event.detail.unicode;
+            insertAtCursor(emoji);
+            picker.style.display = 'none';
+        });
+
+        function insertAtCursor(text) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            textarea.setRangeText(text, start, end, 'end');
+            one_way();
+        }
+
+        const upperDiffBold = "𝗔".codePointAt(0) - "A".codePointAt(0);
+        const lowerDiffBold = "𝗮".codePointAt(0) - "a".codePointAt(0);
+
+        const upperDiffItalic = "𝘈".codePointAt(0) - "A".codePointAt(0);
+        const lowerDiffItalic = "𝘢".codePointAt(0) - "a".codePointAt(0);
+
+        const upperDiffBoldItalic = "𝘼".codePointAt(0) - "A".codePointAt(0);
+        const lowerDiffBoldItalic = "𝙖".codePointAt(0) - "a".codePointAt(0);
+
+        const isUpper = (n) => n >= 65 && n < 91;
+        const isLower = (n) => n >= 97 && n < 123;
+
+        const transformChar = (char, upperDiff, lowerDiff) => {
+            const n = char.charCodeAt(0);
+            if (isUpper(n)) return String.fromCodePoint(n + upperDiff);
+            if (isLower(n)) return String.fromCodePoint(n + lowerDiff);
+            return char;
+        };
+
+        const transformWord = (word, upperDiff, lowerDiff) => [...word].map(char => transformChar(char, upperDiff,
+            lowerDiff)).join('');
+
+        const bolderize = (text) => transformWord(text, upperDiffBold, lowerDiffBold);
+        const italicize = (text) => transformWord(text, upperDiffItalic, lowerDiffItalic);
+        const boldItalicize = (text) => transformWord(text, upperDiffBoldItalic, lowerDiffBoldItalic);
+        const underline = (text) => text.split('').map(char => char + '\u0332').join('');
+
+        function applyFormatting(type) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            let selectedText = textarea.value.slice(start, end);
+
+            let formattedText = selectedText;
+            switch (type) {
+                case 'bold':
+                    formattedText = bolderize(selectedText);
+                    break;
+                case 'italic':
+                    formattedText = italicize(selectedText);
+                    break;
+                case 'underline':
+                    formattedText = underline(selectedText);
+                    break;
+                default:
+                    break;
+            }
+
+            textarea.setRangeText(formattedText, start, end, 'end');
+            one_way();
+        }
+
+        function insertList(type) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.slice(start, end);
+
+            let listItems = selectedText.split('\n').map(item => item.trim());
+            let formattedList = "";
+
+            if (type === 'unordered') {
+                formattedList = listItems.map(item => '• ' + item).join('\n');
+            } else if (type === 'ordered') {
+                formattedList = listItems.map((item, index) => `${index + 1}. ${item}`).join('\n');
+            }
+
+            textarea.setRangeText(formattedList, start, end, 'end');
+        }
+
+        function one_way() {
+            if (!isUndoing) {
+                const input = document.getElementById('content').value;
+                stateStack.push(input);
+            }
+            isUndoing = false;
+            const input = document.getElementById('content').value;
+        }
+
+        function undoChange() {
+            if (stateStack.length > 1) {
+                isUndoing = true;
+                stateStack.pop();
+                const lastState = stateStack[stateStack.length - 1];
+                document.getElementById('content').value = lastState;
+                one_way();
+            }
+        }
+
+        function detectLineChange(event) {
+            if (event.key === 'Enter') {
+                one_way();
+            }
+        }
+    </script>
 @endsection
 
 {{-- Content --}}
@@ -908,9 +1066,28 @@
                             <input class="input-tag-title d-block h-100 w-100 form-control" name="title"
                                 value="{{ $post->title }}" placeholder="Enter your title here" />
                         </div>
-                        <div class="textarea-wrapper my-1">
-                            <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
-                                placeholder="Enter your post description">{{ $post->description }}</textarea>
+                        <div class="editor-container">
+                            <div class="toolbar">
+                                <button type="button" id="bold-btn" onclick="applyFormatting('bold')"><i
+                                        class="fas fa-bold"></i></button>
+                                <button type="button" id="italic-btn" onclick="applyFormatting('italic')"><i
+                                        class="fas fa-italic"></i></button>
+                                <button type="button" id="underline-btn" onclick="applyFormatting('underline')"><i
+                                        class="fas fa-underline"></i></button>
+                                <button type="button" id="unordered-list-btn" onclick="insertList('unordered')"><i
+                                        class="fas fa-list-ul"></i></button>
+                                <button type="button" id="ordered-list-btn" onclick="insertList('ordered')"><i
+                                        class="fas fa-list-ol"></i></button>
+                                <button type="button" id="undo-btn" onclick="undoChange()"><i
+                                        class="fas fa-undo"></i></button>
+                                <div style="position: relative;">
+                                    <button type="button" id="emoji-button">😊</button>
+                                    <emoji-picker id="emoji-picker"
+                                        style="position: absolute; display: none; top: 100%;"></emoji-picker>
+                                </div>
+                            </div>
+                            <textarea id="content" name="description" style="width: 100%;" oninput="one_way()" onkeydown="detectLineChange(event)"
+                                placeholder="Enter text here...">{{ $post->description }}</textarea>
                         </div>
 
                         <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
@@ -966,15 +1143,13 @@
                                         'linkedin_video_post',
                                     ]))
                                 <div class="d-flex align-items-center">
-                                    <button type="button" class="btn btn-transparent btn-pxel" data-bs-toggle="modal"
-                                        data-bs-target="#imagesModal">
-                                        <img src="{{ asset('assets/images/pixel-logo.png') }}" class="w-100"
-                                            alt="" />
+                                    <button type="button" class="btn btn-dark btn-sm" style="padding: 5px 7px; font-size: 12px;" data-bs-toggle="modal"
+                                        data-bs-target="#imagesModal">Free Images
                                     </button>
                                     <label for="mediaInput" class="btn btn-transparent text-dark"><i
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>
-                                    <input class="d-block w-100 form-control d-none" type="file" name="media[]" multiple
-                                        accept="video/*, image/*" id="mediaInput" />
+                                    <input class="d-block w-100 form-control d-none" type="file" name="media[]"
+                                        multiple accept="video/*, image/*" id="mediaInput" />
                                     <input type="hidden" name="media_type" value="image" id="mediaType" />
                                 </div>
                             @endif

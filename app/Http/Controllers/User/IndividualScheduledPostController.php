@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 use App\Models\Post;
+use Illuminate\Support\Facades\Session;
 
 class IndividualScheduledPostController extends Controller
 {
@@ -18,6 +19,12 @@ class IndividualScheduledPostController extends Controller
     public function index()
     {
         if (!Auth::guard('web')->user()->can('scheduled_post')) abort(403);
+        
+        if (Auth::guard('web')->user()->linkedin_access_token == null) {
+            Session::flash('error', ['text' => 'Please connect your Linkedin account.']);
+            return redirect()->route('user.connect');
+        }
+
         return view($this->view);
     }
 

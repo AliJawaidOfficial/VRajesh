@@ -242,11 +242,8 @@
         }
     </style>
 
-    <!-- Include Font Awesome for additional icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Include Emoji Picker Element library -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
-
     <style>
         * {
             margin: 0;
@@ -261,7 +258,7 @@
             flex-direction: column;
         }
 
-        .editor-container  textarea {
+        .editor-container textarea {
             flex: 1;
             border: none;
             border-bottom: 1px solid #ccc;
@@ -274,7 +271,7 @@
             display: flex;
             justify-content: flex-start;
             gap: 20px;
-            background-color: #f5f5f5; 
+            background-color: #f5f5f5;
             padding: 10px;
             width: fit-content
         }
@@ -321,11 +318,6 @@
             const formattedDescription = description.replace(/\n/g, '<br>');
         }
 
-        // document.getElementById("postDescription").addEventListener("keyup", function(e) {
-        //     const description = e.target.value.trim() ? e.target.value : "This is a default post description";
-        //     updateDescription(description);
-        // });
-
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'Enter') {
                 document.querySelectorAll('.like-count').forEach((likeCount) => {
@@ -334,22 +326,6 @@
             }
         });
 
-        // document.getElementById("postDescription").addEventListener("keydown", function(e) {
-        //     if (e.ctrlKey && e.key === "Enter") {
-        //         e.preventDefault(); // Prevent default behavior
-        //         const cursorPosition = e.target.selectionStart;
-        //         const textBefore = e.target.value.substring(0, cursorPosition);
-        //         const textAfter = e.target.value.substring(cursorPosition);
-        //         e.target.value = textBefore + "\n" + textAfter;
-
-        //         // Update the preview
-        //         const description = e.target.value.trim() ? e.target.value : "This is a default post description";
-        //         updateDescription(description);
-
-        //         // Move the cursor to the new line
-        //         e.target.selectionEnd = cursorPosition + 1;
-        //     }
-        // });
 
         // Schedule Form
         $("#scheduleForm").submit(function(e) {
@@ -769,7 +745,7 @@
 
 
     <script>
-         let stateStack = [];
+        let stateStack = [];
         let isUndoing = false;
 
         const button = document.querySelector('#emoji-button');
@@ -813,7 +789,8 @@
             return char;
         };
 
-        const transformWord = (word, upperDiff, lowerDiff) => [...word].map(char => transformChar(char, upperDiff, lowerDiff)).join('');
+        const transformWord = (word, upperDiff, lowerDiff) => [...word].map(char => transformChar(char, upperDiff,
+            lowerDiff)).join('');
 
         const bolderize = (text) => transformWord(text, upperDiffBold, lowerDiffBold);
         const italicize = (text) => transformWord(text, upperDiffItalic, lowerDiffItalic);
@@ -908,11 +885,6 @@
                             <input class="input-tag-title d-block h-100 w-100 form-control" name="title"
                                 placeholder="Enter your title here" />
                         </div>
-                        {{-- <div class="textarea-wrapper my-1">
-                            <textarea class="input-tag-description d-block h-100 w-100 form-control" id="postDescription" name="description"
-                                placeholder="Enter your post description"></textarea>
-                        </div> --}}
-
 
                         <div class="editor-container">
                             <div class="toolbar">
@@ -926,23 +898,23 @@
                                         class="fas fa-list-ul"></i></button>
                                 <button type="button" id="ordered-list-btn" onclick="insertList('ordered')"><i
                                         class="fas fa-list-ol"></i></button>
-                                <button type="button" id="undo-btn" onclick="undoChange()"><i class="fas fa-undo"></i></button>
+                                <button type="button" id="undo-btn" onclick="undoChange()"><i
+                                        class="fas fa-undo"></i></button>
                                 <div style="position: relative;">
                                     <button type="button" id="emoji-button">😊</button>
                                     <emoji-picker id="emoji-picker"
                                         style="position: absolute; display: none; top: 100%;"></emoji-picker>
                                 </div>
                             </div>
-                            <textarea id="content" name="description" style="width: 100%;" oninput="one_way()" onkeydown="detectLineChange(event)" placeholder="Enter text here..."></textarea>
+                            <textarea id="content" name="description" style="width: 100%;" oninput="one_way()" onkeydown="detectLineChange(event)"
+                                placeholder="Enter text here..."></textarea>
                         </div>
 
                         <div class="w-100 my-1 d-flex align-items-center justify-content-between gap-3">
                             @if (Auth::guard('web')->user()->canAny(['linkedin_image_post', 'linkedin_video_post']))
                                 <div class="d-flex align-items-center">
-                                    <button type="button" class="btn btn-transparent btn-pxel" data-bs-toggle="modal"
-                                        data-bs-target="#imagesModal">
-                                        <img src="{{ asset('assets/images/pixel-logo.png') }}" class="w-100"
-                                            alt="" />
+                                    <button type="button" class="btn btn-dark btn-sm" style="padding: 5px 7px; font-size: 12px;" data-bs-toggle="modal"
+                                        data-bs-target="#imagesModal">Free Images
                                     </button>
                                     <label for="mediaInput" class="btn btn-transparent text-dark"><i
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>
@@ -992,8 +964,8 @@
     </section>
 
     <!-- Pixels Images Modal -->
-    <div class="modal fade" id="imagesModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="imagesModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="imagesModal" data-bs-backdrop="static" tabindex="-1"
+        aria-labelledby="imagesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
             <div class="modal-content">
                 <div class="modal-header flex-column">

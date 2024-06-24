@@ -65,21 +65,26 @@
                 ],
             ],
         ],
-        [
+    ];
+
+    if (
+        Auth::guard('web')->user()->linkedin_access_token != null &&
+        Auth::guard('web')->user()->linkedin_community_access_token != null
+    ) {
+        $sideBarList[] = [
             'name' => 'Linkedin Self',
             'active_url' => 'user.individual-post.*',
             'icon' => asset('assets/images/icons/arrow-right.png'),
-            'permissions' => ['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post', 'immediate_post'],
+            'permissions' => ['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post'],
             'submenu' => [
                 [
                     'name' => 'Create',
                     'url' => route('user.individual-post.create'),
                     'active_url' => 'user.individual-post.create',
                     'permissions' => [
-                        'linkedin_text_post',
-                        'linkedin_image_post',
-                        'linkedin_video_post',
-                        'immediate_post',
+                        'linkedin_self_text_post',
+                        'linkedin_self_image_post',
+                        'linkedin_self_video_post',
                     ],
                 ],
                 [
@@ -101,42 +106,46 @@
                     'permissions' => ['scheduled_post'],
                 ],
             ],
-        ],
-        // [
-        //     'name' => 'Leads',
-        //     'active_url' => 'user.linkedin.leads.*',
-        //     'icon' => asset('assets/images/icons/arrow-right.png'),
-        //     'submenu' => [
-        //         [
-        //             'name' => 'Sales Navigator',
-        //             'url' => route('user.linkedin.leads.sales-navigator.index'),
-        //             'active_url' => 'user.linkedin.leads.sales-navigator.*',
-        //         ],
-        //     ],
-        // ],
-        // [
-        //     'name' => 'Pipelines',
-        //     'active_url' => 'user.linkedin.pipeline.*',
-        //     'icon' => asset('assets/images/icons/arrow-right.png'),
-        //     'submenu' => [
-        //         [
-        //             'name' => 'B1',
-        //             'url' => route('user.linkedin.pipeline.index'),
-        //             'active_url' => 'user.linkedin.pipeline.index',
-        //         ],
-        //         [
-        //             'name' => 'B2',
-        //             'url' => route('user.linkedin.pipeline.index'),
-        //             'active_url' => '',
-        //         ],
-        //         [
-        //             'name' => 'B3',
-        //             'url' => route('user.linkedin.pipeline.index'),
-        //             'active_url' => '',
-        //         ],
-        //     ],
-        // ],
-    ];
+        ];
+    }
+
+    // $sideBarList[] = [
+    //     [
+    //         'name' => 'Leads',
+    //         'active_url' => 'user.linkedin.leads.*',
+    //         'icon' => asset('assets/images/icons/arrow-right.png'),
+    //         'submenu' => [
+    //             [
+    //                 'name' => 'Sales Navigator',
+    //                 'url' => route('user.linkedin.leads.sales-navigator.index'),
+    //                 'active_url' => 'user.linkedin.leads.sales-navigator.*',
+    //             ],
+    //         ],
+    //     ],
+    //     [
+    //         'name' => 'Pipelines',
+    //         'active_url' => 'user.linkedin.pipeline.*',
+    //         'icon' => asset('assets/images/icons/arrow-right.png'),
+    //         'submenu' => [
+    //             [
+    //                 'name' => 'B1',
+    //                 'url' => route('user.linkedin.pipeline.index'),
+    //                 'active_url' => 'user.linkedin.pipeline.index',
+    //             ],
+    //             [
+    //                 'name' => 'B2',
+    //                 'url' => route('user.linkedin.pipeline.index'),
+    //                 'active_url' => '',
+    //             ],
+    //             [
+    //                 'name' => 'B3',
+    //                 'url' => route('user.linkedin.pipeline.index'),
+    //                 'active_url' => '',
+    //             ],
+    //         ],
+    //     ],
+    // ];
+
 @endphp
 
 <div class="sidebar">

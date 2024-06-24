@@ -17,15 +17,22 @@ $("form").each(function () {
 });
 
 function standardDateTimeFormat(date) {
-    const options = { 
-        weekday: 'short', 
-        day: '2-digit', 
-        month: 'short', 
-        year: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        hour12: true 
+    const formattedDate = new Date(date);
+    if (isNaN(formattedDate.getTime())) return 'Invalid Date';
+    const options = {
+        weekday: 'short',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
     };
+    const formattedString = formattedDate.toLocaleString('en-US', options);
+    return formattedString;
+}
 
-    return new Date(date).toLocaleString('en-US', options);
+function convertUTCToLocalTime(dateTimeString) {
+    var date = new Date(dateTimeString);
+    return date.toString()
 }

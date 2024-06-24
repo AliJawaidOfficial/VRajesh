@@ -83,6 +83,7 @@ class ConnectController extends Controller
                 'email',
                 'public_profile',
                 'pages_show_list',
+                'business_management',
                 'pages_read_engagement',
                 'pages_manage_posts',
                 'instagram_basic',

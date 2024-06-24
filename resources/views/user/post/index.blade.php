@@ -240,7 +240,7 @@
                             </div>
                             <div class="post-details d-flex flex-column align-items-stretch w-50">
                                 <h4 class="modal-post-title">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
-                                <p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate">${standardDateTimeFormat(response.data.created_at)}</span></p>
+                                <p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate">${response.data.formatted_created_at}</span></p>
                                 <div class="modal-post-description flex-grow-1 d-flex align-items-stretch flex-column"
                                     style="max-height: 200px; overflow-y: auto;">
                                     <p class="mb-0" style="position:sticky; top:0;background-color:#fff;padding: 10px 0px 5px;"><strong>Description:</strong></p> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>

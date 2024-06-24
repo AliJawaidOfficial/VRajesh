@@ -128,7 +128,11 @@ class PostController extends Controller
     {
         try {
             $user = Auth::guard('web')->user();
-            $data = Post::where('user_id', $user->id)->where('id', $id)->first();
+            $data = Post::select(
+                'posts.*',
+                DB::raw("DATE_FORMAT(posts.scheduled_at, '%m/%e/%Y %h:%i:%s %p') AS scheduled_at"),
+                DB::raw("DATE_FORMAT(posts.created_at, '%a, %e %b %Y %h:%i %p') AS formatted_created_at"),
+            )->where('user_id', $user->id)->where('id', $id)->first();
 
             return response()->json([
                 'status' => 200,

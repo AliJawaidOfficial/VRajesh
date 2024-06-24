@@ -480,7 +480,7 @@
             }
         });
 
-        // Pixel API Functionality
+        // Pixel api functionality
         var currentPage = 1;
         var perPage = 12;
         var isLoading = false;
@@ -488,6 +488,7 @@
         var totalImages = 0;
         var selectedImages = [];
         var images = [];
+
         const asset = `{{ env('APP_URL') }}`;
         let postsData = @json($post->media);
 
@@ -530,15 +531,16 @@
             setImage();
         }
 
-        // Function to load more images
-        function loadMoreImages() {
+        // Function to load more images or videos
+        function loadMoreMedia() {
             if (!isLoading) {
                 currentPage++;
-                getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+                const mediaType = $("#mediaTypeSelect").val();
+                getPixels(mediaType, $("#imagesModalSearchInput").val(), currentPage, perPage);
             }
         }
 
-        // Function to fetch images from the server
+        // Function to fetch media from the server
         function getPixels(type, q, page = 1, per_page = 12) {
             const mediaInput = document.getElementById('mediaInput');
             console.log("mediaInput", mediaInput.files);
@@ -550,7 +552,7 @@
 
             $.ajax({
                 type: "GET",
-                url: `{{ env('APP_URL') }}/pixels/photos/${q}?page=${page}&per_page=${per_page}&q=${q}`,
+                url: `{{ env('APP_URL') }}/pixels/${type}/${q}?page=${page}&per_page=${per_page}&q=${q}`,
                 beforeSend: function() {
                     isLoading = true;
                     $("#loading-indicator").show();
@@ -559,11 +561,17 @@
                 success: function(response) {
                     if (response.status == 200) {
                         var html = '';
-                        totalImages += response.data.photos.length;
-                        $.each(response.data.photos, function(indexInArray, photo) {
-                            html += `<div class="col-lg-4 p-0">
-                        <img src="${photo.src.landscape}" class="img-fluid selectable-image" data-image-id="${photo.id}" data-src="${photo.src.landscape}" />
-                    </div>`;
+                        totalImages += response.data[type].length;
+                        $.each(response.data[type], function(indexInArray, media) {
+                            if (type === 'photos') {
+                                html += `<div class="col-lg-4 p-0">
+                            <img src="${media.src.landscape}" class="img-fluid selectable-image" data-image-id="${media.id}" data-src="${media.src.landscape}" />
+                        </div>`;
+                            } else if (type === 'videos') {
+                                html += `<div class="col-lg-4 p-0">
+                            <video src="${media.video_files[0].link}" class="img-fluid selectable-image" data-image-id="${media.id}" data-src="${media.video_files[0].link}" controls></video>
+                        </div>`;
+                            }
                         });
                         $("#images").append(html);
 
@@ -572,7 +580,7 @@
                     }
                 },
                 error: function(xhr, status, error) {
-                    toastr.error("An error occurred while fetching images.");
+                    toastr.error("An error occurred while fetching media.");
                 },
                 complete: function() {
                     isLoading = false;
@@ -588,11 +596,12 @@
             totalImages = 0;
             imagesLoaded = 0;
             $("#images").html("");
-            getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+            const mediaType = $("#mediaTypeSelect").val();
+            getPixels(mediaType, $("#imagesModalSearchInput").val(), currentPage, perPage);
         });
 
         // Attach click event handler to the "Load More" button
-        $("#load-more-btn").click(loadMoreImages);
+        $("#load-more-btn").click(loadMoreMedia);
 
         // Attach click event handler to the search button
         $("#searchButton").click(function() {
@@ -600,13 +609,25 @@
             totalImages = 0;
             imagesLoaded = 0;
             $("#images").html("");
-            getPixels('photos', $("#imagesModalSearchInput").val(), currentPage, perPage);
+            const mediaType = $("#mediaTypeSelect").val();
+            getPixels(mediaType, $("#imagesModalSearchInput").val(), currentPage, perPage);
         });
 
-        // Event delegation for image selection
+        // Attach change event handler to the media type dropdown
+        $("#mediaTypeSelect").change(function() {
+            currentPage = 1;
+            totalImages = 0;
+            imagesLoaded = 0;
+            $("#images").html("");
+            const mediaType = $(this).val();
+            getPixels(mediaType, $("#imagesModalSearchInput").val(), currentPage, perPage);
+        });
+
+        // Event delegation for image and video selection
         $(document).on('click', '.selectable-image', function() {
             var imageId = $(this).data('image-id');
             var imageUrl = $(this).data('src');
+            var mediaType = $("#mediaTypeSelect").val();
 
             // Toggle selection on the clicked image
             if ($(this).hasClass('selected')) {
@@ -614,6 +635,15 @@
                 $(this).closest('div').removeClass('selected-container');
                 selectedImages = selectedImages.filter(img => img.id !== imageId);
             } else {
+                if (mediaType === 'videos') {
+                    // If media type is video, ensure only one video can be selected
+                    selectedImages.forEach(img => {
+                        $(`.selectable-image[data-image-id="${img.id}"]`).removeClass('selected');
+                        $(`.selectable-image[data-image-id="${img.id}"]`).closest('div').removeClass(
+                            'selected-container');
+                    });
+                    selectedImages = [];
+                }
                 $(this).addClass('selected');
                 $(this).closest('div').addClass('selected-container');
                 selectedImages.push({
@@ -626,7 +656,7 @@
                 0); // Enable Done button when images are selected
         });
 
-        // Function to update input files after selecting images from modal
+        // Function to update input files after selecting images or videos from modal
         function updateInputFiles() {
             const fetchPromises = selectedImages.map(image => {
                 const cleanImageUrl = image.src.split('?')[0];
@@ -634,9 +664,43 @@
                     .then(response => response.blob())
                     .then(blob => {
                         const fileName = cleanImageUrl.split('/').pop();
+                        let fileType = blob.type;
+
+                        // If blob.type is empty, determine the type based on the file extension
+                        if (!fileType) {
+                            const extension = fileName.split('.').pop().toLowerCase();
+                            switch (extension) {
+                                case 'mp4':
+                                    fileType = 'video/mp4';
+                                    break;
+                                case 'mov':
+                                    fileType = 'video/quicktime';
+                                    break;
+                                case 'ogg':
+                                    fileType = 'video/ogg';
+                                    break;
+                                case 'qt':
+                                    fileType = 'video/quicktime';
+                                    break;
+                                case 'jpg':
+                                case 'jpeg':
+                                    fileType = 'image/jpeg';
+                                    break;
+                                case 'png':
+                                    fileType = 'image/png';
+                                    break;
+                                case 'gif':
+                                    fileType = 'image/gif';
+                                    break;
+                                default:
+                                    fileType = 'application/octet-stream';
+                            }
+                        }
+
                         const file = new File([blob], fileName, {
-                            type: blob.type
+                            type: fileType
                         });
+
                         if (!validateFiles(images)) {
                             return;
                         }
@@ -649,8 +713,7 @@
 
             // Wait for all fetch operations to complete
             Promise.all(fetchPromises).then(() => {
-
-                showPreview()
+                showPreview();
                 $('#imagesModal .btn-close').click(); // Close the modal
             });
 
@@ -659,7 +722,6 @@
             // Reset modal done button
             $("#imagesModalDoneBtn").prop("disabled", true);
             $("#imagesModalDoneBtn").html('<i class="fas fa-check"></i> Done');
-
         }
 
         // Event listener for the modal's done button click event
@@ -667,9 +729,7 @@
             // Handle Done button click
             $("#imagesModalDoneBtn").prop("disabled", true); // Disable Done button
             // add loader in the done button
-            $("#imagesModalDoneBtn").html(
-                '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>'
-            )
+            $("#imagesModalDoneBtn").text('Loading...');
 
             if (selectedImages.length > 0) {
                 updateInputFiles();
@@ -720,7 +780,7 @@
             // Replace the old input element with the new one
             mediaInput.parentNode.replaceChild(newInput, mediaInput);
 
-            showPreview()
+            showPreview();
         });
 
         // Function to validate file selection
@@ -773,6 +833,8 @@
             const uploadedImagesContainer = document.getElementById('uploadedImages');
             uploadedImagesContainer.innerHTML = ''; // Clear any existing previews
 
+            console.log("images", images);
+
             images.forEach((file, index) => {
                 const fileReader = new FileReader();
                 fileReader.onload = function(e) {
@@ -783,14 +845,24 @@
                     container.style.position = 'relative';
 
                     let mediaElement;
-                    if (file.type.startsWith('image/')) {
+                    const fileType = file.type || file.name.split('.').pop().toLowerCase();
+
+                    if (fileType.startsWith('image/') || fileType === 'jpg' || fileType === 'jpeg' ||
+                        fileType === 'png' || fileType === 'gif') {
                         mediaElement = document.createElement('img');
                         mediaElement.src = fileURL;
-                    } else if (file.type.startsWith('video/')) {
+                    } else if (fileType.startsWith('video/') || fileType === 'mp4' || fileType === 'webm' ||
+                        fileType === 'ogg') {
                         mediaElement = document.createElement('video');
                         mediaElement.src = fileURL;
                         mediaElement.controls = false;
                     }
+
+                    if (!mediaElement) {
+                        console.error('Failed to create media element for file:', file);
+                        return;
+                    }
+
                     mediaElement.style.width = '100px';
                     mediaElement.style.height = '100px';
                     mediaElement.style.objectFit = 'cover';
@@ -992,7 +1064,8 @@
                                         'linkedin_video_post',
                                     ]))
                                 <div class="d-flex align-items-center">
-                                    <button type="button" class="btn btn-dark btn-sm" style="padding: 5px 7px; font-size: 12px;" data-bs-toggle="modal"
+                                    <button type="button" class="btn btn-dark btn-sm"
+                                        style="padding: 5px 7px; font-size: 12px;" data-bs-toggle="modal"
                                         data-bs-target="#imagesModal">Free Images
                                     </button>
                                     <label for="mediaInput" class="btn btn-transparent text-dark"><i
@@ -1024,8 +1097,7 @@
                             @can('scheduled_post')
                                 @if ($action == 'schedule')
                                     <button type="button" class="btn btn-custom" data-bs-toggle="modal"
-                                        data-bs-target="#scheduleModal"><i
-                                            class="fas fa-calendar-alt d-inline-block me-1"></i>
+                                        data-bs-target="#scheduleModal"><i class="fas fa-calendar-alt d-inline-block me-1"></i>
                                         Schedule</button>
                                 @endif
                             @endcan
@@ -1059,18 +1131,20 @@
             <div class="modal-content">
                 <div class="modal-header flex-column">
                     <div class="d-flex align-items-center w-100 justify-content-between">
-                        <h5 class="modal-title" id="imagesModalLabel">Images</h5>
+                        <h5 class="modal-title" id="imagesModalLabel">Media</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-
                     <div class="input-group mt-2">
+                        <select class="form-select border-dark" id="mediaTypeSelect">
+                            <option value="photos">Images</option>
+                            <option value="videos">Videos</option>
+                        </select>
                         <input type="text" class="form-control border-dark" id="imagesModalSearchInput"
                             placeholder="Search...">
                         <button class="btn btn-dark px-5" id="searchButton"><i class="fas fa-search"></i></button>
                     </div>
                 </div>
                 <div class="modal-body">
-
                     <div class="row m-1" id="images"></div>
                     <div class="text-center mt-3">
                         <button id="load-more-btn" class="btn btn-dark rounded-circle p-3"><i

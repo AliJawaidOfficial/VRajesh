@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class GoogleService
 {
@@ -35,32 +36,36 @@ class GoogleService
      * Accounts
      * =================================================================================================
      */
-    public function getAccounts($user_id = null)
+    public function getBusinessProfiles($user_id = null)
     {
         $this->init($user_id);
 
         try {
-            $url = 'https://mybusinessaccountmanagement.googleapis.com/v1/accounts';
+            $cacheKey = 'google_business_profiles';
+            $data = Cache::remember($cacheKey, 60, function () {
+                $url = 'https://mybusinessaccountmanagement.googleapis.com/v1/accounts';
 
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->accessToken,
-                'X-Restli-Protocol-Version: 2.0.0',
-                'LinkedIn-Version: 202403'
-            ]);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
+                $ch = curl_init($url);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Authorization: Bearer ' . $this->accessToken,
+                    'Content-Type: application/json'
+                ]);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
 
-            $data = json_decode($response, true);
+                $data = json_decode($response, true);
 
-            if ($httpCode != 200) throw new Exception($data['error']['message']);
+                if ($httpCode != 200) throw new Exception($data['error']['message']);
 
-            return $data;
+                return $data;
+            });
         } catch (Exception $e) {
-            return ['error' => $e->getMessage()];
+            return [
+                'error' => $e->getMessage()
+            ];
         }
     }
 

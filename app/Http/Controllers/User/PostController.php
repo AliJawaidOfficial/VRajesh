@@ -21,20 +21,20 @@ use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
-    // protected $googleService;
+    protected $googleService;
     protected $linkedinService;
     protected $facebookService;
     protected $instagramService;
     protected $pixelsService;
 
     public function __construct(
-        // private readonly GoogleService $importGoogleService,
+        private readonly GoogleService $importGoogleService,
         private readonly LinkedInService $importLinkedinService,
         private readonly InstagramService $importinstagramService,
         private readonly FacebookService $importFacebookService,
         private readonly PixelsService $importedPixelsService,
     ) {
-        // $this->googleService = $importGoogleService;
+        $this->googleService = $importGoogleService;
         $this->linkedinService = $importLinkedinService;
         $this->facebookService = $importFacebookService;
         $this->instagramService = $importinstagramService;
@@ -83,15 +83,15 @@ class PostController extends Controller
     /**
      * Get LinkedIn Organizations
      */
-    // public function googleBusinessProfiles()
-    // {
-    //     $googleBusinessProfiles = [];
-    //     try {
-    //         if (Auth::guard('web')->user()->linkedin_access_token != null) $googleBusinessProfiles = $this->googleService->getBusinessProfiles();
-    //     } catch (Exception $e) {
-    //     }
-    //     return response()->json($googleBusinessProfiles);
-    // }
+    public function googleBusinessProfiles()
+    {
+        $googleBusinessProfiles = [];
+        try {
+            if (Auth::guard('web')->user()->linkedin_access_token != null) $googleBusinessProfiles = $this->googleService->getBusinessProfiles();
+        } catch (Exception $e) {
+        }
+        return response()->json($googleBusinessProfiles);
+    }
 
     /**
      * Post Posts

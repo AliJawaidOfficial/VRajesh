@@ -116,8 +116,9 @@ Route::name('user.')
              * User Accounts
              */
             Route::get('/facebook-pages', [PostController::class, 'facebookPages'])->name('facebook.pages');
-            Route::get('instagram-accounts', [PostController::class, 'instagramAccounts'])->name('instagram.accounts');
-            Route::get('linkedin-accounts', [PostController::class, 'linkedinOrganizations'])->name('linkedin.organizations');
+            Route::get('/instagram-accounts', [PostController::class, 'instagramAccounts'])->name('instagram.accounts');
+            Route::get('/linkedin-accounts', [PostController::class, 'linkedinOrganizations'])->name('linkedin.organizations');
+            Route::get('/google-business-profiles', [PostController::class, 'googleBusinessProfiles'])->name('google.business.profiles');
 
 
             /**

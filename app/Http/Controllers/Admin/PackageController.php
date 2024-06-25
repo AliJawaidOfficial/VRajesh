@@ -76,6 +76,14 @@ class PackageController extends Controller
             'name' => 'connect_google',
             'title' => 'Connect With Google'
         ],
+        [
+            'name' => 'google_text_post',
+            'title' => 'Text Post - Google Business Profile Post'
+        ],
+        [
+            'name' => 'google_image_post',
+            'title' => 'Image Post - Google Business Profile Post'
+        ],
     ];
     protected $otherPermissions = [
         [

@@ -639,7 +639,11 @@
                                 </div>
                             </td>
                             <td>
-                                <p class="post-date mb-0">{{ standardDateTimeFormat($post->created_at) }}</p>
+                                <p class="post-date mb-0">
+                                    {{ date('d/M/Y', strtotime($post->created_at)) }}
+                                    <span
+                                        class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime($post->created_at)) }}</span>
+                                </p>
                             </td>
                         </tr>
                     @endforeach

@@ -434,16 +434,19 @@
                                     @if ($post->scheduled_at == null)
                                         -
                                     @else
-                                        {{ standardDateTimeFormat($post->created_at) }}
+                                        {{ date('d/M/Y', strtotime($post->created_at)) }}
+                                        <span class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime($post->created_at)) }}</span>
                                     @endif
                                 </p>
                             </td>
                             <td>
                                 <p class="post-date mb-0">
                                     @if ($post->scheduled_at != null)
-                                        {{ standardDateTimeFormat(convertUTCToLocalTime($post->scheduled_at, $timezone)) }}
+                                        {{ date('d/M/Y', strtotime(convertUTCToLocalTime($post->scheduled_at, $timezone))) }}
+                                        <span class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime(convertUTCToLocalTime($post->scheduled_at, $timezone))) }}</span>
                                     @else
-                                        {{ standardDateTimeFormat($post->created_at) }}
+                                    {{ date('d/M/Y', strtotime($post->created_at)) }}
+                                    <span class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime($post->created_at)) }}</span>
                                     @endif
                                 </p>
                             </td>

@@ -40,29 +40,14 @@
                                     @foreach ($facebookPermissions as $permission)
                                         <div class="ps-2">
                                             <div
-                                                class="form-switch p-0 pe-2 d-flex flex-wrap flex-row-reverse justify-content-between mb-2">
-                                                <input type="checkbox" name="permissions[]"
-                                                    id="permission_{{ $i }}" class="form-check-input"
-                                                    value="{{ $permission['name'] }}"
-                                                    {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
-                                                <label class="form-check-label"
-                                                    for="permission_{{ $i }}">{{ $permission['title'] }}</label>
-                                            </div>
-                                        </div>
-                                        @php($i++)
-                                    @endforeach
-                                </div>
-                                <div class="col-xl-3 col-md-4 col-sm-6 p-0 border border-dark">
-                                    <h2 class="bg-dark text-light h6 p-2">LinkedIn</h2>
-                                    @foreach ($linkedInPermissions as $permission)
-                                        <div class="ps-2">
-                                            <div
-                                                class="form-switch p-0 pe-2 d-flex flex-wrap flex-row-reverse justify-content-between mb-2">
-                                                <input type="checkbox" name="permissions[]"
-                                                    id="permission_{{ $i }}" class="form-check-input"
-                                                    value="{{ $permission['name'] }}"
-                                                    {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
-                                                <label class="form-check-label"
+                                                class="form-switch p-0 pe-2 d-flex flex-row-reverse justify-content-between mb-2">
+                                                <div class="m-0">
+                                                    <input type="checkbox" name="permissions[]"
+                                                        id="permission_{{ $i }}" class="form-check-input"
+                                                        value="{{ $permission['name'] }}"
+                                                        {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
+                                                </div>
+                                                <label class="form-check-label me-3"
                                                     for="permission_{{ $i }}">{{ $permission['title'] }}</label>
                                             </div>
                                         </div>
@@ -74,12 +59,33 @@
                                     @foreach ($googlePermissions as $permission)
                                         <div class="ps-2">
                                             <div
-                                                class="form-switch p-0 pe-2 d-flex flex-wrap flex-row-reverse justify-content-between mb-2">
-                                                <input type="checkbox" name="permissions[]"
-                                                    id="permission_{{ $i }}" class="form-check-input"
-                                                    value="{{ $permission['name'] }}"
-                                                    {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
-                                                <label class="form-check-label"
+                                                class="form-switch p-0 pe-2 d-flex flex-row-reverse justify-content-between mb-2">
+                                                <div class="m-0">
+                                                    <input type="checkbox" name="permissions[]"
+                                                        id="permission_{{ $i }}" class="form-check-input"
+                                                        value="{{ $permission['name'] }}"
+                                                        {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
+                                                </div>
+                                                <label class="form-check-label me-3"
+                                                    for="permission_{{ $i }}">{{ $permission['title'] }}</label>
+                                            </div>
+                                        </div>
+                                        @php($i++)
+                                    @endforeach
+                                </div>
+                                <div class="col-xl-3 col-md-4 col-sm-6 p-0 border border-dark">
+                                    <h2 class="bg-dark text-light h6 p-2">LinkedIn</h2>
+                                    @foreach ($linkedInPermissions as $permission)
+                                        <div class="ps-2">
+                                            <div
+                                                class="form-switch p-0 pe-2 d-flex flex-row-reverse justify-content-between mb-2">
+                                                <div class="m-0">
+                                                    <input type="checkbox" name="permissions[]"
+                                                        id="permission_{{ $i }}" class="form-check-input"
+                                                        value="{{ $permission['name'] }}"
+                                                        {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
+                                                </div>
+                                                <label class="form-check-label me-3"
                                                     for="permission_{{ $i }}">{{ $permission['title'] }}</label>
                                             </div>
                                         </div>
@@ -91,12 +97,14 @@
                                     @foreach ($otherPermissions as $permission)
                                         <div class="ps-2">
                                             <div
-                                                class="form-switch p-0 pe-2 d-flex flex-wrap flex-row-reverse justify-content-between mb-2">
-                                                <input type="checkbox" name="permissions[]"
-                                                    id="permission_{{ $i }}" class="form-check-input"
-                                                    value="{{ $permission['name'] }}"
-                                                    {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
-                                                <label class="form-check-label"
+                                                class="form-switch p-0 pe-2 d-flex flex-row-reverse justify-content-between mb-2">
+                                                <div class="m-0">
+                                                    <input type="checkbox" name="permissions[]"
+                                                        id="permission_{{ $i }}" class="form-check-input"
+                                                        value="{{ $permission['name'] }}"
+                                                        {{ in_array($permission['name'], old('permissions', $rolePermissions)) ? 'checked' : '' }} />
+                                                </div>
+                                                <label class="form-check-label me-3"
                                                     for="permission_{{ $i }}">{{ $permission['title'] }}</label>
                                             </div>
                                         </div>

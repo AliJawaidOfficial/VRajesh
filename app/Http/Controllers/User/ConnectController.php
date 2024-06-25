@@ -142,7 +142,11 @@ class ConnectController extends Controller
      */
     public function google()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->scopes([
+                'https://www.googleapis.com/auth/business.manage'
+            ])
+            ->redirect();
     }
 
     public function googleCallback(Request $request)

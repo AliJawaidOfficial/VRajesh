@@ -553,33 +553,38 @@
         }
 
         // Google Business Profiles
-        // function getGoogleBusinessProfiles(element) {
-        //     if (element.checked) {
-        //         $("#googleBusinessProfileSelectSection").fadeIn();
-        //         $.ajax({
-        //             type: "GET",
-        //             url: "{{-- route('user.google.business.profiles') --}}",
-        //             beforeSend: function() {
-        //                 $("#googleBusinessProfileSelect").html(`<option value="">Loading...</option>`);
-        //             },
-        //             success: function(response) {
-        //                 html = `<option value="">Select</option>`;
+        function getGoogleBusinessProfiles(element) {
+            if (element.checked) {
+                $("#googleBusinessProfileSelectSection").fadeIn();
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('user.google.business.profiles') }}",
+                    beforeSend: function() {
+                        $("#googleBusinessProfileSelect").html(`<option value="">Loading...</option>`);
+                    },
+                    success: function(response) {
+                        html = `<option value="">Select</option>`;
 
-        //                 if (response.length > 0) {
-        //                     response.forEach((account) => {
-        //                         html +=
-        //                             `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
-        //                     })
-        //                 } else {
-        //                     html = `<option value="">No Business Profile Found</option>`;
-        //                 }
-        //                 $("#googleBusinessProfileSelect").html(html);
-        //             }
-        //         });
-        //     } else {
-        //         $("#googleBusinessProfileSelectSection").fadeOut();
-        //     }
-        // }
+                        if (response.error) {
+                            toastr.error(response.error);
+                        } else {
+                            if (response.length > 0) {
+                                response.forEach((account) => {
+                                    html +=
+                                        `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
+                                })
+                            } else {
+                                html = `<option value="">No Business Profile Found</option>`;
+                            }
+                        }
+
+                        $("#googleBusinessProfileSelect").html(html);
+                    }
+                });
+            } else {
+                $("#googleBusinessProfileSelectSection").fadeOut();
+            }
+        }
 
         // Pixel api functionality
         var currentPage = 1;
@@ -1151,7 +1156,7 @@
                                     @endif
                                 @endif
 
-                                {{-- @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
+                                @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
                                     @if (Auth::guard('web')->user()->google_access_token != null)
                                         <label class="d-inline-block platform-checkbox">
                                             <input type="checkbox" name="on_business_profile"
@@ -1163,7 +1168,7 @@
                                                     style="font-size: 15px"></i></span>
                                         </label>
                                     @endif
-                                @endif --}}
+                                @endif
                             </div>
 
                             @if (Auth::guard('web')->user()->canAny([

@@ -10,7 +10,7 @@ use Carbon\Carbon;
  */
 function standardDateTimeFormat($date)
 {
-    return date('D, d M Y h:i A', strtotime($date));
+    return date('d/M/Y h:i A', strtotime($date));
 }
 
 function dateTimeFormat($date)
@@ -85,4 +85,11 @@ function convertTimeToUtc($time, $timezone)
     $date = new DateTime($time, new DateTimeZone($timezone));
     $date->setTimezone(new DateTimeZone('UTC'));
     return $date->format('H:i:s');
+}
+
+function convertUTCToLocalTime($dateTimeString, $timezone)
+{
+    $date = new DateTime($dateTimeString, new DateTimeZone('UTC'));
+    $date->setTimezone(new DateTimeZone($timezone));
+    return $date->format('Y-m-d H:i:s');
 }

@@ -20,7 +20,6 @@ function standardDateTimeFormat(date) {
     const formattedDate = new Date(date);
     if (isNaN(formattedDate.getTime())) return 'Invalid Date';
     const options = {
-        weekday: 'short',
         day: '2-digit',
         month: 'short',
         year: 'numeric',

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Services\FacebookService;
+use App\Services\GoogleService;
 use App\Services\InstagramService;
 use App\Services\LinkedInService;
 use App\Services\PixelsService;
@@ -20,17 +21,20 @@ use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
+    // protected $googleService;
     protected $linkedinService;
     protected $facebookService;
     protected $instagramService;
     protected $pixelsService;
 
     public function __construct(
+        // private readonly GoogleService $importGoogleService,
         private readonly LinkedInService $importLinkedinService,
         private readonly InstagramService $importinstagramService,
         private readonly FacebookService $importFacebookService,
         private readonly PixelsService $importedPixelsService,
     ) {
+        // $this->googleService = $importGoogleService;
         $this->linkedinService = $importLinkedinService;
         $this->facebookService = $importFacebookService;
         $this->instagramService = $importinstagramService;
@@ -77,6 +81,19 @@ class PostController extends Controller
     }
 
     /**
+     * Get LinkedIn Organizations
+     */
+    // public function googleBusinessProfiles()
+    // {
+    //     $googleBusinessProfiles = [];
+    //     try {
+    //         if (Auth::guard('web')->user()->linkedin_access_token != null) $googleBusinessProfiles = $this->googleService->getBusinessProfiles();
+    //     } catch (Exception $e) {
+    //     }
+    //     return response()->json($googleBusinessProfiles);
+    // }
+
+    /**
      * Post Posts
      */
     public function index(Request $request)
@@ -118,7 +135,9 @@ class PostController extends Controller
 
         $dataSet = $dataSet->paginate(10);
 
-        return view('user.post.index', compact('dataSet', 'postMonths'));
+        $timezone = getCountryAndTimezone($request->ip())['timezone'];
+
+        return view('user.post.index', compact('dataSet', 'postMonths', 'timezone'));
     }
 
     /**
@@ -236,6 +255,7 @@ class PostController extends Controller
             $data->description = str_replace('\n', "\n", $request->description);
 
             $errors = [];
+            $success = [];
             $mediaPaths = [];
             $mediaSizes = [];
 
@@ -278,7 +298,6 @@ class PostController extends Controller
 
                 $long_facebook_access_token = $this->facebookService->tokenTime($facebook_page_access_token);
 
-                $data->on_facebook = 1;
                 $data->facebook_page_id = $facebook_page_id;
                 $data->facebook_page_access_token = $long_facebook_access_token;
                 $data->facebook_page_name = $facebook_page_name;
@@ -290,7 +309,6 @@ class PostController extends Controller
                 $instagram_account_id = $instagram_account[0];
                 $instagram_account_name = $instagram_account[1];
 
-                $data->on_instagram = 1;
                 $data->instagram_account_id = $instagram_account_id;
                 $data->instagram_account_name = $instagram_account_name;
             }
@@ -301,7 +319,6 @@ class PostController extends Controller
                 $linkedin_organization_id = $linkedin_organization[0];
                 $linkedin_organization_name = $linkedin_organization[1];
 
-                $data->on_linkedin = 1;
                 $data->linkedin_company_id = $linkedin_organization_id;
                 $data->linkedin_company_name = $linkedin_organization_name;
             }
@@ -317,19 +334,32 @@ class PostController extends Controller
                     if ($data->media != null) {
 
                         if ($data->media_type == 'image')
-                            $posted = $this->instagramService->postImage(
+                            $instagramPost = $this->instagramService->postImage(
                                 $data->instagram_account_id,
                                 $data->media,
                                 $request->description
                             );
 
                         if ($data->media_type == 'video')
-                            $posted = $this->instagramService->postVideo(
+                            $instagramPost = $this->instagramService->postVideo(
                                 $data->instagram_account_id,
                                 explode(',', $data->media)[0],
                                 $mediaSizes[0],
                                 $request->description
                             );
+
+                        if (isset($instagramPost['error'])) {
+                            $errors[] = [
+                                'heading' => 'Instagram',
+                                'message' => $instagramPost['error'],
+                            ];
+                        } else {
+                            $data->on_instagram = 1;
+                            $success[] = [
+                                'heading' => 'Instagram',
+                                'message' => 'Posted successfully.'
+                            ];
+                        }
                     }
                 }
 
@@ -337,7 +367,7 @@ class PostController extends Controller
                 if ($request->has('on_facebook')) {
                     if ($data->media != null) {
                         if ($data->media_type == 'image')
-                            $posted = $this->facebookService->postImages(
+                            $facebookPost = $this->facebookService->postImages(
                                 $data->facebook_page_id,
                                 $data->facebook_page_access_token,
                                 $data->media,
@@ -345,7 +375,7 @@ class PostController extends Controller
                             );
 
                         if ($data->media_type == 'video')
-                            $posted = $this->facebookService->postVideo(
+                            $facebookPost = $this->facebookService->postVideo(
                                 $data->facebook_page_id,
                                 $data->facebook_page_access_token,
                                 $mediaSizes[0],
@@ -353,7 +383,20 @@ class PostController extends Controller
                                 $request->description
                             );
                     } else {
-                        $posted = $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
+                        $facebookPost = $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
+                    }
+
+                    if (isset($facebookPost['error'])) {
+                        $errors[] = [
+                            'heading' => 'Facebook',
+                            'message' => $facebookPost['error'],
+                        ];
+                    } else {
+                        $data->on_facebook = 1;
+                        $success[] = [
+                            'heading' => 'Facebook',
+                            'message' => 'Posted successfully.'
+                        ];
                     }
                 }
 
@@ -361,20 +404,33 @@ class PostController extends Controller
                 if ($request->has('on_linkedin')) {
                     if ($data->media != null) {
                         if ($data->media_type == 'image')
-                            $posted = $this->linkedinService->postImage(
+                            $linkedinPost = $this->linkedinService->postImage(
                                 $data->linkedin_company_id,
                                 $data->media,
                                 $request->description
                             );
 
                         if ($data->media_type == 'video')
-                            $posted = $this->linkedinService->postVideo(
+                            $linkedinPost = $this->linkedinService->postVideo(
                                 $data->linkedin_company_id,
                                 explode(',', $data->media)[0],
                                 $request->description
                             );
                     } else {
-                        $posted = $this->linkedinService->postText($data->linkedin_company_id, $request->description);
+                        $linkedinPost = $this->linkedinService->postText($data->linkedin_company_id, $request->description);
+                    }
+
+                    if (isset($linkedinPost['error'])) {
+                        $errors[] = [
+                            'heading' => 'LinkedIn',
+                            'message' => $linkedinPost['error'],
+                        ];
+                    } else {
+                        $data->on_linkedin = 1;
+                        $success[] = [
+                            'heading' => 'LinkedIn',
+                            'message' => 'Posted successfully.'
+                        ];
                     }
                 }
 
@@ -383,18 +439,26 @@ class PostController extends Controller
 
             $data->save();
 
+            if (count($errors) > 0) return response()->json([
+                'status' => 500,
+                'success' => $success,
+                'errors' => $errors,
+            ]);
+
             if ($request->schedule_date != null && $request->schedule_time != null) return response()->json([
                 'status' => 200,
-                'message' => 'Post scheduled successfully'
+                'message' => 'Post scheduled successfully',
+                'redirect' => route('user.post.scheduled')
             ]);
 
             return response()->json([
                 'status' => 200,
-                'message' => 'Post published successfully'
+                'message' => 'Post published successfully',
+                'redirect' => route('user.post.index')
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'status' => 500,
+                'status' => 400,
                 'error' => $e->getMessage()
             ]);
         }
@@ -458,6 +522,7 @@ class PostController extends Controller
             $data->description = str_replace('\n', "\n", $request->description);
 
             $errors = [];
+            $success = [];
             $mediaPaths = [];
             $mediaSizes = [];
 
@@ -537,7 +602,6 @@ class PostController extends Controller
 
                 $long_facebook_access_token = $this->facebookService->tokenTime($facebook_page_access_token);
 
-                $data->on_facebook = 1;
                 $data->facebook_page_id = $facebook_page_id;
                 $data->facebook_page_access_token = $long_facebook_access_token;
                 $data->facebook_page_name = $facebook_page_name;
@@ -549,7 +613,6 @@ class PostController extends Controller
                 $instagram_account_id = $instagram_account[0];
                 $instagram_account_name = $instagram_account[1];
 
-                $data->on_instagram = 1;
                 $data->instagram_account_id = $instagram_account_id;
                 $data->instagram_account_name = $instagram_account_name;
             }
@@ -560,7 +623,6 @@ class PostController extends Controller
                 $linkedin_organization_id = $linkedin_organization[0];
                 $linkedin_organization_name = $linkedin_organization[1];
 
-                $data->on_linkedin = 1;
                 $data->linkedin_company_id = $linkedin_organization_id;
                 $data->linkedin_company_name = $linkedin_organization_name;
             }
@@ -575,19 +637,32 @@ class PostController extends Controller
                     if ($data->media != null) {
 
                         if ($data->media_type == 'image')
-                            $posted = $this->instagramService->postImage(
+                            $instagramPost = $this->instagramService->postImage(
                                 $data->instagram_account_id,
                                 $data->media,
                                 $request->description
                             );
 
                         if ($data->media_type == 'video')
-                            $posted = $this->instagramService->postVideo(
+                            $instagramPost = $this->instagramService->postVideo(
                                 $data->instagram_account_id,
                                 explode(',', $data->media)[0],
                                 $mediaSizes[0],
                                 $request->description
                             );
+
+                        if (isset($instagramPost['error'])) {
+                            $errors[] = [
+                                'heading' => 'Instagram',
+                                'message' => $instagramPost['error'],
+                            ];
+                        } else {
+                            $data->on_instagram = 1;
+                            $success[] = [
+                                'heading' => 'Instagram',
+                                'message' => 'Posted successfully.'
+                            ];
+                        }
                     }
                 }
 
@@ -595,7 +670,7 @@ class PostController extends Controller
                 if ($request->has('on_facebook')) {
                     if ($data->media != null) {
                         if ($data->media_type == 'image')
-                            $posted = $this->facebookService->postImages(
+                            $facebookPost = $this->facebookService->postImages(
                                 $data->facebook_page_id,
                                 $data->facebook_page_access_token,
                                 $data->media,
@@ -603,7 +678,7 @@ class PostController extends Controller
                             );
 
                         if ($data->media_type == 'video')
-                            $posted = $this->facebookService->postVideo(
+                            $facebookPost = $this->facebookService->postVideo(
                                 $data->facebook_page_id,
                                 $data->facebook_page_access_token,
                                 $mediaSizes[0],
@@ -611,7 +686,20 @@ class PostController extends Controller
                                 $request->description
                             );
                     } else {
-                        $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
+                        $facebookPost = $this->facebookService->postText($data->facebook_page_id, $data->facebook_page_access_token, $request->description);
+                    }
+
+                    if (isset($facebookPost['error'])) {
+                        $errors[] = [
+                            'heading' => 'Facebook',
+                            'message' => $facebookPost['error'],
+                        ];
+                    } else {
+                        $data->on_facebook = 1;
+                        $success[] = [
+                            'heading' => 'Facebook',
+                            'message' => 'Posted successfully.'
+                        ];
                     }
                 }
 
@@ -619,20 +707,33 @@ class PostController extends Controller
                 if ($request->has('on_linkedin')) {
                     if ($data->media != null) {
                         if ($data->media_type == 'image')
-                            $posted = $this->linkedinService->postImage(
+                            $linkedinPost = $this->linkedinService->postImage(
                                 $data->linkedin_company_id,
                                 $data->media,
                                 $request->description
                             );
 
                         if ($data->media_type == 'video')
-                            $posted = $this->linkedinService->postVideo(
+                            $linkedinPost = $this->linkedinService->postVideo(
                                 $data->linkedin_company_id,
                                 explode(',', $data->media)[0],
                                 $request->description
                             );
                     } else {
-                        $posted = $this->linkedinService->postText($data->linkedin_company_id, $request->description);
+                        $linkedinPost = $this->linkedinService->postText($data->linkedin_company_id, $request->description);
+                    }
+
+                    if (isset($linkedinPost['error'])) {
+                        $errors[] = [
+                            'heading' => 'LinkedIn',
+                            'message' => $linkedinPost['error'],
+                        ];
+                    } else {
+                        $data->on_linkedin = 1;
+                        $success[] = [
+                            'heading' => 'LinkedIn',
+                            'message' => 'Posted successfully.'
+                        ];
                     }
                 }
 
@@ -647,12 +748,26 @@ class PostController extends Controller
                 $oldPost->delete();
             }
 
+            if (count($errors) > 0) return response()->json([
+                'status' => 500,
+                'success' => $success,
+                'errors' => $errors,
+            ]);
+
+            if ($request->schedule_date != null && $request->schedule_time != null) return response()->json([
+                'status' => 200,
+                'message' => 'Post scheduled successfully',
+                'redirect' => route('user.post.scheduled')
+            ]);
+
             return response()->json([
                 'status' => 200,
+                'message' => 'Post published successfully',
+                'redirect' => route('user.post.index')
             ]);
         } catch (Exception $e) {
             return response()->json([
-                'status' => 500,
+                'status' => 400,
                 'error' => $e->getMessage()
             ]);
         }

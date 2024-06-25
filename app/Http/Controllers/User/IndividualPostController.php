@@ -68,8 +68,10 @@ class IndividualPostController extends Controller
         );
 
         $dataSet = $dataSet->paginate(10);
+        
+        $timezone = getCountryAndTimezone($request->ip())['timezone'];
 
-        return view('user.individual-post.index', compact('dataSet', 'postMonths'));
+        return view('user.individual-post.index', compact('dataSet', 'postMonths', 'timezone'));
     }
 
     /**

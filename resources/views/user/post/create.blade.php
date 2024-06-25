@@ -382,13 +382,34 @@
                                 timer: 700
                             }).then(() => {
                                 @if ($schedule_date != '')
-                                    window.location.href = "{{ route('user.post.scheduled') }}";
+                                    window.location.href = response.redirect;
                                 @else
-                                    window.location.href = "{{ route('user.post.index') }}";
+                                    window.location.href = response.redirect;
                                 @endif
                             });
-                        } else {
+                        } else if (response.status == 400) {
                             toastr.error(response.error);
+                        } else {
+                            let errorsHtml = ``;
+
+                            $.each(response.success, function(index, alert) {
+                                errorsHtml += `
+                                    <div class="alert alert-success alert-dismissible fade show m-0" role="alert">
+                                        <strong>${alert.heading}</strong>: ${alert.message}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                `;
+                            });
+
+                            $.each(response.errors, function(index, alert) {
+                                errorsHtml += `
+                                    <div class="alert alert-danger alert-dismissible fade show m-0" role="alert">
+                                        <strong>${alert.heading}</strong>: ${alert.message}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                `;
+                            });
+                            $("#errors").html(errorsHtml);
                         }
                     }
                 });
@@ -531,6 +552,35 @@
             }
         }
 
+        // Google Business Profiles
+        // function getGoogleBusinessProfiles(element) {
+        //     if (element.checked) {
+        //         $("#googleBusinessProfileSelectSection").fadeIn();
+        //         $.ajax({
+        //             type: "GET",
+        //             url: "{{-- route('user.google.business.profiles') --}}",
+        //             beforeSend: function() {
+        //                 $("#googleBusinessProfileSelect").html(`<option value="">Loading...</option>`);
+        //             },
+        //             success: function(response) {
+        //                 html = `<option value="">Select</option>`;
+
+        //                 if (response.length > 0) {
+        //                     response.forEach((account) => {
+        //                         html +=
+        //                             `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
+        //                     })
+        //                 } else {
+        //                     html = `<option value="">No Business Profile Found</option>`;
+        //                 }
+        //                 $("#googleBusinessProfileSelect").html(html);
+        //             }
+        //         });
+        //     } else {
+        //         $("#googleBusinessProfileSelectSection").fadeOut();
+        //     }
+        // }
+
         // Pixel api functionality
         var currentPage = 1;
         var perPage = 12;
@@ -552,8 +602,6 @@
         // Function to fetch media from the server
         function getPixels(type, q, page = 1, per_page = 12) {
             const mediaInput = document.getElementById('mediaInput');
-            console.log("mediaInput", mediaInput.files);
-            console.log("images", images);
 
             if (q.length == 0) {
                 q = 'green';
@@ -842,8 +890,6 @@
             const uploadedImagesContainer = document.getElementById('uploadedImages');
             uploadedImagesContainer.innerHTML = ''; // Clear any existing previews
 
-            console.log("images", images);
-
             images.forEach((file, index) => {
                 const fileReader = new FileReader();
                 fileReader.onload = function(e) {
@@ -1104,6 +1150,20 @@
                                         </label>
                                     @endif
                                 @endif
+
+                                {{-- @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
+                                    @if (Auth::guard('web')->user()->google_access_token != null)
+                                        <label class="d-inline-block platform-checkbox">
+                                            <input type="checkbox" name="on_business_profile"
+                                                onchange="getGoogleBusinessProfiles(this)" value="1"
+                                                data-bs-toggle="business-profile-post"
+                                                class="form-check-input toggle-post" />
+                                            -
+                                            <span class="d-inline-block ms-1"><i class="fab fa-google"
+                                                    style="font-size: 15px"></i></span>
+                                        </label>
+                                    @endif
+                                @endif --}}
                             </div>
 
                             @if (Auth::guard('web')->user()->canAny([
@@ -1166,7 +1226,7 @@
                                 @endif
                             @endif
 
-                            {{-- LinkedIn Account --}}
+                            {{-- LinkedIn Organizations --}}
                             @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
                                 @if (Auth::guard('web')->user()->linkedin_access_token != null)
                                     <div class="col-md-4">
@@ -1184,6 +1244,26 @@
                                     </div>
                                 @endif
                             @endif
+
+                            {{-- Google Business Profiles --}}
+                            {{-- @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
+                                @if (Auth::guard('web')->user()->google_access_token != null)
+                                    <div class="col-md-4">
+                                        <div class="mb-2" style="display: none;"
+                                            id="googleBusinessProfileSelectSection">
+                                            <div class="d-flex flex-column gap-2">
+                                                <p class="mb-0">Google Business Profiles:</p>
+                                                <div class="d-flex flex-column gap-1 w-100">
+                                                    <select name="google_business_profile"
+                                                        id="googleBusinessProfileSelect" class="form-select w-100">
+                                                        <option value="">Select</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endif --}}
                         </div>
                     </div>
 
@@ -1218,9 +1298,8 @@
                 <div class="uploaded-images-container p-4 bg-white rounded-6 overflow-scroll"
                     style="height: calc(100vh - (0px + 73px + 40px));">
                     <h5>Uploaded Images</h5>
-                    <div class="row" id="uploadedImages">
-                        <!-- Uploaded images will be displayed here -->
-                    </div>
+                    <div class="row" id="uploadedImages"></div>
+                    <div class="d-flex flex-column gap-2" id="errors"></div>
                 </div>
             </div>
         </div>

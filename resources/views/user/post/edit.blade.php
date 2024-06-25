@@ -2,7 +2,7 @@
 @extends('user.layouts.app')
 
 {{-- Title --}}
-@section('title', 'Create New Post')
+@section('title', ucfirst($action) . ' Post')
 
 {{-- Styles --}}
 @section('styles')
@@ -382,8 +382,29 @@
                             }).then(() => {
                                 window.location.href = "{{ route('user.post.index') }}";
                             });
-                        } else {
+                        } else if (response.status == 400) {
                             toastr.error(response.error);
+                        } else {
+                            let errorsHtml = ``;
+
+                            $.each(response.success, function(index, alert) {
+                                errorsHtml += `
+                                    <div class="alert alert-success alert-dismissible fade show m-0" role="alert">
+                                        <strong>${alert.heading}</strong>: ${alert.message}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                `;
+                            });
+
+                            $.each(response.errors, function(index, alert) {
+                                errorsHtml += `
+                                    <div class="alert alert-danger alert-dismissible fade show m-0" role="alert">
+                                        <strong>${alert.heading}</strong>: ${alert.message}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                `;
+                            });
+                            $("#errors").html(errorsHtml);
                         }
                     }
                 });
@@ -561,7 +582,7 @@
                             response.forEach((account) => {
                                 html += `
                                     <option value="${account.id} - ${account.name}"
-                                    ${account.id == @json($post->linkedin_organization_id) ? 'selected' : ''}
+                                    ${account.id == @json($post->linkedin_company_id) ? 'selected' : ''}
                                     >
                                     ${account.name} (${account.vanity_name})
                                     </option>
@@ -587,7 +608,7 @@
                 $("#onInstagramCheckbox").click();
             @endif
 
-            @if ($post->linked_in == 1)
+            @if ($post->on_linkedin == 1)
                 $("#onLinkedInCheckbox").click();
             @endif
         });
@@ -617,8 +638,6 @@
                         .then(response => response.blob())
                         .then(blob => {
                             const fileName = posts[index].split('http://vrajesh.localhost/')[0];
-                            console.log(fileName)
-                            console.log(image)
                             const file = new File([blob], fileName, {
                                 type: blob.type
                             });
@@ -655,8 +674,6 @@
         // Function to fetch media from the server
         function getPixels(type, q, page = 1, per_page = 12) {
             const mediaInput = document.getElementById('mediaInput');
-            console.log("mediaInput", mediaInput.files);
-            console.log("images", images);
 
             if (q.length == 0) {
                 q = 'green';
@@ -945,8 +962,6 @@
             const uploadedImagesContainer = document.getElementById('uploadedImages');
             uploadedImagesContainer.innerHTML = ''; // Clear any existing previews
 
-            console.log("images", images);
-
             images.forEach((file, index) => {
                 const fileReader = new FileReader();
                 fileReader.onload = function(e) {
@@ -1199,8 +1214,9 @@
                                                 onchange="getLinkedInOrganizations(this)" value="1"
                                                 data-bs-toggle="linkedin-post" class="form-check-input toggle-post" />
                                             -
-                                            <span class="d-inline-block ms-1"><i class="fab fa-linkedin-in"
-                                                    style="font-size: 17px"></i></span>
+                                            <span class="d-inline-block ms-1">
+                                                <i class="fab fa-linkedin-in" style="font-size: 17px"></i>
+                                            </span>
                                         </label>
                                     @endif
                                 @endif
@@ -1327,9 +1343,8 @@
                 <div class="uploaded-images-container p-4 bg-white rounded-6 overflow-scroll"
                     style="height: calc(100vh - (0px + 73px + 40px));">
                     <h5>Uploaded Images</h5>
-                    <div class="row" id="uploadedImages">
-
-                    </div>
+                    <div class="row" id="uploadedImages"></div>
+                    <div class="d-flex flex-column gap-2" id="errors"></div>
                 </div>
             </div>
         </div>

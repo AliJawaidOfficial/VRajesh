@@ -203,7 +203,7 @@
         function showPostDetail(id) {
             $.ajax({
                 type: "GET",
-                url: `{{ route('user.individual-post.index') }}/details/show/${id}`,
+                url: `{{ route('user.post.index') }}/details/show/${id}`,
                 dataType: "json",
                 success: function(response) {
                     if (response.status == 200) {
@@ -240,7 +240,19 @@
                             </div>
                             <div class="post-details d-flex flex-column align-items-stretch w-50">
                                 <h4 class="modal-post-title">Title: <span id="modalPostTitle">${response.data.title}</span></h4>
-                                <p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate">${response.data.formatted_created_at}</span></p>
+                        `;
+
+                        if (response.data.scheduled_at != null) {
+                            html +=
+                                `<p class="modal-post-date mb-1"><strong>Created on:</strong> <span id="modalPostDate">${response.data.formatted_created_at}</span></p>`;
+                            html +=
+                                `<p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate">${standardDateTimeFormat(convertUTCToLocalTime(response.data.scheduled_at + ' UTC'))}</span></p>`;
+                        } else {
+                            html +=
+                                `<p class="modal-post-date mb-1"><strong>Published on:</strong> <span id="modalPostDate">${response.data.formatted_created_at}</span></p>`;
+                        }
+
+                        html += `
                                 <div class="modal-post-description flex-grow-1 d-flex align-items-stretch flex-column"
                                     style="max-height: 200px; overflow-y: auto;">
                                     <p class="mb-0" style="position:sticky; top:0;background-color:#fff;padding: 10px 0px 5px;"><strong>Description:</strong></p> <span id="modalPostDescription">${response.data.description.replace(/\n/g, '<br>')}</span>
@@ -248,7 +260,7 @@
                                 <input type="hidden" id="postDetailId" value="${response.data.id}"/>
                                 <div class="py-2">
                                     <div class="mb-2 plaform-page-detail">
-                                        <strong>Platforms & Pages:</strong>
+                                        <strong>Platforms:</strong>
                                     </div>
                         `;
                         html += `
@@ -281,16 +293,6 @@
                                 </div>
                             </div>
                         `;
-
-                        html += ` 
-                            <input type="hidden" id="facebook_page_access_token" value="${response.data.facebook_page_access_token}"/>
-                            <input type="hidden" id="facebook_page_id" value="${response.data.facebook_page_id}"/>
-                            <input type="hidden" id="facebook_page_name" value="${response.data.facebook_page_name}"/>
-                            <input type="hidden" id="instagram_account_id" value="${response.data.instagram_account_id}"/>
-                            <input type="hidden" id="instagram_account_name" value="${response.data.instagram_account_name}"/>
-                            <input type="hidden" id="linkedin_company_id" value="${response.data.linkedin_company_id}"/>
-                            <input type="hidden" id="linkedin_company_name" value="${response.data.linkedin_company_name}"/>
-                        `
 
                         $('#postDetail .modal-body').html(html);
                         $('#postDetail').modal('show');
@@ -387,8 +389,8 @@
                         <th class="text-left">Title</th>
                         <th class="text-nowrap">Platforms</th>
                         <th class="text-left">Used</th>
-                        <th class="text-nowrap">Published Date</th>
-                        <th class="text-nowrap">Scheduled Date</th>
+                        <th class="text-nowrap">Created On</th>
+                        <th class="text-nowrap">Published On</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -428,14 +430,20 @@
                                 <span class="badge p-1 rounded-circle bg-primary">{{ $post->post_count }}</span>
                             </td>
                             <td>
-                                <p class="post-date mb-0">{{ standardDateTimeFormat($post->created_at) }}</p>
+                                <p class="post-date mb-0">
+                                    @if ($post->scheduled_at == null)
+                                        -
+                                    @else
+                                        {{ standardDateTimeFormat($post->created_at) }}
+                                    @endif
+                                </p>
                             </td>
                             <td>
                                 <p class="post-date mb-0">
                                     @if ($post->scheduled_at != null)
-                                        {{ standardDateTimeFormat($post->scheduled_at) }}
+                                        {{ standardDateTimeFormat(convertUTCToLocalTime($post->scheduled_at, $timezone)) }}
                                     @else
-                                        -
+                                        {{ standardDateTimeFormat($post->created_at) }}
                                     @endif
                                 </p>
                             </td>

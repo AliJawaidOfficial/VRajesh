@@ -1156,7 +1156,7 @@
                                     @endif
                                 @endif
 
-                                @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
+                                {{-- @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
                                     @if (Auth::guard('web')->user()->google_access_token != null)
                                         <label class="d-inline-block platform-checkbox">
                                             <input type="checkbox" name="on_business_profile"
@@ -1168,7 +1168,7 @@
                                                     style="font-size: 15px"></i></span>
                                         </label>
                                     @endif
-                                @endif
+                                @endif --}}
                             </div>
 
                             @if (Auth::guard('web')->user()->canAny([
@@ -1182,7 +1182,7 @@
                                 <div class="d-flex align-items-center">
                                     <button type="button" class="btn btn-dark btn-sm"
                                         style="padding: 5px 7px; font-size: 12px;" data-bs-toggle="modal"
-                                        data-bs-target="#imagesModal">Free Images
+                                        data-bs-target="#imagesModal">Free Media
                                     </button>
                                     <label for="mediaInput" class="btn btn-transparent text-dark"><i
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>

@@ -1233,7 +1233,7 @@
                                 <div class="d-flex align-items-center">
                                     <button type="button" class="btn btn-dark btn-sm"
                                         style="padding: 5px 7px; font-size: 12px;" data-bs-toggle="modal"
-                                        data-bs-target="#imagesModal">Free Images
+                                        data-bs-target="#imagesModal">Free Media
                                     </button>
                                     <label for="mediaInput" class="btn btn-transparent text-dark"><i
                                             class="fas fa-paperclip" style="font-size: 20px"></i></label>

@@ -1132,8 +1132,33 @@ class LinkedInService
      */
     public function salesNavigatorLeads()
     {
+        // try {
+        //     $url = 'https://api.linkedin.com/rest/complianceEvents?q=memberAndApplication';
+
+        //     $this->init();
+
+        //     $ch = curl_init($url);
+        //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        //     curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        //         'Authorization: Bearer ' . $this->accessToken,
+        //         'LinkedIn-Version: 202310',
+        //         'Content-Type: application/json',
+        //     ]);
+        //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+        //     $response = curl_exec($ch);
+        //     if ($response === false) throw new Exception(curl_error($ch));
+        //     curl_close($ch);
+
+        //     $data = json_decode($response, true);
+
+        //     return $data;
+        // } catch (Exception $e) {
+        //     return $e->getMessage();
+        // }
+        
         try {
-            $url = 'https://api.linkedin.com/rest/complianceEvents?q=memberAndApplication';
+            $url = 'https://api.linkedin.com/v2/salesNavigatorLeads?q=search&count=10';
 
             $this->init();
 

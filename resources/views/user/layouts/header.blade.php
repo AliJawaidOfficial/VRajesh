@@ -7,7 +7,7 @@
                 <img src="{{ asset('assets/images/icons/hamberger.png') }}" style="filter: invert(100%)" alt=""></button>
         </div>
 
-        <div class="notifications-wrapper">
+        {{-- <div class="notifications-wrapper">
             <button class="alert-icon position-relative" type="button" id="notificationButton" data-bs-toggle="dropdown"
                 aria-expanded="false">
                 <img src={{ asset('assets/images/icons/Notification.png') }} style="filter: invert(100%)"
@@ -20,13 +20,13 @@
                 <li><a class="dropdown-item" href="#">Notification 2</a></li>
                 <li><a class="dropdown-item" href="#">Notification 3</a></li>
             </ul>
-        </div>
+        </div> --}}
     </div>
 
     <div class="user-dropdown-wrapper">
         <div class="d-flex align-items-center">
             <div class="user-info d-flex flex-column align-items-end">
-                {{-- <span class="user-name">{{ Auth::user()->first_name }}</span> --}}
+                <span class="user-name">{{ Auth::user()->first_name }} {{ Auth::user()->last_name }}</span>
                 {{-- <span class="user-role">Admin</span> --}}
             </div>
             <button class="user-avatar position-relative" type="button" id="profileButton" data-bs-toggle="dropdown"

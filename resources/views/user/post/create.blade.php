@@ -563,22 +563,25 @@
                         $("#googleBusinessProfileSelect").html(`<option value="">Loading...</option>`);
                     },
                     success: function(response) {
-                        html = `<option value="">Select</option>`;
 
-                        if (response.error) {
-                            toastr.error(response.error);
-                        } else {
-                            if (response.length > 0) {
-                                response.forEach((account) => {
-                                    html +=
-                                        `<option value="${account.id} - ${account.name}">${account.name} (${account.vanity_name})</option>`
-                                })
-                            } else {
-                                html = `<option value="">No Business Profile Found</option>`;
-                            }
-                        }
+                        console.table(response);
 
-                        $("#googleBusinessProfileSelect").html(html);
+                        // html = `<option value="">Select</option>`;
+
+                        // if (response.error) {
+                        //     toastr.error(response.error);
+                        // } else {
+                        //     if (response.accounts.length > 0) {
+                        //         response.accounts.forEach((account) => {
+                        //             html +=
+                        //                 `<option value="${account.location_id} - ${account.location_name}">(${account.location_name})</option>`
+                        //         })
+                        //     } else {
+                        //         html = `<option value="">No Business Profile Found</option>`;
+                        //     }
+                        // }
+
+                        // $("#googleBusinessProfileSelect").html(html);
                     }
                 });
             } else {
@@ -1156,7 +1159,7 @@
                                     @endif
                                 @endif
 
-                                {{-- @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
+                                @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
                                     @if (Auth::guard('web')->user()->google_access_token != null)
                                         <label class="d-inline-block platform-checkbox">
                                             <input type="checkbox" name="on_business_profile"
@@ -1168,7 +1171,7 @@
                                                     style="font-size: 15px"></i></span>
                                         </label>
                                     @endif
-                                @endif --}}
+                                @endif
                             </div>
 
                             @if (Auth::guard('web')->user()->canAny([

@@ -87,7 +87,7 @@ class PostController extends Controller
     {
         $googleBusinessProfiles = [];
         try {
-            if (Auth::guard('web')->user()->linkedin_access_token != null) $googleBusinessProfiles = $this->googleService->getBusinessProfiles();
+            if (Auth::guard('web')->user()->google_access_token != null) $googleBusinessProfiles = $this->googleService->getBusinessProfiles();
         } catch (Exception $e) {
         }
         return response()->json($googleBusinessProfiles);
@@ -328,6 +328,9 @@ class PostController extends Controller
                 $countryAndTimezone = getCountryAndTimezone($ip);
                 $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
                 $data->scheduled_at = $request->schedule_date . ' ' . $time;
+                if ($request->has('on_facebook')) $data->on_facebook = 1;
+                if ($request->has('on_instagram')) $data->on_instagram = 1;
+                if ($request->has('on_linkedin')) $data->on_linkedin = 1;
             } else {
                 // On Instagram
                 if ($request->has('on_instagram')) {
@@ -632,6 +635,9 @@ class PostController extends Controller
                 $countryAndTimezone = getCountryAndTimezone($ip);
                 $time = convertTimeToUtc($request->schedule_time, $countryAndTimezone['timezone']);
                 $data->scheduled_at = $request->schedule_date . ' ' . $time;
+                if ($request->has('on_facebook')) $data->on_facebook = 1;
+                if ($request->has('on_instagram')) $data->on_instagram = 1;
+                if ($request->has('on_linkedin')) $data->on_linkedin = 1;
             } else {
                 if ($request->has('on_instagram')) {
                     if ($data->media != null) {

@@ -27,8 +27,6 @@ class SalesNavigatorController extends Controller
      */
     public function all()
     {
-        $connections = $this->linkedinService->connections();
-        return $connections;
         $leads = $this->linkedinService->salesNavigatorLeads();
         return $leads;
     }

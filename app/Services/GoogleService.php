@@ -30,6 +30,34 @@ class GoogleService
     }
 
 
+    // Refresh Token
+    // public function refreshToken($user_id = null)
+    // {
+    //     $this->init($user_id);
+
+    //     $url = 'https://oauth2.googleapis.com/token';
+    //     $params = [
+    //         'form_params' => [
+    //             'client_id' => $this->clientId,
+    //             'client_secret' => $this->clientSecret,
+    //             'refresh_token' => $this->accessToken,
+    //             'grant_type' => 'refresh_token'
+    //         ]
+    //     ];
+
+    //     $ch = curl_init($url);
+    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //     curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+    //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+    //     $response = curl_exec($ch);
+    //     if ($response === false) throw new Exception(curl_error($ch));
+    //     curl_close($ch);
+    //     $data = json_decode($response, true);
+    //     return $data;
+    //     // return $data['access_token'];
+    // }
+
 
     /**
      * =================================================================================================
@@ -40,34 +68,128 @@ class GoogleService
     {
         $this->init($user_id);
 
+        $data = [];
+
+        $accounts = $this->getAccounts();
+
+        foreach ($accounts['accounts'] as $account) {
+            $account_id = $account['name'];
+            $locations = $this->getLocations($account_id);
+            foreach ($locations as $location) {
+                $data[] = [
+                    'location_id' => $location[0]['name'],
+                    'location_name' => $location[0]['title'],
+                    'location_phone' => $location[0]['phoneNumbers']['primaryPhone'],
+                ];
+            }
+        }
+
+        return $data;
+    }
+
+    public function getAccounts()
+    {
         try {
-            $cacheKey = 'google_business_profiles';
-            $data = Cache::remember($cacheKey, 60, function () {
-                $url = 'https://mybusinessaccountmanagement.googleapis.com/v1/accounts';
+            $url = 'https://mybusinessaccountmanagement.googleapis.com/v1/accounts';
 
-                $ch = curl_init($url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Authorization: Bearer ' . $this->accessToken,
-                    'Content-Type: application/json'
-                ]);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                $response = curl_exec($ch);
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $this->accessToken,
+                'Content-Type: application/json'
+            ]);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
 
-                $data = json_decode($response, true);
+            $data = json_decode($response, true);
 
-                if ($httpCode != 200) throw new Exception($data['error']['message']);
+            if ($httpCode != 200) throw new Exception($data['error']['message']);
 
-                return $data;
-            });
+            return $data;
         } catch (Exception $e) {
             return [
                 'error' => $e->getMessage()
             ];
         }
     }
+
+    public function getLocations($account_id)
+    {
+        try {
+            $fields = [
+                'title',
+                'name',
+                'phoneNumbers',
+                // . 'labels',
+                // 'address',
+                // 'primaryCategory',
+                // 'additionalCategories',
+                // 'websiteUrl',
+                // . 'latlng',
+                // . 'metadata',
+                // . 'adWordsLocationExtensions',
+                // . 'labels',
+                // . 'openInfo',
+                // . 'profile',
+                // . 'regularHours',
+                // . 'moreHours',
+                // . 'serviceItems',
+            ];
+            $params = implode(',', $fields);
+            $url = "https://mybusinessbusinessinformation.googleapis.com/v1/$account_id/locations?readMask=$params";
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $this->accessToken,
+                'Content-Type: application/json'
+            ]);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            $data = json_decode($response, true);
+
+            if ($httpCode != 200) throw new Exception(isset($data['error']['message']) ? $data['error']['message'] : 'An error occurred while fetching business locations.');
+
+            return $data;
+        } catch (Exception $e) {
+            return [
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    // public function getLocation($location_id)
+    // {
+    //     try {
+    //         $url = "https://mybusinessbusinessinformation.googleapis.com/v1/$location_id?readMask=name,phoneNumbers";
+    //         $ch = curl_init($url);
+    //         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //         curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    //             'Authorization: Bearer ' . $this->accessToken,
+    //             'Content-Type: application/json'
+    //         ]);
+    //         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+    //         $response = curl_exec($ch);
+    //         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    //         curl_close($ch);
+    //         $data = json_decode($response, true);
+
+    //         return $data;
+
+    //         if ($httpCode != 200) throw new Exception(isset($data['error']['message']) ? $data['error']['message'] : 'An error occurred while fetching business locations.');
+
+    //         return $data;
+    //     } catch (Exception $e) {
+    //         return [
+    //             'error' => $e->getMessage()
+    //         ];
+    //     }
+    // }
 
 
 

@@ -37,6 +37,8 @@ class User extends Authenticatable
         'linkedin_email',
 
         'google_access_token',
+        'google_refresh_access_token',
+        'google_token_expires_at',
         'google_avatar',
         'google_name',
         'google_email',

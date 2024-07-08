@@ -160,12 +160,19 @@ class ConnectController extends Controller
                 'email' => $user->getEmail(),
                 'avatar' => $user->getAvatar(),
                 'token' => $user->token,
+                'refresh_token' => $user->refreshToken,
+                'expires_in' => $user->expiresIn,
             ];
+
+            return $response;
 
             $user = User::where('id', Auth::guard('web')->user()->id)->where('google_email', $response['email'])->first();
             if (!$user) throw new Exception('Sorry this google account is not register with us.');
 
             $user->google_access_token = $response['token'];
+            $user->google_refresh_token = $response['refresh_token'];
+            $user->google_token_expires_at = now()->addSeconds($response['expires_in']);
+
             $user->google_avatar = $response['avatar'];
             $user->google_name = $response['name'];
             $user->save();

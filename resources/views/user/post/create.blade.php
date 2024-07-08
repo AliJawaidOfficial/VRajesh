@@ -416,7 +416,6 @@
             }
         });
 
-
         // Draft Form
         $('#postForm button[name="draft"]').click(function(e) {
             e.preventDefault();
@@ -555,6 +554,7 @@
         // Google Business Profiles
         function getGoogleBusinessProfiles(element) {
             if (element.checked) {
+                $("#googleBusinessProfileModal").modal('show');
                 $("#googleBusinessProfileSelectSection").fadeIn();
                 $.ajax({
                     type: "GET",
@@ -563,31 +563,42 @@
                         $("#googleBusinessProfileSelect").html(`<option value="">Loading...</option>`);
                     },
                     success: function(response) {
+                        html = `<option value="">Select</option>`;
 
-                        console.table(response);
+                        if (response.error) {
+                            toastr.error(response.error);
+                        } else {
+                            if (response.length > 0) {
+                                response.forEach((account) => {
+                                    html +=
+                                        `<option value="${account.account_id} - ${account.location_id} - ${account.location_name} - ${account.location_phone}">${account.location_name} (${account.location_id.split('/')[1]})</option>`
+                                })
+                            } else {
+                                html = `<option value="">No Business Profile Found</option>`;
+                            }
+                        }
 
-                        // html = `<option value="">Select</option>`;
-
-                        // if (response.error) {
-                        //     toastr.error(response.error);
-                        // } else {
-                        //     if (response.accounts.length > 0) {
-                        //         response.accounts.forEach((account) => {
-                        //             html +=
-                        //                 `<option value="${account.location_id} - ${account.location_name}">(${account.location_name})</option>`
-                        //         })
-                        //     } else {
-                        //         html = `<option value="">No Business Profile Found</option>`;
-                        //     }
-                        // }
-
-                        // $("#googleBusinessProfileSelect").html(html);
+                        $("#googleBusinessProfileSelect").html(html);
                     }
                 });
-            } else {
-                $("#googleBusinessProfileSelectSection").fadeOut();
             }
         }
+
+        // Google Business Profile Additional Features
+        $("#googleBusinessProfileModalBtn").change(function(e) {
+            e.preventDefault();
+            $("#googleBusinessProfileModalUrl").val("");
+            ($(this).val() != "" && $(this).val() != "CALL")? $("#googleBusinessProfileModalUrlSection").fadeIn() : $("#googleBusinessProfileModalUrlSection").fadeOut();
+        });
+
+        $("#googleBusinessProfileForm").submit(function (e) { 
+            e.preventDefault();
+            if ($(this).valid()) {
+                $("#googleBusinessProfileModal").modal('hide');
+                $("#post_business_profile_action_btn").val($("#googleBusinessProfileModalBtn").val());
+                $("#post_business_profile_action_url").val($("#googleBusinessProfileModalUrl").val());
+            }
+        });
 
         // Pixel api functionality
         var currentPage = 1;
@@ -1084,6 +1095,8 @@
                     <input type="date" name="schedule_date" id="post_schedule_date" value="{{ $schedule_date }}"
                         class="d-none" />
                     <input type="time" name="schedule_time" id="post_schedule_time" class="d-none" />
+                    <input type="hidden" name="business_profile_action_btn" id="post_business_profile_action_btn" />
+                    <input type="hidden" name="business_profile_action_url" id="post_business_profile_action_url" />
                     <input type="hidden" name="media_type" id="mediaType" />
 
                     <div class="d-flex flex-column flex-grow-1">
@@ -1254,7 +1267,7 @@
                             @endif
 
                             {{-- Google Business Profiles --}}
-                            {{-- @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
+                            @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
                                 @if (Auth::guard('web')->user()->google_access_token != null)
                                     <div class="col-md-4">
                                         <div class="mb-2" style="display: none;"
@@ -1271,7 +1284,7 @@
                                         </div>
                                     </div>
                                 @endif
-                            @endif --}}
+                            @endif
                         </div>
                     </div>
 
@@ -1386,4 +1399,43 @@
             </div>
         </div>
     @endcan
+
+    <!-- Schedule Modal -->
+    @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
+        <div class="modal fade" id="googleBusinessProfileModal" data-bs-backdrop="static" tabindex="-1"
+            aria-labelledby="googleBusinessProfileModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="googleBusinessProfileModalLabel">Additional Options</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="googleBusinessProfileForm" method="POST">
+                            <div class="mb-3">
+                                <label for="googleBusinessProfileModalBtn" class="form-label">Button</label>
+                                <select name="google_business_call_to_action_button" class="form-select"
+                                    id="googleBusinessProfileModalBtn">
+                                    <option value="">None</option>
+                                    <option value="BOOK">BOOK</option>
+                                    <option value="ORDER">ORDER</option>
+                                    <option value="SHOP">SHOP</option>
+                                    <option value="LEARN_MORE">LEARN_MORE</option>
+                                    <option value="SIGN_UP">SIGN_UP</option>
+                                    <option value="CALL">CALL</option>
+                                </select>
+                            </div>
+                            <div class="mb-3" id="googleBusinessProfileModalUrlSection" style="display: none" >
+                                <label for="googleBusinessProfileModalUrl" class="form-label">URL</label>
+                                <input type="url" class="form-control" placeholder="https://example.com"
+                                    id="googleBusinessProfileModalUrl" name="google_business_call_to_action_url"
+                                    />
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection

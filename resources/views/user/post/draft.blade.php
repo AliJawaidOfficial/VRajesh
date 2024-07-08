@@ -277,6 +277,13 @@
                         if (response.data.on_linkedin) html +=
                             `<i class="fab fa-linkedin"></i><span class="m-0 ms-2">${response.data.linkedin_company_name}</span>`;
                         html += `
+                                </div>
+                                <div class="d-flex gap-2 align-items-center">`;
+                        if (response.data.on_business_profile) html += `
+                            <i class="fab fa-google"></i>
+                            <span class="m-0 ms-2">${response.data.business_profile_name}</span>
+                        `;
+                        html += `
                                         </div>
                                     </div>
                                 </div>
@@ -634,6 +641,14 @@
                                             <i class="fab fa-linkedin-in"></i>
                                             <span
                                                 class="m-0 lh-1 border-start border-light ps-1">{{ $post->linkedin_company_name }}</span>
+                                        </div>
+                                    @endif
+                                    @if ($post->on_business_profile)
+                                        <div
+                                            class="badge p-1 bg-linkedin rounded-2 text-light d-flex gap-1 align-items-start">
+                                            <i class="fab fa-linkedin-in"></i>
+                                            <span
+                                                class="m-0 lh-1 border-start border-light ps-1">{{ $post->business_profile_name }}</span>
                                         </div>
                                     @endif
                                 </div>

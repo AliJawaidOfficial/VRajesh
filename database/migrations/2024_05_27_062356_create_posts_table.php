@@ -22,6 +22,9 @@ return new class extends Migration
             $table->text('media')->nullable();
             $table->string('media_type')->nullable();
 
+            $table->string('business_profile_call_to_action_button')->nullable();
+            $table->string('business_profile_call_to_action_url')->nullable();
+
             $table->boolean('on_facebook')->default(0);
             $table->string('facebook_page_id')->nullable();
             $table->text('facebook_page_access_token')->nullable();
@@ -34,6 +37,11 @@ return new class extends Migration
             $table->boolean('on_linkedin')->default(0);
             $table->string('linkedin_company_id')->nullable();
             $table->string('linkedin_company_name')->nullable();
+            
+            $table->boolean('on_business_profile')->default(0);
+            $table->string('business_profile_id')->nullable();
+            $table->string('business_profile_name')->nullable();
+            $table->string('business_profile_account_id')->nullable();
 
             $table->dateTime('scheduled_at')->nullable();
             $table->boolean('draft')->default(0);

@@ -266,27 +266,35 @@
                         html += `
                                 <div class="d-flex flex-column gap-2">
                                     <div class="d-flex gap-2 align-items-center">
-                                        <input type="checkbox" style="pointer-events: none; display: none"
-                                            id="facebook-post-detail" ${(response.data.on_facebook) ? 'checked' : ''}>
                         `;
-                        if (response.data.on_facebook) html +=
-                            `<i class="fab fa-facebook m-0"></i><span class="m-0 ms-2">${response.data.facebook_page_name}</span>`;
+
+                        if (response.data.on_facebook) html += `
+                            <i class="fab fa-facebook m-0"></i>
+                            <span class="m-0 ms-2">${response.data.facebook_page_name}</span>
+                        `;
                         html += `
-                                    </div>
-                                    <div class="d-flex gap-2 align-items-center">
-                                        <input type="checkbox" style="pointer-events: none; display: none"
-                                            id="instagram-post-detail" ${(response.data.on_instagram) ? 'checked' : ''}>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">
                         `;
-                        if (response.data.on_instagram) html +=
-                            `<i class="fab fa-instagram"></i><span class="m-0 ms-2">${response.data.instagram_account_name}</span>`;
+                        if (response.data.on_instagram) html += `
+                                <i class="fab fa-instagram"></i>
+                                <span class="m-0 ms-2">${response.data.instagram_account_name}</span>
+                            `;
                         html += `
-                                    </div>
-                                    <div class="d-flex gap-2 align-items-center">
-                                        <input type="checkbox" style="pointer-events: none; display: none"
-                                            id="linkedin-post-detail" ${(response.data.on_linkedin) ? 'checked' : ''}>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">
                         `;
-                        if (response.data.on_linkedin) html +=
-                            `<i class="fab fa-linkedin"></i><span class="m-0 ms-2">${response.data.linkedin_company_name}</span>`;
+                        if (response.data.on_linkedin) html += `
+                            <i class="fab fa-linkedin"></i>
+                            <span class="m-0 ms-2">${response.data.linkedin_company_name}</span>
+                        `;
+                        html += `
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">`;
+                        if (response.data.on_business_profile) html += `
+                            <i class="fab fa-google"></i>
+                            <span class="m-0 ms-2">${response.data.business_profile_name}</span>
+                        `;
                         html += `
                                         </div>
                                     </div>
@@ -647,6 +655,14 @@
                                                 class="m-0 lh-1 border-start border-light ps-1">{{ $post->linkedin_company_name }}</span>
                                         </div>
                                     @endif
+                                    @if ($post->on_business_profile)
+                                        <div
+                                            class="badge p-1 bg-google rounded-2 text-light d-flex gap-1 align-items-start">
+                                            <i class="fab fa-google"></i>
+                                            <span
+                                                class="m-0 lh-1 border-start border-light ps-1">{{ $post->business_profile_name }}</span>
+                                        </div>
+                                    @endif
                                 </div>
                             </td>
                             <td>
@@ -658,7 +674,8 @@
                                         -
                                     @else
                                         {{ date('d/M/Y', strtotime($post->created_at)) }}
-                                        <span class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime($post->created_at)) }}</span>
+                                        <span
+                                            class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime($post->created_at)) }}</span>
                                     @endif
                                 </p>
                             </td>
@@ -666,10 +683,12 @@
                                 <p class="post-date mb-0">
                                     @if ($post->scheduled_at != null)
                                         {{ date('d/M/Y', strtotime(convertUTCToLocalTime($post->scheduled_at, $timezone))) }}
-                                        <span class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime(convertUTCToLocalTime($post->scheduled_at, $timezone))) }}</span>
+                                        <span
+                                            class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime(convertUTCToLocalTime($post->scheduled_at, $timezone))) }}</span>
                                     @else
-                                    {{ date('d/M/Y', strtotime($post->created_at)) }}
-                                    <span class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime($post->created_at)) }}</span>
+                                        {{ date('d/M/Y', strtotime($post->created_at)) }}
+                                        <span
+                                            class="badge p-1 bg-warning rounded-2 text-dark">{{ date('h:i A', strtotime($post->created_at)) }}</span>
                                     @endif
                                 </p>
                             </td>
@@ -773,6 +792,17 @@
                                                     value="1" id="PlatformInstagram">
                                                 <label class="form-check-label" for="PlatformInstagram">
                                                     <i class="fab fa-instagram"></i>
+                                                </label>
+                                            </div>
+                                        @endif
+                                    @endif
+                                    @if (Auth::guard('web')->user()->canAny(['linkedin_text_post', 'linkedin_image_post', 'linkedin_video_post']))
+                                        @if (Auth::guard('web')->user()->linkedin_access_token != null)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="on_linkedin"
+                                                    value="1" id="PlatformLinkedIn">
+                                                <label class="form-check-label" for="PlatformLinkedIn">
+                                                    <i class="fab fa-linkedin-in"></i>
                                                 </label>
                                             </div>
                                         @endif

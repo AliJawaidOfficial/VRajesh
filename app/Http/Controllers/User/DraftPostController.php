@@ -46,6 +46,7 @@ class DraftPostController extends Controller
                 $q->where('on_linkedin', 1)->whereNotNull('linkedin_company_id');
                 $q->orWhere('on_facebook', 1)->whereNotNull('facebook_page_id');
                 $q->orWhere('on_instagram', 1)->whereNotNull('instagram_account_id');
+                $q->orWhere('on_business_profile', 1)->whereNotNull('business_profile_name');
             })
             ->where('posted', 0)
             ->where('draft', 1)
@@ -87,6 +88,10 @@ class DraftPostController extends Controller
                     'instagram_account' => 'nullable|required_if:on_instagram,1',
                     'on_linkedin' => 'nullable|boolean',
                     'linkedin_organization' => 'nullable|required_if:on_linkedin,1',
+                    'on_business_profile' => 'nullable|boolean',
+                    'google_business_profile' => 'nullable|required_if:on_business_profile,1',
+                    'business_profile_action_btn' => 'nullable',
+                    'business_profile_action_url' => 'nullable',
                     'schedule_date' => 'nullable|date|after_or_equal:today',
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
@@ -105,6 +110,8 @@ class DraftPostController extends Controller
                     'instagram_account.required_if' => 'Instagram Account is required.',
 
                     'linkedin_organization.required_if' => 'Linkedin Organization is required.',
+
+                    'google_business_profile.required_if' => 'Google Business Profile Account is required.',
 
                     'schedule_date.after_or_equal' => 'Schedule date should be a future date.',
 
@@ -131,7 +138,12 @@ class DraftPostController extends Controller
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
-            if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
+            if (
+                !$request->has('on_facebook') &&
+                !$request->has('on_instagram') &&
+                !$request->has('on_linkedin') &&
+                !$request->has('on_business_profile')
+            ) throw new Exception('Please select at least one platform.');
 
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
@@ -144,6 +156,25 @@ class DraftPostController extends Controller
             if ($request->media) {
                 $mediaPaths = [];
                 $mediaSizes = [];
+
+                if ($request->has('on_facebook')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_facebook_image_post')) throw new Exception('You do not have permission to post image on Facebook.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_facebook_video_post')) throw new Exception('You do not have permission to post video on Facebook.');
+                }
+
+                if ($request->has('on_instagram')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_instagram_image_post')) throw new Exception('You do not have permission to post image on Instagram.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_instagram_video_post')) throw new Exception('You do not have permission to post video on Instagram.');
+                }
+
+                if ($request->has('on_linkedin')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('linkedin_image_post')) throw new Exception('You do not have permission to post image on Linkedin.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('linkedin_video_post')) throw new Exception('You do not have permission to post video on Linkedin.');
+                }
+
+                if ($request->has('on_business_profile')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('google_image_post')) throw new Exception('You do not have permission to post image on Google Business Profile Mananger.');
+                }
 
                 foreach ($request->media as $media) {
                     $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
@@ -196,6 +227,25 @@ class DraftPostController extends Controller
                 $data->linkedin_company_name = $linkedin_organization_name;
             }
 
+            // On Business Profile
+            if ($request->has('on_business_profile')) {
+                $google_business_profile = explode(' - ', $request->google_business_profile);
+                $data->business_profile_account_id = $google_business_profile[0];
+                $data->business_profile_id = $google_business_profile[1];
+                $data->business_profile_name = $google_business_profile[2];
+
+                $data->on_business_profile = 1;
+                if ($request->business_profile_action_btn != '') {
+                    $data->business_profile_call_to_action_button = $request->business_profile_action_btn;
+
+                    if ($request->business_profile_action_btn == "CALL") {
+                        $data->business_profile_call_to_action_url = $request->business_profile_action_url;
+                    } else {
+                        $data->business_profile_call_to_action_url = $google_business_profile[3];
+                    }
+                }
+            }
+
             if ($request->schedule_date != null && $request->schedule_time != null) {
                 $ip = $request->ip();
                 $countryAndTimezone = getCountryAndTimezone($ip);
@@ -229,12 +279,21 @@ class DraftPostController extends Controller
                     'description' => 'nullable|required_without:media',
                     'media_type' => 'nullable|required_if:media,1|in:image,video',
                     'media' => 'nullable|required_if:on_instagram,1|max:524288',
+
                     'on_facebook' => 'nullable|boolean',
                     'facebook_page' => 'nullable|required_if:on_facebook,1',
+
                     'on_instagram' => 'nullable|boolean',
                     'instagram_account' => 'nullable|required_if:on_instagram,1',
+
                     'on_linkedin' => 'nullable|boolean',
                     'linkedin_organization' => 'nullable|required_if:on_linkedin,1',
+
+                    'on_business_profile' => 'nullable|boolean',
+                    'google_business_profile' => 'nullable|required_if:on_business_profile,1',
+                    'business_profile_action_btn' => 'nullable',
+                    'business_profile_action_url' => 'nullable',
+
                     'schedule_date' => 'nullable|date|after_or_equal:today',
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
@@ -253,6 +312,8 @@ class DraftPostController extends Controller
                     'instagram_account.required_if' => 'Instagram Account is required.',
 
                     'linkedin_organization.required_if' => 'Linkedin Organization is required.',
+
+                    'google_business_profile.required_if' => 'Google Business Profile Account is required.',
 
                     'schedule_date.after_or_equal' => 'Schedule date should be a future date.',
 
@@ -279,7 +340,13 @@ class DraftPostController extends Controller
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
-            if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
+            if (
+                !$request->has('on_facebook') &&
+                !$request->has('on_instagram') &&
+                !$request->has('on_linkedin') &&
+                !$request->has('on_business_profile')
+            ) throw new Exception('Please select at least one platform.');
+
 
             $data = new Post;
             $data->user_id = Auth::guard('web')->user()->id;
@@ -288,12 +355,32 @@ class DraftPostController extends Controller
             $data->description = str_replace('\n', "\n", $request->description);
             $data->draft = 1;
 
-
             $errors = [];
+            $success = [];
             $mediaPaths = [];
             $mediaSizes = [];
 
             if ($request->media) {
+
+                if ($request->has('on_facebook')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_facebook_image_post')) throw new Exception('You do not have permission to post image on Facebook.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_facebook_video_post')) throw new Exception('You do not have permission to post video on Facebook.');
+                }
+
+                if ($request->has('on_instagram')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_instagram_image_post')) throw new Exception('You do not have permission to post image on Instagram.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_instagram_video_post')) throw new Exception('You do not have permission to post video on Instagram.');
+                }
+
+                if ($request->has('on_linkedin')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('linkedin_image_post')) throw new Exception('You do not have permission to post image on Linkedin.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('linkedin_video_post')) throw new Exception('You do not have permission to post video on Linkedin.');
+                }
+
+                if ($request->has('on_business_profile')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('google_image_post')) throw new Exception('You do not have permission to post image on Google Business Profile Mananger.');
+                }
+
                 foreach ($request->media as $media) {
                     $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
                     $mediaSize = $media->getSize();
@@ -363,6 +450,25 @@ class DraftPostController extends Controller
                 $data->linkedin_company_name = $linkedin_organization_name;
             }
 
+            // On Business Profile
+            if ($request->has('on_business_profile')) {
+                $google_business_profile = explode(' - ', $request->google_business_profile);
+                $data->business_profile_account_id = $google_business_profile[0];
+                $data->business_profile_id = $google_business_profile[1];
+                $data->business_profile_name = $google_business_profile[2];
+
+                $data->on_business_profile = 1;
+                if ($request->business_profile_action_btn != '') {
+                    $data->business_profile_call_to_action_button = $request->business_profile_action_btn;
+
+                    if ($request->business_profile_action_btn == "CALL") {
+                        $data->business_profile_call_to_action_url = $request->business_profile_action_url;
+                    } else {
+                        $data->business_profile_call_to_action_url = $google_business_profile[3];
+                    }
+                }
+            }
+
             $data->save();
 
             DB::commit();
@@ -393,12 +499,21 @@ class DraftPostController extends Controller
                     'description' => 'nullable|required_without:media',
                     'media_type' => 'nullable|required_if:media,1|in:image,video',
                     'media' => 'nullable|required_if:on_instagram,1|max:524288',
+
                     'on_facebook' => 'nullable|boolean',
                     'facebook_page' => 'nullable|required_if:on_facebook,1',
+
                     'on_instagram' => 'nullable|boolean',
                     'instagram_account' => 'nullable|required_if:on_instagram,1',
+
                     'on_linkedin' => 'nullable|boolean',
                     'linkedin_organization' => 'nullable|required_if:on_linkedin,1',
+
+                    'on_business_profile' => 'nullable|boolean',
+                    'google_business_profile' => 'nullable|required_if:on_business_profile,1',
+                    'business_profile_action_btn' => 'nullable',
+                    'business_profile_action_url' => 'nullable',
+
                     'schedule_date' => 'nullable|date|after_or_equal:today',
                     'schedule_time' => 'nullable|date_format:H:i',
                 ],
@@ -420,6 +535,8 @@ class DraftPostController extends Controller
                     'instagram_account.required_if' => 'Instagram Account is required.',
 
                     'linkedin_organization.required_if' => 'Linkedin Organization is required.',
+
+                    'google_business_profile.required_if' => 'Google Business Profile Account is required.',
 
                     'schedule_date.after_or_equal' => 'Schedule date should be a future date.',
 
@@ -446,7 +563,12 @@ class DraftPostController extends Controller
 
             if ($validator->fails()) throw new Exception($validator->errors()->first());
 
-            if (!$request->has('on_facebook') && !$request->has('on_instagram') && !$request->has('on_linkedin')) throw new Exception('Please select at least one platform.');
+            if (
+                !$request->has('on_facebook') &&
+                !$request->has('on_instagram') &&
+                !$request->has('on_linkedin') &&
+                !$request->has('on_business_profile')
+            ) throw new Exception('Please select at least one platform.');
 
             $oldPost = Post::where('id', $request->post_id)->first();
             if ($oldPost->media != null) {
@@ -469,6 +591,26 @@ class DraftPostController extends Controller
             $data->draft = 1;
 
             if ($request->media) {
+                
+                if ($request->has('on_facebook')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_facebook_image_post')) throw new Exception('You do not have permission to post image on Facebook.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_facebook_video_post')) throw new Exception('You do not have permission to post video on Facebook.');
+                }
+
+                if ($request->has('on_instagram')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('meta_instagram_image_post')) throw new Exception('You do not have permission to post image on Instagram.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('meta_instagram_video_post')) throw new Exception('You do not have permission to post video on Instagram.');
+                }
+
+                if ($request->has('on_linkedin')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('linkedin_image_post')) throw new Exception('You do not have permission to post image on Linkedin.');
+                    if ($request->media_type == 'video' && !Auth::guard('web')->user()->can('linkedin_video_post')) throw new Exception('You do not have permission to post video on Linkedin.');
+                }
+
+                if ($request->has('on_business_profile')) {
+                    if ($request->media_type == 'image' && !Auth::guard('web')->user()->can('google_image_post')) throw new Exception('You do not have permission to post image on Google Business Profile Mananger.');
+                }
+
                 foreach ($request->media as $media) {
                     $mediaName = time() . '_' . rand(1000, 9999) . '.' . $media->getClientOriginalExtension();
                     $mediaSize = $media->getSize();
@@ -531,6 +673,32 @@ class DraftPostController extends Controller
                 $data->on_linkedin = 0;
                 $data->linkedin_company_id = null;
                 $data->linkedin_company_name = null;
+            }
+
+            // On Business Profile
+            if ($request->has('on_business_profile')) {
+                $google_business_profile = explode(' - ', $request->google_business_profile);
+                $data->business_profile_account_id = $google_business_profile[0];
+                $data->business_profile_id = $google_business_profile[1];
+                $data->business_profile_name = $google_business_profile[2];
+
+                $data->on_business_profile = 1;
+                if ($request->business_profile_action_btn != '') {
+                    $data->business_profile_call_to_action_button = $request->business_profile_action_btn;
+
+                    if ($request->business_profile_action_btn == "CALL") {
+                        $data->business_profile_call_to_action_url = $request->business_profile_action_url;
+                    } else {
+                        $data->business_profile_call_to_action_url = $google_business_profile[3];
+                    }
+                }
+            } else {
+                $data->on_business_profile = 0;
+                $data->business_profile_account_id = null;
+                $data->business_profile_id = null;
+                $data->business_profile_name = null;
+                $data->business_profile_call_to_action_button = null;
+                $data->business_profile_call_to_action_url = null;
             }
 
             $data->save();

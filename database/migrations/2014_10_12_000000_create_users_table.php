@@ -26,17 +26,18 @@ return new class extends Migration
 
             $table->text('linkedin_access_token')->nullable();
             $table->text('linkedin_community_access_token')->nullable();
-            
+
             $table->text('linkedin_urn')->nullable();
             $table->text('linkedin_avatar')->nullable();
             $table->string('linkedin_name')->nullable();
             $table->string('linkedin_email')->nullable();
-            
+
             $table->text('google_access_token')->nullable();
+            $table->text('google_refresh_access_token')->nullable();
+            $table->timestamp('google_token_expires_at')->nullable();
             $table->text('google_avatar')->nullable();
             $table->string('google_name')->nullable();
             $table->string('google_email')->nullable();
-
 
             $table->rememberToken();
             $table->timestamps();

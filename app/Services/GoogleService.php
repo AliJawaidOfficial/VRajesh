@@ -12,6 +12,8 @@ class GoogleService
     protected $clientId;
     protected $clientSecret;
     protected $accessToken;
+    protected $refreshAccessToken;
+    protected $userId;
 
     public function __construct()
     {
@@ -23,40 +25,46 @@ class GoogleService
     {
         if ($user_id === null) {
             $this->accessToken = Auth::guard('web')->user()->google_access_token;
+            $this->userId = Auth::guard('web')->user()->id;
         } else {
             $user = User::where('id', $user_id)->first();
             $this->accessToken = $user->google_access_token;
+            $this->userId = $user->id;
         }
     }
 
 
     // Refresh Token
-    // public function refreshToken($user_id = null)
-    // {
-    //     $this->init($user_id);
+    public function refreshToken($user_id = null)
+    {
+        $this->init($user_id);
 
-    //     $url = 'https://oauth2.googleapis.com/token';
-    //     $params = [
-    //         'form_params' => [
-    //             'client_id' => $this->clientId,
-    //             'client_secret' => $this->clientSecret,
-    //             'refresh_token' => $this->accessToken,
-    //             'grant_type' => 'refresh_token'
-    //         ]
-    //     ];
+        $user = User::find($this->userId);
 
-    //     $ch = curl_init($url);
-    //     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    //     curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-    //     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $url = 'https://oauth2.googleapis.com/token';
+        $params = [
+            'form_params' => [
+                'client_id' => $this->clientId,
+                'client_secret' => $this->clientSecret,
+                'refresh_token' => $user->google_refresh_token,
+                'grant_type' => 'refresh_token'
+            ]
+        ];
 
-    //     $response = curl_exec($ch);
-    //     if ($response === false) throw new Exception(curl_error($ch));
-    //     curl_close($ch);
-    //     $data = json_decode($response, true);
-    //     return $data;
-    //     // return $data['access_token'];
-    // }
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+        $response = curl_exec($ch);
+        if ($response === false) throw new Exception(curl_error($ch));
+        curl_close($ch);
+        $data = json_decode($response, true);
+
+        $user->google_access_token = $data['access_token'];
+        $user->google_token_expires_at = now()->addSeconds($data['expires_in']);
+        $user->save();
+    }
 
 
     /**
@@ -77,6 +85,7 @@ class GoogleService
             $locations = $this->getLocations($account_id);
             foreach ($locations as $location) {
                 $data[] = [
+                    'account_id' => $account_id,
                     'location_id' => $location[0]['name'],
                     'location_name' => $location[0]['title'],
                     'location_phone' => $location[0]['phoneNumbers']['primaryPhone'],
@@ -162,35 +171,6 @@ class GoogleService
         }
     }
 
-    // public function getLocation($location_id)
-    // {
-    //     try {
-    //         $url = "https://mybusinessbusinessinformation.googleapis.com/v1/$location_id?readMask=name,phoneNumbers";
-    //         $ch = curl_init($url);
-    //         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    //         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    //             'Authorization: Bearer ' . $this->accessToken,
-    //             'Content-Type: application/json'
-    //         ]);
-    //         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-    //         $response = curl_exec($ch);
-    //         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    //         curl_close($ch);
-    //         $data = json_decode($response, true);
-
-    //         return $data;
-
-    //         if ($httpCode != 200) throw new Exception(isset($data['error']['message']) ? $data['error']['message'] : 'An error occurred while fetching business locations.');
-
-    //         return $data;
-    //     } catch (Exception $e) {
-    //         return [
-    //             'error' => $e->getMessage()
-    //         ];
-    //     }
-    // }
-
 
 
     /**
@@ -203,12 +183,12 @@ class GoogleService
     /**
      * Text
      */
-    public function postText($message, $user_id = null)
+    public function postText($account_id, $location_id, $summary, $actionType, $callToActionURL, $user_id = null)
     {
         try {
             $this->init($user_id);
 
-            $url = 'https://mybusiness.googleapis.com/v4/accounts/{YOUR_ACCOUNT_ID}/locations/{YOUR_LOCATION_ID}/localPosts';
+            $url = "https://mybusiness.googleapis.com/v4/$account_id/$location_id/localPosts";
 
             $headers = [
                 'Authorization: Bearer ' . $this->accessToken,
@@ -216,12 +196,151 @@ class GoogleService
             ];
 
             $params = [
-                'languageCode' => 'en',
-                'summary' => $message,
+                'languageCode' => 'en-US',
+                'summary' => $summary,
+                'topicType' => 'STANDARD'
+            ];
+
+            if ($actionType != null) {
+                if ($actionType == "CALL") {
+                    $params['callToAction'] = [
+                        'actionType' => $actionType,
+                    ];
+                } else {
+                    $params['callToAction'] = [
+                        'actionType' => $actionType,
+                        'url' => $callToActionURL,
+                    ];
+                }
+            }
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            $response = curl_exec($ch);
+            $error = curl_error($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            return $response;
+            $responseData = json_decode($response, true);
+
+            if ($httpCode != 200) throw new Exception($responseData['error']['message'] ?? 'Unknown error', $httpCode);
+
+            return $responseData;
+        } catch (Exception $e) {
+            return [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'response' => $response ?? null
+            ];
+        }
+    }
+
+
+
+    /**
+     * Image
+     */
+    public function postImage($account_id, $location_id, $imageUrl, $summary, $actionType, $callToActionURL, $user_id = null)
+    {
+        try {
+            $this->init($user_id);
+
+            $url = "https://mybusiness.googleapis.com/v4/$account_id/$location_id/localPosts";
+
+            $headers = [
+                'Authorization: Bearer ' . $this->accessToken,
+                'Content-Type: application/json'
+            ];
+
+            $params = [
+                'languageCode' => 'en-US',
+                'summary' => $summary,
+                'media' => [
+                    [
+                        'mediaFormat' => 'PHOTO',
+                        'sourceUrl' => $imageUrl,
+                    ],
+                ],
+                'topicType' => 'STANDARD'
+            ];
+
+            if ($actionType != null) {
+                if ($actionType == "CALL") {
+                    $params['callToAction'] = [
+                        'actionType' => $actionType,
+                    ];
+                } else {
+                    $params['callToAction'] = [
+                        'actionType' => $actionType,
+                        'url' => $callToActionURL,
+                    ];
+                }
+            }
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            $responseData = json_decode($response, true);
+
+            if ($httpCode != 200) throw new Exception($responseData['error']['message'] ?? 'Unknown error', $httpCode);
+
+            return $responseData;
+        } catch (Exception $e) {
+            return [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'response' => $response ?? null
+            ];
+        }
+    }
+
+
+
+    /**
+     * Video
+     */
+    public function postVideo($account_id, $location_id, $videoUrl, $summary, $actionType, $callToActionURL, $user_id = null)
+    {
+        try {
+            $this->init($user_id);
+
+            $url = "https://mybusiness.googleapis.com/v4/$account_id/$location_id/localPosts";
+
+            $headers = [
+                'Authorization: Bearer ' . $this->accessToken,
+                'Content-Type: application/json'
+            ];
+
+            $params = [
+                'languageCode' => 'en-US',
+                'summary' => $summary,
                 'callToAction' => [
-                    'actionType' => 'LEARN_MORE',
-                    'url' => 'https://example.com'
-                ]
+                    'actionType' => $actionType,
+                    'url' => $callToActionURL,
+                ],
+                'media' => [
+                    [
+                        'mediaFormat' => 'VIDEO',
+                        'sourceUrl' => $videoUrl,
+                    ]
+                ],
+                'topicType' => 'STANDARD'
             ];
 
             $ch = curl_init();
@@ -230,73 +349,22 @@ class GoogleService
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             $responseData = json_decode($response, true);
 
-            if ($httpCode != 200) throw new Exception($responseData['error']['message']);
-
-            return $responseData;
-        } catch (Exception $e) {
-            return ['error' => $e->getMessage()];
-        }
-    }
-
-
-    /**
-     * Image
-     */
-    public function postImage($message, $imagePath, $user_id = null)
-    {
-        try {
-            $this->init($user_id);
-
-            $url = 'https://mybusiness.googleapis.com/v4/accounts/{YOUR_ACCOUNT_ID}/locations/{YOUR_LOCATION_ID}/localPosts';
-
-            $headers = [
-                'Authorization: Bearer ' . $this->accessToken,
-                'Content-Type: multipart/related; boundary=foo_bar_baz'
-            ];
-
-            // Create multipart data
-            $boundary = uniqid();
-            $postData = "--foo_bar_baz\r\n";
-            $postData .= "Content-Type: application/json; charset=UTF-8\r\n\r\n";
-            $postData .= json_encode([
-                'languageCode' => 'en',
-                'summary' => $message,
-                'callToAction' => [
-                    'actionType' => 'LEARN_MORE',
-                    'url' => 'https://example.com'
-                ]
-            ]);
-            $postData .= "\r\n--foo_bar_baz\r\n";
-            $postData .= "Content-Type: image/jpeg\r\n";
-            $postData .= "Content-Transfer-Encoding: base64\r\n";
-            $postData .= "\r\n";
-            $postData .= base64_encode(file_get_contents($imagePath)) . "\r\n";
-            $postData .= "--foo_bar_baz--";
-
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            $responseData = json_decode($response, true);
-
-            if ($httpCode != 200) throw new Exception($responseData['error']['message']);
+            // if ($httpCode != 200) throw new Exception($responseData['error']['message'] ?? 'Unknown error', $httpCode);
 
             return $responseData;
         } catch (Exception $e) {
             return [
                 'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'response' => $response ?? null
             ];
         }
     }

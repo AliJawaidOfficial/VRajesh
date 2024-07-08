@@ -565,6 +565,59 @@
             }
         }
 
+        // Google Business Profiles
+        function getGoogleBusinessProfiles(element) {
+            if (element.checked) {
+                $("#googleBusinessProfileModal").modal('show');
+                $("#googleBusinessProfileSelectSection").fadeIn();
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('user.google.business.profiles') }}",
+                    beforeSend: function() {
+                        $("#googleBusinessProfileSelect").html(`<option value="">Loading...</option>`);
+                    },
+                    success: function(response) {
+                        html = `<option value="">Select</option>`;
+
+                        if (response.error) {
+                            toastr.error(response.error);
+                        } else {
+                            if (response.length > 0) {
+                                response.forEach((account) => {
+                                    html +=
+                                        `<option value="${account.account_id} - ${account.location_id} - ${account.location_name} - ${account.location_phone}"
+                                    ${account.location_name == @json($post->business_profile_name) ? 'selected' : ''} 
+                                        >${account.location_name} (${account.location_id.split('/')[1]})</option>`
+                                })
+                            } else {
+                                html = `<option value="">No Business Profile Found</option>`;
+                            }
+                        }
+
+                        $("#googleBusinessProfileSelect").html(html);
+                    }
+                });
+            }
+        }
+
+        // Google Business Profile Additional Features
+        $("#googleBusinessProfileModalBtn").change(function(e) {
+            e.preventDefault();
+            $("#googleBusinessProfileModalUrl").val("");
+            ($(this).val() != "" && $(this).val() != "CALL") ? $("#googleBusinessProfileModalUrlSection").fadeIn():
+                $("#googleBusinessProfileModalUrlSection").fadeOut();
+        });
+
+        $("#googleBusinessProfileForm").submit(function(e) {
+            e.preventDefault();
+            if ($(this).valid()) {
+                $("#googleBusinessProfileModal").modal('hide');
+                $("#post_business_profile_action_btn").val($("#googleBusinessProfileModalBtn").val());
+                $("#post_business_profile_action_url").val($("#googleBusinessProfileModalUrl").val());
+            }
+        });
+
+
         // LinkedIn Organizations
         function getLinkedInOrganizations(element) {
             if (element.checked) {
@@ -610,6 +663,10 @@
 
             @if ($post->on_linkedin == 1)
                 $("#onLinkedInCheckbox").click();
+            @endif
+
+            @if ($post->on_business_profile == 1)
+                $("#onGoogleBusinessProfileCheckbox").click();
             @endif
         });
 
@@ -1220,6 +1277,21 @@
                                         </label>
                                     @endif
                                 @endif
+
+                                @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
+                                    @if (Auth::guard('web')->user()->google_access_token != null)
+                                        <label class="d-inline-block platform-checkbox">
+                                            <input type="checkbox" name="on_business_profile"
+                                                onchange="getGoogleBusinessProfiles(this)" value="1"
+                                                data-bs-toggle="business-profile-post"
+                                                id="onGoogleBusinessProfileCheckbox"
+                                                class="form-check-input toggle-post" />
+                                            -
+                                            <span class="d-inline-block ms-1"><i class="fab fa-google"
+                                                    style="font-size: 15px"></i></span>
+                                        </label>
+                                    @endif
+                                @endif
                             </div>
 
                             @if (Auth::guard('web')->user()->canAny([
@@ -1293,6 +1365,26 @@
                                                 <div class="d-flex flex-column gap-1 w-100">
                                                     <select name="linkedin_organization" id="linkedinOrganizationsSelect"
                                                         class="form-select w-100">
+                                                        <option value="">Select</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            @endif
+
+                            {{-- Google Business Profiles --}}
+                            @if (Auth::guard('web')->user()->canAny(['google_text_post', 'google_image_post']))
+                                @if (Auth::guard('web')->user()->google_access_token != null)
+                                    <div class="col-md-4">
+                                        <div class="mb-2" style="display: none;"
+                                            id="googleBusinessProfileSelectSection">
+                                            <div class="d-flex flex-column gap-2">
+                                                <p class="mb-0">Google Business Profiles:</p>
+                                                <div class="d-flex flex-column gap-1 w-100">
+                                                    <select name="google_business_profile"
+                                                        id="googleBusinessProfileSelect" class="form-select w-100">
                                                         <option value="">Select</option>
                                                     </select>
                                                 </div>
